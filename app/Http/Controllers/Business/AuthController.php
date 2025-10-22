@@ -135,6 +135,8 @@ class AuthController extends Controller
                 $request->admin_name
             ));
             
+            \Log::info("OTP sent successfully to {$request->admin_email} for business: {$request->business_name}");
+            
             return response()->json([
                 'success' => true,
                 'message' => 'OTP sent successfully to your email!',
@@ -143,11 +145,15 @@ class AuthController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Failed to send OTP email: ' . $e->getMessage());
+            \Log::error('Failed to send OTP email: ' . $e->getMessage(), [
+                'email' => $request->admin_email,
+                'business_name' => $request->business_name,
+                'error' => $e->getTraceAsString()
+            ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send OTP. Please try again later.'
+                'message' => 'Failed to send OTP. Please check your email configuration or try again later.'
             ], 500);
         }
     }
@@ -309,17 +315,23 @@ class AuthController extends Controller
                 $otpData['admin_name']
             ));
             
+            \Log::info("OTP resent successfully to {$otpData['admin_email']} for business: {$otpData['business_name']}");
+            
             return response()->json([
                 'success' => true,
                 'message' => 'New OTP sent successfully to your email!'
             ]);
             
         } catch (\Exception $e) {
-            \Log::error('Failed to resend OTP email: ' . $e->getMessage());
+            \Log::error('Failed to resend OTP email: ' . $e->getMessage(), [
+                'email' => $otpData['admin_email'],
+                'business_name' => $otpData['business_name'],
+                'error' => $e->getTraceAsString()
+            ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send OTP. Please try again later.'
+                'message' => 'Failed to resend OTP. Please try again later.'
             ], 500);
         }
     }

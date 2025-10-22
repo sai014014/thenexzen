@@ -20,6 +20,36 @@ use App\Http\Controllers\Business\DashboardController as BusinessDashboardContro
 |
 */
 
+// Test OTP email route (remove in production)
+Route::get('/test-otp-email', function () {
+    try {
+        $otp = '123456';
+        $businessName = 'Test Business';
+        $adminName = 'Test Admin';
+        $email = 'test@example.com';
+        
+        \Mail::to($email)->send(new \App\Mail\BusinessRegistrationOTP($otp, $businessName, $adminName));
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Test OTP email sent successfully!',
+            'mail_config' => [
+                'driver' => config('mail.default'),
+                'host' => config('mail.mailers.smtp.host'),
+                'port' => config('mail.mailers.smtp.port'),
+                'encryption' => config('mail.mailers.smtp.encryption'),
+                'from' => config('mail.from.address'),
+            ]
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send test email: ' . $e->getMessage(),
+            'error' => $e->getTraceAsString()
+        ], 500);
+    }
+})->name('test.otp.email');
+
 Route::get('/', function () {
     return view('welcome');
 });

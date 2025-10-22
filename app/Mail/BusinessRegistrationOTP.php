@@ -34,6 +34,7 @@ class BusinessRegistrationOTP extends Mailable
     {
         return new Envelope(
             subject: 'Business Registration OTP - The NexZen',
+            from: config('mail.from.address', 'noreply@thenexzen.com'),
         );
     }
 
@@ -44,13 +45,16 @@ class BusinessRegistrationOTP extends Mailable
     {
         return new Content(
             view: 'emails.business-registration-otp',
+            with: [
+                'otp' => $this->otp,
+                'businessName' => $this->businessName,
+                'adminName' => $this->adminName,
+            ]
         );
     }
 
     /**
      * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
     {

@@ -1,4 +1,6 @@
 # Only ignore exactly what the server requested
-bootstrap/cache/
+bootstrap/
 .env
-storage/framework/cache/
+public/
+storage/
+node_modules/

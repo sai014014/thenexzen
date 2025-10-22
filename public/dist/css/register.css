@@ -1,0 +1,296 @@
+body {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: #f8f9fa;
+}
+
+.register {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.left-section {
+  position: fixed;
+  width: 50%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+}
+
+.right-section {
+  margin-left: 50%; /* Push content to the right */
+  width: 50%;
+  height: 100vh;
+  overflow-y: auto; /* Make the right section scrollable */
+  background-color: #fff;
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+}
+
+.form-container {
+  width: 70%;
+  margin: 0 auto;
+}
+
+.welcom_text {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.welcom_text h1 {
+  font-size: 2rem;
+  margin-top: 1rem;
+  font-weight: 600;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-size: 1rem;
+}
+
+.form-control {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 1rem;
+  width: 100%;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #000;
+  box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1);
+}
+
+textarea.form-control {
+  min-height: 100px;
+}
+
+.invalid-feedback {
+  display: none;
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+.submit {
+  width: 100%;
+  padding: 10px;
+  background: #000;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  margin-top: 2rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 1.1rem;
+}
+
+.submit:hover {
+  background: #333;
+}
+.welcom_text h1 {
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 28px;
+  color: #000;
+  font-weight: bold;
+  font-family: "Poppins", sans-serif !important;
+}
+.welcom_text {
+  position: relative;
+}
+.welcom_text svg {
+  position: absolute;
+  right: 36px;
+  top: -26px;
+}
+.registerForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.login {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.login a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.login a:hover {
+  color: #666;
+}
+
+.alert {
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .left-section {
+    width: 100%;
+    height: 300px;
+    position: relative;
+  }
+  .right-section {
+    width: 100%;
+    margin-left: 0;
+    padding: 2rem 1.5rem;
+  }
+  .form-container {
+    max-width: 600px;
+  }
+  .welcom_text h1 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-container {
+    max-width: 100%;
+  }
+  .row {
+    margin: 0;
+  }
+  .col-md-6 {
+    padding: 0 0px;
+  }
+  .form-control {
+    padding: 0.8rem;
+  }
+  .welcom_text {
+    margin-bottom: 2rem;
+  }
+  .register {
+    margin-top: 1px;
+    overflow: auto;
+    height: 100vh;
+  }
+  .submit {
+    padding: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .right-section {
+    padding: 1.5rem 1rem;
+  }
+  .left-section {
+    height: 200px;
+  }
+  .welcom_text h1 {
+    font-size: 1.5rem;
+  }
+  .form-label {
+    font-size: 0.9rem;
+  }
+  .form-control {
+    font-size: 0.9rem;
+  }
+}
+.step {
+  display: none;
+}
+
+.step.active {
+  display: block;
+}
+
+.otp-popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.otp-popup.active {
+  display: block;
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.overlay.active {
+  display: block;
+}
+.invalid {
+  color: red;
+}
+
+.valid {
+  color: green;
+  font-weight: bold;
+}
+
+#passwordRequirements {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+#confirmPasswordMatch {
+  display: none;
+}
+@media (max-width: 768px) {
+  .form-container {
+    width: 90%;
+  }
+  .welcom_text svg {
+    position: absolute;
+    right: -9px;
+    top: -22px;
+    width: 28px;
+  }
+}
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .login .card {
+    width: 100%;
+  }
+  .welcom_text svg {
+    position: absolute;
+    right: 15px;
+    top: -36px;
+  }
+}
+@media screen and (min-device-width: 820px) and (max-device-width: 1180px) and (orientation: landscape) {
+  .login .card {
+    width: 100%;
+  }
+  .welcom_text svg {
+    position: absolute;
+    right: 70px;
+    top: -40px;
+  }
+}

@@ -1,0 +1,73 @@
+body {
+  background-color: #f7f9fc;
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.price-summary-card {
+  background-color: #eef4ff;
+  border: 1px solid #d1e3ff;
+}
+
+.btn-primary {
+  background-color: #6c63ff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #5949d6;
+}
+
+.form-control,
+.form-select {
+  border-radius: 5px;
+}
+
+.section-title {
+  color: #6c63ff;
+  font-weight: bold;
+}
+.nav-tabs {
+  border: none;
+  gap: 15px;
+}
+.Tab_Title {
+  border: 1px solid #333 !important;
+  border-radius: 4px !important;
+  color: #333;
+  font-weight: 600;
+}
+.Tab_Title.active {
+  background-color: #fff !important;
+  color: #6c63ff !important;
+  border: 1px solid #6c63ff !important;
+}
+.btn-custom {
+  background: #fff;
+  color: #6c63ff;
+  font-weight: 600;
+  box-shadow: 0px 0px 5px #00000033;
+  padding: 10px 20px;
+  font-size: 14px;
+  border: 1px solid #fff;
+}
+.btn-custom:hover {
+  background: #fff;
+  color: #6c63ff;
+}
+.personal_info {
+  color: #5d5fef;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+#newCustomerForm {
+  margin-top: 20px;
+}
+.nav-item .Tab_Title {
+  color: #fff;
+  border-color: #fff !important;
+}

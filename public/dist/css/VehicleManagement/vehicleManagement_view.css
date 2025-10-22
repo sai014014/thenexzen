@@ -1,0 +1,235 @@
+.table-responsive {
+  margin-top: 20px;
+}
+
+.btn-custom {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-custom:hover {
+  background-color: #218838;
+}
+
+.filter-options {
+  margin: 20px 0;
+}
+.filter-section {
+  background: #fff;
+  padding: 15px 15px;
+  border-radius: 12px;
+  border: none;
+}
+.action-icons {
+  cursor: pointer;
+}
+
+.action-icons i {
+  margin-right: 10px;
+  color: #007bff;
+}
+
+.action-icons i:hover {
+  color: #0056b3;
+}
+
+.error-message {
+  color: red;
+}
+
+.vehicleModal {
+  display: flex;
+  gap: 12px;
+}
+.vehicleInfo {
+  display: flex;
+  flex-direction: column;
+}
+.vehicleName {
+  color: #263238;
+  font-weight: 600;
+  font-size: 14px;
+  width: max-content;
+}
+.vehicleNumber {
+  color: #555;
+  font-size: 13px;
+}
+.vechile-logo {
+  width: 40px;
+  height: auto;
+}
+.vehicleStatusSpan {
+  padding: 6px 15px;
+  border-radius: 30px;
+  color: #fff;
+  font-weight: 500;
+}
+.vehicleStatus-1 {
+  background: #56a067;
+}
+.vehicleStatus-0 {
+  background: #f36370 !important;
+}
+.vehicleStatus-2 {
+  background: red;
+}
+.vehicleStatus-3 {
+  background: #ff9029;
+}
+.VehicleSearch {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.AddBranch {
+  background: #5d5fef;
+  border: none;
+  padding: 10px 30px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+.titleII {
+  color: #263238;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eeeeee;
+  padding-bottom: 7px;
+}
+.action-icons {
+  display: flex;
+  gap: 30px;
+}
+.VehicleViewAction {
+  color: #3f51b5;
+  font-weight: 600;
+  text-decoration: none;
+}
+.VehicleDeleteAction {
+  color: #dc3545;
+  font-weight: 600;
+  text-decoration: none;
+}
+.dataTables_info {
+  text-align: right;
+  padding-right: 20px;
+  color: #777;
+  font-size: 14px;
+}
+.Brand_Name {
+  position: relative;
+  font-size: 12px;
+  font-weight: 500;
+  color: #777 !important;
+  padding-left: 14px;
+}
+.Booking_Status {
+  font-size: 12px;
+  font-weight: 500;
+  color: #777 !important;
+}
+.Brand_Name::after {
+  content: "";
+  color: #56a067;
+  width: 10px;
+  height: 10px;
+  margin-left: 5px;
+  position: absolute;
+  background: #56a067;
+  border-radius: 30px;
+  left: -3px;
+  top: 4px;
+}
+.Brand_Title h4 {
+  font-size: 20px;
+  color: #263238;
+  font-weight: 600;
+}
+.Vehicle_Brand {
+  padding: 0px 12px;
+}
+.book-button {
+  background: #5d5fef;
+  border-radius: 30px;
+  color: #fff;
+  padding: 6px 60px;
+  border: none;
+}
+.card-title {
+  color: #5d5fef;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.info-label {
+  font-size: 12px;
+  font-style: italic;
+  color: #555;
+  font-weight: 500;
+}
+.Vehicle_Details {
+  color: #212121;
+  font-weight: 600;
+  font-size: 14px;
+}
+.filter-section .card-body {
+  padding: 0px !important;
+  border: none;
+}
+.thumbnails-container {
+  flex-direction: column;
+  overflow: auto;
+  overflow-x: hidden;
+  margin-left: 14px;
+  flex-wrap: nowrap !important;
+}
+.Image_preview {
+  display: flex;
+  height: 400px;
+  overflow: hidden;
+}
+.img-thumbnail {
+  border: none;
+  align-self: center;
+  width: 50px;
+}
+.document-icon {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  height: 85px;
+  display: flex;
+  width: 85px;
+  align-items: center;
+  justify-content: center;
+}
+.Doc_View_sec {
+  gap: 0px 8px;
+  /* justify-content: space-between; */
+}
+.Doc_Title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #263238;
+  margin-bottom: 0px;
+}
+.Doc_head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.doc_small {
+  text-align: center;
+}
+.Doc_Type {
+  color: #212121;
+  font-weight: 500;
+  font-size: 14px;
+}
+.vechileRow {
+  align-items: center;
+}
+.addVehicle {
+  padding-top: 20px;
+}

@@ -1,0 +1,38 @@
+.header {
+  height: 90px;
+  background: #6b6ade;
+  padding: 20px 15px;
+  position: fixed;
+  top: 0;
+  left: 0px;
+  right: 0;
+  z-index: 998;
+}
+.main-content {
+  width: 97%;
+  margin: 0px auto;
+  margin-top: 100px !important;
+}
+.orderSummaryTable {
+  width: 100% !important;
+  border-collapse: collapse;
+}
+
+.orderSummaryTable tr {
+  border: none;
+}
+
+.orderSummaryTable tr td:first-child {
+  text-align: left;
+}
+
+.orderSummaryTable tr td:nth-child(2) {
+  text-align: center;
+}
+
+.orderSummaryTable tr td:nth-child(3) {
+  text-align: right;
+}
+#addNewCustomer {
+  cursor: pointer;
+}

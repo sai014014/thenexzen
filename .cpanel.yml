@@ -1,6 +1,9 @@
 ---
 deployment:
   tasks:
+    - git reset --hard HEAD
+    - git clean -fd
+    - git pull origin main
     - export COMPOSER_HOME=/tmp
     - /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
     - /usr/local/bin/php artisan key:generate --force

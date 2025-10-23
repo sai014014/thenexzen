@@ -18,17 +18,33 @@ class MigrationController extends Controller
     public function getStatus()
     {
         try {
-            // Get pending migrations
-            $pendingMigrations = $this->getPendingMigrations();
+            // Check if migrations table exists first
+            $migrationsTableExists = Schema::hasTable('migrations');
             
-            // Get ran migrations
-            $ranMigrations = $this->getRanMigrations();
+            if (!$migrationsTableExists) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'migrations_table_exists' => false,
+                        'total_migration_files' => 0,
+                        'ran_migrations' => 0,
+                        'pending_migrations' => 0,
+                        'pending_list' => [],
+                        'ran_list' => [],
+                        'last_migration' => null,
+                        'message' => 'Migrations table does not exist. Run migrations to create it.'
+                    ]
+                ]);
+            }
             
             // Get migration files
             $migrationFiles = $this->getMigrationFiles();
             
-            // Check if migrations table exists
-            $migrationsTableExists = Schema::hasTable('migrations');
+            // Get ran migrations using direct database query to avoid Artisan issues
+            $ranMigrations = $this->getRanMigrationsDirect();
+            
+            // Calculate pending migrations
+            $pendingMigrations = array_diff($migrationFiles, $ranMigrations);
             
             return response()->json([
                 'success' => true,
@@ -37,7 +53,7 @@ class MigrationController extends Controller
                     'total_migration_files' => count($migrationFiles),
                     'ran_migrations' => count($ranMigrations),
                     'pending_migrations' => count($pendingMigrations),
-                    'pending_list' => $pendingMigrations,
+                    'pending_list' => array_values($pendingMigrations),
                     'ran_list' => $ranMigrations,
                     'last_migration' => !empty($ranMigrations) ? end($ranMigrations) : null
                 ]
@@ -50,10 +66,29 @@ class MigrationController extends Controller
                 'admin_id' => auth()->id()
             ]);
             
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to get migration status: ' . $e->getMessage()
-            ], 500);
+            // Try fallback method
+            try {
+                $migrationFiles = $this->getMigrationFiles();
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'migrations_table_exists' => false,
+                        'total_migration_files' => count($migrationFiles),
+                        'ran_migrations' => 0,
+                        'pending_migrations' => count($migrationFiles),
+                        'pending_list' => $migrationFiles,
+                        'ran_list' => [],
+                        'last_migration' => null,
+                        'message' => 'Using fallback method. Migrations table may not exist or be accessible.'
+                    ]
+                ]);
+            } catch (\Exception $fallbackError) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to get migration status: ' . $e->getMessage(),
+                    'fallback_error' => $fallbackError->getMessage()
+                ], 500);
+            }
         }
     }
     
@@ -386,6 +421,26 @@ class MigrationController extends Controller
                 ->pluck('migration')
                 ->toArray();
         } catch (\Exception $e) {
+            return [];
+        }
+    }
+    
+    /**
+     * Get ran migrations using direct database query (fallback method)
+     */
+    private function getRanMigrationsDirect()
+    {
+        try {
+            if (!Schema::hasTable('migrations')) {
+                return [];
+            }
+            
+            $migrations = DB::select('SELECT migration FROM migrations ORDER BY batch, migration');
+            return array_column($migrations, 'migration');
+        } catch (\Exception $e) {
+            Log::warning('Failed to get ran migrations directly', [
+                'error' => $e->getMessage()
+            ]);
             return [];
         }
     }

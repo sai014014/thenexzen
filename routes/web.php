@@ -67,6 +67,26 @@ Route::post('/test-otp-send-basic', [TestOTPController::class, 'sendBasic']);
 Route::post('/test-otp-send-otp', [TestOTPController::class, 'sendOTP']);
 Route::post('/test-otp-send-custom-smtp', [TestOTPController::class, 'sendCustomSMTP']);
 
+// Test business registration OTP directly
+Route::post('/test-business-otp', function(\Illuminate\Http\Request $request) {
+    try {
+        $controller = new \App\Http\Controllers\Business\AuthController();
+        return $controller->sendOTP($request);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Exception: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    } catch (Error $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'PHP Error: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
+
 // Simple working routes for testing
 Route::get('/email-config', function() {
     $controller = new \App\Http\Controllers\TestOTPController();

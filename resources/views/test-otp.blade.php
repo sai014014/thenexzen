@@ -214,6 +214,7 @@
                 <button class="btn btn-success" onclick="testOTPEmail()">🔐 Test OTP Email</button>
                 <button class="btn btn-warning" onclick="testCustomSMTP()">⚙️ Test Custom SMTP</button>
                 <button class="btn btn-primary" onclick="checkConfiguration()">🔍 Check Config</button>
+                <button class="btn btn-info" onclick="testBusinessOTP()">🏢 Test Business OTP</button>
             </div>
 
             <!-- Results Section -->
@@ -394,6 +395,49 @@
             .catch(error => {
                 addLog(`Configuration check error: ${error.message}`, 'error');
                 showResult(`❌ Error checking configuration: ${error.message}`, 'error');
+            });
+        }
+
+        function testBusinessOTP() {
+            addLog('Starting business OTP test...', 'info');
+            
+            const recipient = document.getElementById('recipient_email').value;
+            const otp = document.getElementById('test_otp').value;
+            
+            if (!recipient || !otp) {
+                showResult('Please enter recipient email and OTP code.', 'error');
+                return;
+            }
+
+            fetch('/test-business-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    business_name: 'Test Business',
+                    business_type: 'transportation',
+                    email: 'test@business.com',
+                    phone: '1234567890',
+                    address: 'Test Address',
+                    admin_name: 'Test Admin',
+                    admin_email: recipient
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addLog('Business OTP email sent successfully!', 'success');
+                    showResult('✅ Business OTP email sent successfully! Check your inbox.', 'success');
+                } else {
+                    addLog(`Business OTP email failed: ${data.message}`, 'error');
+                    showResult(`❌ Business OTP email failed: ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                addLog(`Business OTP email error: ${error.message}`, 'error');
+                showResult(`❌ Error: ${error.message}`, 'error');
             });
         }
 

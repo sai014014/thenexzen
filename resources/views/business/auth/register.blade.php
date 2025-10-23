@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Business Registration - TheNexZen</title>
     <link rel="icon" href="{{ asset('homePage/assets/img/businesslogowhite.svg') }}" type="image/x-icon" />
     <link href="{{ asset('dist/bootstrap/bootstrap.min.css') }}" rel="stylesheet">

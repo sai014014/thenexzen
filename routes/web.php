@@ -8,6 +8,7 @@ use App\Http\Controllers\SuperAdmin\BusinessController as SuperAdminBusinessCont
 use App\Http\Controllers\SuperAdmin\BugController as SuperAdminBugController;
 use App\Http\Controllers\Business\AuthController as BusinessAuthController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
+use App\Http\Controllers\TestOTPController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +50,21 @@ Route::get('/test-otp-email', function () {
         ], 500);
     }
 })->name('test.otp.email');
+
+// Advanced OTP Testing Routes
+Route::prefix('test-otp')->group(function () {
+    Route::get('/', [TestOTPController::class, 'index'])->name('test.otp.index');
+    Route::post('/send-basic', [TestOTPController::class, 'sendBasic'])->name('test.otp.send.basic');
+    Route::post('/send-otp', [TestOTPController::class, 'sendOTP'])->name('test.otp.send.otp');
+    Route::post('/send-custom-smtp', [TestOTPController::class, 'sendCustomSMTP'])->name('test.otp.send.custom.smtp');
+    Route::get('/check-config', [TestOTPController::class, 'checkConfig'])->name('test.otp.check.config');
+    Route::post('/test-smtp-connection', [TestOTPController::class, 'testSMTPConnection'])->name('test.otp.test.smtp.connection');
+});
+
+// Alternative routes without prefix (backup)
+Route::get('/test-otp-check-config', [TestOTPController::class, 'checkConfig']);
+Route::post('/test-otp-send-basic', [TestOTPController::class, 'sendBasic']);
+Route::post('/test-otp-send-otp', [TestOTPController::class, 'sendOTP']);
 
 Route::get('/', function () {
     return view('welcome');
@@ -183,6 +199,59 @@ Route::prefix('business')->name('business.')->group(function () {
 // Test route
 Route::get('/test', function () {
     return 'Hello World - Laravel 12 is working!';
+});
+
+// Simple test route
+Route::get('/test-simple-route', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'Simple route is working',
+        'time' => now(),
+        'laravel_version' => app()->version()
+    ]);
+});
+
+// Direct test for checkConfig method
+Route::get('/test-check-config', function () {
+    try {
+        $controller = new \App\Http\Controllers\TestOTPController();
+        return $controller->checkConfig();
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Exception: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    } catch (Error $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'PHP Error: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
+});
+
+// Debug route for TestOTPController
+Route::get('/test-otp-debug', function () {
+    try {
+        $controller = new \App\Http\Controllers\TestOTPController();
+        $reflection = new ReflectionClass($controller);
+        $method = $reflection->getMethod('getEmailConfig');
+        $method->setAccessible(true);
+        $config = $method->invoke($controller);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'TestOTPController is working',
+            'config' => $config
+        ]);
+    } catch (Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+    }
 });
 
 // Laravel Breeze routes (for user authentication)

@@ -156,6 +156,10 @@ Route::prefix('super-admin')->name('super-admin.')->group(function () {
         Route::patch('/bugs/{bug}/update-status', [SuperAdminBugController::class, 'updateStatus'])->name('bugs.update-status');
         Route::delete('/bug-attachments/{attachment}', [SuperAdminBugController::class, 'deleteAttachment'])->name('bug-attachments.destroy');
         Route::resource('bugs', SuperAdminBugController::class);
+        
+        // Cache Management Routes
+        Route::post('/cache/clear', [\App\Http\Controllers\SuperAdmin\CacheController::class, 'clearAllCache'])->name('cache.clear');
+        Route::get('/cache/status', [\App\Http\Controllers\SuperAdmin\CacheController::class, 'getCacheStatus'])->name('cache.status');
     });
 });
 

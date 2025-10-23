@@ -124,6 +124,10 @@
                     <h1 class="h2">@yield('page-title', 'Dashboard')</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAllCache()" id="clearCacheBtn">
+                                <i class="fas fa-trash-alt me-1"></i>
+                                Clear Cache
+                            </button>
                             <button type="button" class="btn btn-sm btn-outline-secondary">
                                 <i class="fas fa-download me-1"></i>
                                 Export
@@ -178,6 +182,116 @@
     <!-- Scripts -->
     <script src="{{ asset('dist/jquery.min.js') }}"></script>
     <script src="{{ asset('dist/bootstrap/bootstrap.bundle.min.js') }}"></script>
+    
+    <script>
+        function clearAllCache() {
+            const btn = document.getElementById('clearCacheBtn');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Clearing...';
+            btn.disabled = true;
+            
+            // Show confirmation dialog
+            if (!confirm('Are you sure you want to clear all caches? This will clear:\n\n• Application Cache\n• Configuration Cache\n• Route Cache\n• View Cache\n• Compiled Views\n• Session Cache\n• Temporary Files\n\nThis action cannot be undone.')) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return;
+            }
+            
+            // Make AJAX request to clear cache
+            fetch('{{ route("super-admin.cache.clear") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    showAlert('success', 'Cache cleared successfully!', data.message);
+                    
+                    // Show what was cleared
+                    if (data.cleared_caches) {
+                        const cacheList = data.cleared_caches.join(', ');
+                        showAlert('info', 'Cleared caches:', cacheList);
+                    }
+                } else {
+                    showAlert('error', 'Failed to clear cache', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Error', 'An error occurred while clearing cache');
+            })
+            .finally(() => {
+                // Restore button state
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+        
+        function showAlert(type, title, message) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+            alertDiv.setAttribute('role', 'alert');
+            
+            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+            
+            alertDiv.innerHTML = `
+                <i class="fas fa-${icon} me-2"></i>
+                <strong>${title}</strong><br>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert alert at the top of main content
+            const mainContent = document.querySelector('.main-content');
+            const firstChild = mainContent.firstElementChild;
+            mainContent.insertBefore(alertDiv, firstChild);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        // Add some CSS for better button styling
+        document.addEventListener('DOMContentLoaded', function() {
+            const style = document.createElement('style');
+            style.textContent = `
+                #clearCacheBtn:hover {
+                    background-color: #dc3545 !important;
+                    border-color: #dc3545 !important;
+                    color: white !important;
+                }
+                
+                #clearCacheBtn:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+                
+                .alert {
+                    margin-bottom: 1rem;
+                    border-radius: 8px;
+                }
+                
+                .btn-group .btn {
+                    margin-right: 5px;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
     
     @stack('scripts')
 </body>

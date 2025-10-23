@@ -936,7 +936,7 @@ function saveNewVendor() {
         console.log(key + ': ' + value);
     }
     
-    customFetch('http://10.0.0.162/nexzen/public/business/vendors', {
+    customFetch('{{ url("/business/vendors") }}', {
         method: 'POST',
         body: formData,
         headers: {
@@ -1046,7 +1046,7 @@ function searchVendors(query) {
         return;
     }
     
-    const url = `http://10.0.0.162/nexzen/public/business/vendors/search?q=${encodeURIComponent(query)}`;
+    const url = `{{ url("/business/vendors/search") }}?q=${encodeURIComponent(query)}`;
     
     customFetch(url, {
         method: 'GET',

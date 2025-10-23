@@ -218,8 +218,8 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Current Image</label>
                             <div id="imagePreview" class="border rounded p-2" style="height: 150px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
-                                @if($vehicle->vehicle_image_path && file_exists(public_path('storage/' . $vehicle->vehicle_image_path)))
-                                    <img src="{{ asset('storage/' . $vehicle->vehicle_image_path) }}" 
+                                @if($vehicle->vehicle_image_path && file_exists(storage_path('app/public/' . $vehicle->vehicle_image_path)))
+                                    <img src="{{ asset('storage/app/public/' . $vehicle->vehicle_image_path) }}" 
                                          alt="Current Vehicle Image" 
                                          class="img-fluid" 
                                          style="max-height: 140px; max-width: 100%; object-fit: contain;">

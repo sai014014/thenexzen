@@ -24,8 +24,8 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-4 text-center mb-4">
-                        @if($vehicle->vehicle_image_path && file_exists(public_path('storage/' . $vehicle->vehicle_image_path)))
-                            <img src="{{ asset('storage/' . $vehicle->vehicle_image_path) }}" 
+                        @if($vehicle->vehicle_image_path && file_exists(storage_path('app/public/' . $vehicle->vehicle_image_path)))
+                            <img src="{{ asset('storage/app/public/' . $vehicle->vehicle_image_path) }}" 
                                  alt="{{ $vehicle->vehicle_make }} {{ $vehicle->vehicle_model }}" 
                                  class="img-fluid rounded" 
                                  style="height: 200px; width: 100%; object-fit: cover;">

@@ -164,6 +164,7 @@ Route::prefix('super-admin')->name('super-admin.')->group(function () {
         // Migration Management Routes
         Route::get('/migrations/status', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'getStatus'])->name('migrations.status');
         Route::post('/migrations/run', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'runMigrations'])->name('migrations.run');
+        Route::post('/migrations/sync', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'syncMigrations'])->name('migrations.sync');
         Route::post('/migrations/rollback', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'rollbackMigrations'])->name('migrations.rollback');
         Route::post('/migrations/reset', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'resetMigrations'])->name('migrations.reset');
     });

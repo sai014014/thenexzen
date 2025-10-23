@@ -78,13 +78,34 @@ class MigrationController extends Controller
                 ]);
             }
             
-            // Run migrations
-            Artisan::call('migrate', ['--force' => true]);
+            // Check if migrations table exists, if not create it
+            if (!Schema::hasTable('migrations')) {
+                Artisan::call('migrate:install');
+            }
+            
+            // Run migrations with --force flag to avoid interactive prompts
+            Artisan::call('migrate', [
+                '--force' => true,
+                '--pretend' => false
+            ]);
             $output = Artisan::output();
             
             // Get pending migrations after running
             $pendingAfter = $this->getPendingMigrations();
             $migrationsRun = count($pendingBefore) - count($pendingAfter);
+            
+            // If no migrations were actually run but we had pending ones, 
+            // it might be because tables already exist but aren't tracked
+            if ($migrationsRun === 0 && !empty($pendingBefore)) {
+                // Try to mark existing migrations as run without actually running them
+                $this->markExistingMigrationsAsRun($pendingBefore);
+                $pendingAfter = $this->getPendingMigrations();
+                $migrationsRun = count($pendingBefore) - count($pendingAfter);
+                
+                if ($migrationsRun > 0) {
+                    $output .= "\nMarked existing migrations as run without executing them.";
+                }
+            }
             
             // Log the migration run
             Log::info('Super Admin ran migrations', [
@@ -98,7 +119,7 @@ class MigrationController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => "Successfully ran {$migrationsRun} migration(s).",
+                'message' => $migrationsRun > 0 ? "Successfully ran {$migrationsRun} migration(s)." : "No new migrations were executed. All migrations are up to date.",
                 'data' => [
                     'migrations_run' => $migrationsRun,
                     'pending_before' => count($pendingBefore),
@@ -115,9 +136,93 @@ class MigrationController extends Controller
                 'admin_id' => auth()->id()
             ]);
             
+            // Check if it's a table already exists error
+            if (strpos($e->getMessage(), 'already exists') !== false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Some tables already exist. Try using "Check Status" first, or use "Reset All Migrations" if you need to start fresh.',
+                    'error_details' => $e->getMessage(),
+                    'suggestion' => 'Use the migration status check to see which migrations are not tracked properly.'
+                ], 500);
+            }
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to run migrations: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Sync migrations - mark existing tables as migrated without running them
+     */
+    public function syncMigrations(Request $request)
+    {
+        try {
+            // Get pending migrations
+            $pendingMigrations = $this->getPendingMigrations();
+            
+            if (empty($pendingMigrations)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'No pending migrations to sync.',
+                    'data' => [
+                        'migrations_synced' => 0
+                    ]
+                ]);
+            }
+            
+            // Check if migrations table exists, if not create it
+            if (!Schema::hasTable('migrations')) {
+                Artisan::call('migrate:install');
+            }
+            
+            $syncedMigrations = [];
+            $currentBatch = DB::table('migrations')->max('batch') ?? 0;
+            $newBatch = $currentBatch + 1;
+            
+            foreach ($pendingMigrations as $migration) {
+                // Check if this migration creates a table that already exists
+                if ($this->migrationCreatesExistingTable($migration)) {
+                    // Mark as run without executing
+                    DB::table('migrations')->insert([
+                        'migration' => $migration,
+                        'batch' => $newBatch
+                    ]);
+                    $syncedMigrations[] = $migration;
+                }
+            }
+            
+            // Log the sync operation
+            Log::info('Super Admin synced migrations', [
+                'admin_id' => auth()->id(),
+                'migrations_synced' => count($syncedMigrations),
+                'synced_migrations' => $syncedMigrations,
+                'timestamp' => now()
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => count($syncedMigrations) > 0 ? 
+                    "Successfully synced " . count($syncedMigrations) . " migration(s) that were already applied." : 
+                    "No migrations needed syncing. All pending migrations require actual execution.",
+                'data' => [
+                    'migrations_synced' => count($syncedMigrations),
+                    'synced_migrations' => $syncedMigrations,
+                    'remaining_pending' => array_diff($pendingMigrations, $syncedMigrations)
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to sync migrations', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'admin_id' => auth()->id()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to sync migrations: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -300,5 +405,70 @@ class MigrationController extends Controller
         
         sort($migrations);
         return $migrations;
+    }
+    
+    /**
+     * Mark existing migrations as run without executing them
+     */
+    private function markExistingMigrationsAsRun($pendingMigrations)
+    {
+        try {
+            if (!Schema::hasTable('migrations')) {
+                return;
+            }
+            
+            $currentBatch = DB::table('migrations')->max('batch') ?? 0;
+            $newBatch = $currentBatch + 1;
+            
+            foreach ($pendingMigrations as $migration) {
+                // Check if this migration creates a table that already exists
+                if ($this->migrationCreatesExistingTable($migration)) {
+                    // Mark as run without executing
+                    DB::table('migrations')->insert([
+                        'migration' => $migration,
+                        'batch' => $newBatch
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to mark existing migrations as run', [
+                'error' => $e->getMessage(),
+                'migrations' => $pendingMigrations
+            ]);
+        }
+    }
+    
+    /**
+     * Check if a migration creates a table that already exists
+     */
+    private function migrationCreatesExistingTable($migration)
+    {
+        try {
+            // Common table names that might already exist
+            $commonTables = [
+                'vehicle_makes' => 'create_vehicle_makes_table',
+                'vehicle_models' => 'create_vehicle_models_table',
+                'users' => 'create_users_table',
+                'businesses' => 'create_businesses_table',
+                'business_admins' => 'create_business_admins_table',
+                'vehicles' => 'create_vehicles_table',
+                'bookings' => 'create_bookings_table',
+                'customers' => 'create_customers_table',
+                'vendors' => 'create_vendors_table',
+                'bugs' => 'create_bugs_table',
+                'bug_attachments' => 'create_bug_attachments_table',
+                'notifications' => 'create_notifications_table'
+            ];
+            
+            foreach ($commonTables as $tableName => $migrationPattern) {
+                if (strpos($migration, $migrationPattern) !== false) {
+                    return Schema::hasTable($tableName);
+                }
+            }
+            
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

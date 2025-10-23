@@ -140,6 +140,9 @@
                                     <li><a class="dropdown-item" href="#" onclick="runMigrations()">
                                         <i class="fas fa-play me-2"></i>Run Migrations
                                     </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="syncMigrations()">
+                                        <i class="fas fa-sync me-2"></i>Sync Existing Tables
+                                    </a></li>
                                     <li><a class="dropdown-item" href="#" onclick="rollbackMigrations()">
                                         <i class="fas fa-undo me-2"></i>Rollback Last Batch
                                     </a></li>
@@ -372,6 +375,58 @@
             .catch(error => {
                 console.error('Error:', error);
                 showAlert('error', 'Error', 'An error occurred while running migrations');
+            })
+            .finally(() => {
+                // Restore button state
+                btn.innerHTML = originalText;
+            });
+        }
+        
+        function syncMigrations() {
+            if (!confirm('This will mark existing tables as migrated without running the migration code. Use this when tables already exist but aren\'t tracked in the migrations table.\n\nAre you sure you want to sync existing tables?')) {
+                return;
+            }
+            
+            const btn = document.querySelector('[onclick="syncMigrations()"]');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Syncing...';
+            
+            fetch('{{ route("super-admin.migrations.sync") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let message = data.message;
+                    if (data.data.migrations_synced > 0) {
+                        message += `\n\nSynced: ${data.data.migrations_synced} migration(s)`;
+                        if (data.data.synced_migrations) {
+                            message += `\n\nSynced Migrations:\n`;
+                            data.data.synced_migrations.forEach(migration => {
+                                message += `• ${migration}\n`;
+                            });
+                        }
+                        if (data.data.remaining_pending && data.data.remaining_pending.length > 0) {
+                            message += `\n\nRemaining Pending:\n`;
+                            data.data.remaining_pending.forEach(migration => {
+                                message += `• ${migration}\n`;
+                            });
+                        }
+                    }
+                    showAlert('success', 'Sync Completed', message);
+                } else {
+                    showAlert('error', 'Failed to sync migrations', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Error', 'An error occurred while syncing migrations');
             })
             .finally(() => {
                 // Restore button state

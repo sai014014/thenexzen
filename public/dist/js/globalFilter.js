@@ -1,21 +1,29 @@
 const globalFilterButton = document.getElementById("globalRecordsFilterButton");
 if (!globalFilterButton) {
   console.warn("globalRecordsFilterButton element not found, skipping global filter initialization");
-  return;
-}
-console.log(globalFilterButton);
+  // Provide a fallback function when globalFilterButton is not found
+  window.getGlobalDateFilterValues = function() {
+    console.warn("Global filter not available");
+    return {
+      globalFilterSelected: 'all',
+      globalStartDateSelected: null,
+      globalEndDateSelected: null,
+    };
+  };
+} else {
+  console.log(globalFilterButton);
 
-const globalFilterDropdown = document.getElementById("globalRecordsDropdown");
-const globalFilterOptions = document.querySelectorAll(".globalFilterOption");
-const globalCustomDateInputs = document.getElementById(
-  "globalRecordsCustomDateFilter"
-);
-const globalCustomOption = document.querySelector(
-  '.globalFilterOption[data-value="7"]'
-); // Custom option is value 7
-const globalApplyButton = document.getElementById("globalRecordsApplyButton");
-const globalStartDate = document.getElementById("globalFromDate");
-const globalEndDate = document.getElementById("globalToDate");
+  const globalFilterDropdown = document.getElementById("globalRecordsDropdown");
+  const globalFilterOptions = document.querySelectorAll(".globalFilterOption");
+  const globalCustomDateInputs = document.getElementById(
+    "globalRecordsCustomDateFilter"
+  );
+  const globalCustomOption = document.querySelector(
+    '.globalFilterOption[data-value="7"]'
+  ); // Custom option is value 7
+  const globalApplyButton = document.getElementById("globalRecordsApplyButton");
+  const globalStartDate = document.getElementById("globalFromDate");
+  const globalEndDate = document.getElementById("globalToDate");
 
 // Toggle dropdown
 if (globalFilterButton) {
@@ -95,7 +103,9 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// Helper function to fetch filter values
+}
+
+// Helper function to fetch filter values (moved outside to be globally accessible)
 function getGlobalDateFilterValues() {
   const selectedFilter =
     document

@@ -1,11 +1,9 @@
-@extends('business.layouts.app')
+<?php $__env->startSection('title', 'Vehicle Management'); ?>
+<?php $__env->startSection('page-title', 'Vehicle Management'); ?>
 
-@section('title', 'Vehicle Management')
-@section('page-title', 'Vehicle Management')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <!-- Main Content -->
-<link rel="stylesheet" href="{{ asset('dist/css/VehicleManagement/vehicleManagement_view.css') }}">
+<link rel="stylesheet" href="<?php echo e(asset('dist/css/VehicleManagement/vehicleManagement_view.css')); ?>">
 
 <!-- Vehicle Statistics Cards -->
 <div class="vehicle-stats-container">
@@ -14,7 +12,7 @@
             <i class="fas fa-car"></i>
         </div>
         <div class="stat-content">
-            <div class="stat-number">{{ $vehicles->total() }}</div>
+            <div class="stat-number"><?php echo e($vehicles->total()); ?></div>
             <div class="stat-label">All Vehicles</div>
         </div>
     </div>
@@ -23,7 +21,7 @@
             <i class="fas fa-check-circle"></i>
         </div>
         <div class="stat-content">
-            <div class="stat-number">{{ $vehicles->where('vehicle_status', 'active')->count() }}</div>
+            <div class="stat-number"><?php echo e($vehicles->where('vehicle_status', 'active')->count()); ?></div>
             <div class="stat-label">Available Vehicles</div>
         </div>
     </div>
@@ -32,7 +30,7 @@
             <i class="fas fa-calendar-check"></i>
         </div>
         <div class="stat-content">
-            <div class="stat-number">{{ $vehicles->where('vehicle_status', 'booked')->count() }}</div>
+            <div class="stat-number"><?php echo e($vehicles->where('vehicle_status', 'booked')->count()); ?></div>
             <div class="stat-label">Booked Vehicles</div>
         </div>
     </div>
@@ -322,13 +320,13 @@
             </div>
         </div>
         <div class="add-vehicle-container">
-            <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
+            <a href="<?php echo e(route('business.vehicles.create')); ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>Add Vehicle
             </a>
         </div>
     </div>
     
-    <div class="record-count">{{ $vehicles->total() }} Records Found, Page {{ $vehicles->currentPage() }} of {{ $vehicles->lastPage() }}</div>
+    <div class="record-count"><?php echo e($vehicles->total()); ?> Records Found, Page <?php echo e($vehicles->currentPage()); ?> of <?php echo e($vehicles->lastPage()); ?></div>
     <div class="filter-section">
         <div class="table-responsive">
             <table id="vehicleTable" class="table table-striped table-bordered">
@@ -344,30 +342,31 @@
                     </tr>
                 </thead>
                 <tbody id="vehicleTableBody">
-                    @foreach($vehicles as $vehicle)
+                    <?php $__currentLoopData = $vehicles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehicle): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr>
                         <td class="vechicle_title">
                             <div class="d-flex align-items-center">
-                                @php
+                                <?php
                                     $brandIcon = 'images/vehicle-brands/' . strtolower(str_replace(' ', '-', $vehicle->vehicle_make)) . '.svg';
                                     $brandIconPath = public_path($brandIcon);
                                     $defaultIcon = 'images/vehicle-brands/default.svg';
-                                @endphp
-                                @if(file_exists($brandIconPath))
-                                    <img src="{{ asset($brandIcon) }}" alt="{{ $vehicle->vehicle_make }}" class="me-2" style="width: 30px; height: 30px;">
-                                @else
+                                ?>
+                                <?php if(file_exists($brandIconPath)): ?>
+                                    <img src="<?php echo e(asset($brandIcon)); ?>" alt="<?php echo e($vehicle->vehicle_make); ?>" class="me-2" style="width: 30px; height: 30px;">
+                                <?php else: ?>
                                     <div class="brand-icon-placeholder me-2 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #f8f9fa; border-radius: 4px; font-size: 12px; font-weight: bold; color: #6c757d;">
-                                        {{ strtoupper(substr($vehicle->vehicle_make, 0, 2)) }}
+                                        <?php echo e(strtoupper(substr($vehicle->vehicle_make, 0, 2))); ?>
+
                                     </div>
-                                @endif
+                                <?php endif; ?>
                                 <div>
-                                    <div class="fw-bold">{{ $vehicle->vehicle_make }} {{ $vehicle->vehicle_model }}</div>
-                                    <small class="text-muted">{{ $vehicle->registration_number }}</small>
+                                    <div class="fw-bold"><?php echo e($vehicle->vehicle_make); ?> <?php echo e($vehicle->vehicle_model); ?></div>
+                                    <small class="text-muted"><?php echo e($vehicle->registration_number); ?></small>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            @php
+                            <?php
                                 $unitType = '';
                                 if($vehicle->vehicle_type === 'car') {
                                     $unitType = 'Car - ' . ucfirst($vehicle->transmission_type);
@@ -376,29 +375,31 @@
                                 } elseif($vehicle->vehicle_type === 'heavy_vehicle') {
                                     $unitType = 'Heavy Vehicle - ' . ucfirst($vehicle->transmission_type);
                                 }
-                            @endphp
-                            {{ $unitType }}
+                            ?>
+                            <?php echo e($unitType); ?>
+
                         </td>
-                        <td>{{ ucfirst($vehicle->fuel_type) }}</td>
+                        <td><?php echo e(ucfirst($vehicle->fuel_type)); ?></td>
                         <td>
-                            @if($vehicle->vehicle_type === 'car')
-                                {{ $vehicle->seating_capacity }} Seats
-                            @elseif($vehicle->vehicle_type === 'bike_scooter')
-                                {{ $vehicle->engine_capacity_cc }}cc Engine
-                            @elseif($vehicle->vehicle_type === 'heavy_vehicle')
-                                @if($vehicle->seating_capacity)
-                                    {{ $vehicle->seating_capacity }} Seats
-                                @elseif($vehicle->payload_capacity_tons)
-                                    {{ $vehicle->payload_capacity_tons }} Tons
-                                @endif
-                            @endif
+                            <?php if($vehicle->vehicle_type === 'car'): ?>
+                                <?php echo e($vehicle->seating_capacity); ?> Seats
+                            <?php elseif($vehicle->vehicle_type === 'bike_scooter'): ?>
+                                <?php echo e($vehicle->engine_capacity_cc); ?>cc Engine
+                            <?php elseif($vehicle->vehicle_type === 'heavy_vehicle'): ?>
+                                <?php if($vehicle->seating_capacity): ?>
+                                    <?php echo e($vehicle->seating_capacity); ?> Seats
+                                <?php elseif($vehicle->payload_capacity_tons): ?>
+                                    <?php echo e($vehicle->payload_capacity_tons); ?> Tons
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </td>
                         <td>
-                            ₹ {{ number_format($vehicle->rental_price_24h, 2) }}
+                            ₹ <?php echo e(number_format($vehicle->rental_price_24h, 2)); ?>
+
                             <i class="fas fa-info-circle text-muted ms-1" style="cursor: pointer;"></i>
                         </td>
                         <td>
-                            @php
+                            <?php
                                 $displayStatus = 'Available';
                                 $badgeClass = 'success';
 
@@ -409,16 +410,17 @@
                                     $displayStatus = 'Booked';
                                     $badgeClass = 'warning';
                                 }
-                            @endphp
-                            <span class="badge rounded-pill bg-{{ $badgeClass }} text-white fw-bold px-2 py-1">
-                                {{ $displayStatus }}
+                            ?>
+                            <span class="badge rounded-pill bg-<?php echo e($badgeClass); ?> text-white fw-bold px-2 py-1">
+                                <?php echo e($displayStatus); ?>
+
                             </span>
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('business.vehicles.show', $vehicle) }}" class="text-primary text-decoration-none">View</a>
+                            <a href="<?php echo e(route('business.vehicles.show', $vehicle)); ?>" class="text-primary text-decoration-none">View</a>
                         </td>
                     </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
         </div>
@@ -426,37 +428,37 @@
         <div class="d-flex justify-content-between align-items-center mt-3">
             <div class="pagination-info">
                 <span class="text-muted">Rows per page: 10</span>
-                <span class="text-muted ms-3">{{ $vehicles->firstItem() }}-{{ $vehicles->lastItem() }} of {{ $vehicles->total() }}</span>
+                <span class="text-muted ms-3"><?php echo e($vehicles->firstItem()); ?>-<?php echo e($vehicles->lastItem()); ?> of <?php echo e($vehicles->total()); ?></span>
             </div>
             <nav aria-label="Vehicle pagination">
                 <ul class="pagination mb-0">
-                    @if ($vehicles->onFirstPage())
+                    <?php if($vehicles->onFirstPage()): ?>
                         <li class="page-item disabled">
                             <span class="page-link">
                                 <i class="fas fa-chevron-left"></i>
                             </span>
                         </li>
-                    @else
+                    <?php else: ?>
                         <li class="page-item">
-                            <a class="page-link" href="{{ $vehicles->previousPageUrl() }}">
+                            <a class="page-link" href="<?php echo e($vehicles->previousPageUrl()); ?>">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                         </li>
-                    @endif
+                    <?php endif; ?>
 
-                    @if ($vehicles->hasMorePages())
+                    <?php if($vehicles->hasMorePages()): ?>
                         <li class="page-item">
-                            <a class="page-link" href="{{ $vehicles->nextPageUrl() }}">
+                            <a class="page-link" href="<?php echo e($vehicles->nextPageUrl()); ?>">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
-                    @else
+                    <?php else: ?>
                         <li class="page-item disabled">
                             <span class="page-link">
                                 <i class="fas fa-chevron-right"></i>
                             </span>
                         </li>
-                    @endif
+                    <?php endif; ?>
                 </ul>
             </nav>
         </div>
@@ -571,7 +573,7 @@
                 if (vehicleType || status || fuelType || searchTerm) {
                     recordCount.textContent = `${visibleCount} Records Found (filtered from ${totalRows} total)`;
                 } else {
-                    recordCount.textContent = `${totalRows} Records Found, Page {{ $vehicles->currentPage() }} of {{ $vehicles->lastPage() }}`;
+                    recordCount.textContent = `${totalRows} Records Found, Page <?php echo e($vehicles->currentPage()); ?> of <?php echo e($vehicles->lastPage()); ?>`;
                 }
             }
         }
@@ -592,4 +594,5 @@
     });
 
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('business.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/business/vehicles/index.blade.php ENDPATH**/ ?>

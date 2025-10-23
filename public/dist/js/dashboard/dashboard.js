@@ -399,7 +399,12 @@ function fetchVehiclesSummaryData(params) {
 }
 
 function renderDoughnutChart(counts) {
-  const ctx = document.getElementById("doughnutChart").getContext("2d");
+  const doughnutChartElement = document.getElementById("doughnutChart");
+  if (!doughnutChartElement) {
+    console.warn("doughnutChart element not found, skipping doughnut chart creation");
+    return;
+  }
+  const ctx = doughnutChartElement.getContext("2d");
 
   if (window.vehicleChart) {
     window.vehicleChart.destroy();

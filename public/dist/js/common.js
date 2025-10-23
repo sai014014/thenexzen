@@ -82,7 +82,10 @@ function showLoader() {
   /**
    * Show the loader
    */
-  document.getElementById("loader").style.display = "flex";
+  const loader = document.getElementById("loader");
+  if (loader) {
+    loader.style.display = "flex";
+  }
 }
 
 /**
@@ -98,7 +101,10 @@ function hideLoader() {
    * Hide the loader if there are no active requests left
    */
   if (activeRequests <= 0) {
-    document.getElementById("loader").style.display = "none";
+    const loader = document.getElementById("loader");
+    if (loader) {
+      loader.style.display = "none";
+    }
   }
 }
 

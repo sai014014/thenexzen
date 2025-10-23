@@ -159,6 +159,12 @@ Route::prefix('super-admin')->name('super-admin.')->group(function () {
     });
 });
 
+
+Route::prefix('business/api')->name('business.api.')->group(function () {
+    Route::get('/vehicle-makes', [\App\Http\Controllers\Api\VehicleMakeModelController::class, 'getMakes'])->name('vehicle-makes');
+    Route::get('/vehicle-models', [\App\Http\Controllers\Api\VehicleMakeModelController::class, 'getModels'])->name('vehicle-models');
+});
+
 // Business Admin Routes
 Route::prefix('business')->name('business.')->group(function () {
     // Authentication Routes
@@ -173,18 +179,15 @@ Route::prefix('business')->name('business.')->group(function () {
     });
 
     // Vehicle API Routes for dropdowns (accessible without authentication)
-    Route::get('/api/vehicle-makes', [\App\Http\Controllers\Api\VehicleApiController::class, 'getMakes'])->name('api.vehicle-makes');
-    Route::get('/api/vehicle-models', [\App\Http\Controllers\Api\VehicleApiController::class, 'getModels'])->name('api.vehicle-models');
+    Route::get('/api/vehicle-makes', [\App\Http\Controllers\Api\VehicleMakeModelController::class, 'getMakes'])->name('api.vehicle-makes');
+    Route::get('/api/vehicle-models', [\App\Http\Controllers\Api\VehicleMakeModelController::class, 'getModels'])->name('api.vehicle-models');
     Route::get('/api/vehicle-makes-with-models', [\App\Http\Controllers\Api\VehicleApiController::class, 'getMakesWithModels'])->name('api.vehicle-makes-with-models');
     
-    // Test route for debugging
-    Route::get('/test-route', function() {
-        return response()->json(['success' => true, 'message' => 'Test route working']);
-    });
 
     Route::middleware(['business_admin', 'check.business.status'])->group(function () {
         Route::post('/logout', [BusinessAuthController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [BusinessDashboardController::class, 'index'])->name('dashboard');
+        
         
         // Vehicle Management Routes
         Route::resource('vehicles', \App\Http\Controllers\Business\VehicleController::class);
@@ -199,8 +202,8 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::get('/customers/{customer}/drivers/{driver}/download/{type}', [\App\Http\Controllers\Business\CustomerController::class, 'downloadDriverDocument'])->name('customers.download-driver-document');
         
         // Vendor Management Routes
-        Route::resource('vendors', \App\Http\Controllers\Business\VendorController::class);
         Route::get('/vendors/search', [\App\Http\Controllers\Business\VendorController::class, 'search'])->name('vendors.search');
+        Route::resource('vendors', \App\Http\Controllers\Business\VendorController::class);
         Route::get('/vendors/{vendor}/download/{type}', [\App\Http\Controllers\Business\VendorController::class, 'downloadDocument'])->name('vendors.download-document');
         
         // Booking Management Routes

@@ -35,6 +35,7 @@ class Vehicle extends Model
         'insurance_provider',
         'policy_number',
         'insurance_expiry_date',
+        'vehicle_image_path',
         'insurance_document_path',
         'rc_number',
         'rc_document_path',

@@ -120,6 +120,12 @@ class VehicleController extends Controller
             if ($data['vehicle_type'] === 'bike_scooter') {
                 $data['transmission_type'] = $data['bike_transmission_type'] ?? null;
             }
+            
+            // Handle seating capacity for heavy vehicles
+            if ($data['vehicle_type'] === 'heavy_vehicle' && isset($data['seating_capacity_heavy'])) {
+                $data['seating_capacity'] = $data['seating_capacity_heavy'];
+                unset($data['seating_capacity_heavy']);
+            }
 
             Vehicle::create($data);
 
@@ -240,6 +246,14 @@ class VehicleController extends Controller
             $data = $request->all();
 
             // Handle file uploads
+            if ($request->hasFile('vehicle_image')) {
+                // Delete old file if exists
+                if ($vehicle->vehicle_image_path) {
+                    Storage::disk('public')->delete($vehicle->vehicle_image_path);
+                }
+                $data['vehicle_image_path'] = $this->uploadDocument($request->file('vehicle_image'), 'vehicle_images');
+            }
+
             if ($request->hasFile('insurance_document')) {
                 // Delete old file if exists
                 if ($vehicle->insurance_document_path) {
@@ -259,6 +273,12 @@ class VehicleController extends Controller
             // Set transmission type based on vehicle type
             if ($data['vehicle_type'] === 'bike_scooter') {
                 $data['transmission_type'] = $data['bike_transmission_type'] ?? null;
+            }
+            
+            // Handle seating capacity for heavy vehicles
+            if ($data['vehicle_type'] === 'heavy_vehicle' && isset($data['seating_capacity_heavy'])) {
+                $data['seating_capacity'] = $data['seating_capacity_heavy'];
+                unset($data['seating_capacity_heavy']);
             }
 
             $vehicle->update($data);
@@ -438,7 +458,7 @@ class VehicleController extends Controller
             'vehicle_type' => 'required|in:car,bike_scooter,heavy_vehicle',
             'vehicle_make' => 'required|string|max:100',
             'vehicle_model' => 'required|string|max:100',
-            'vehicle_year' => 'required|integer|min:1900|max:' . (date('Y') + 1),
+            'vehicle_year' => 'required|integer|min:1900|max:' . date('Y'),
             'vehicle_number' => 'required|string|max:20|unique:vehicles,vehicle_number,' . $vehicleId,
             'vehicle_status' => 'required|in:active,inactive,under_maintenance',
             'fuel_type' => 'required|in:petrol,diesel,cng,electric,hybrid',
@@ -473,7 +493,7 @@ class VehicleController extends Controller
             $rules['engine_capacity_cc'] = 'required|integer|min:50|max:2000';
             $rules['bike_transmission_type'] = 'required|in:gear,gearless';
         } elseif ($request->vehicle_type === 'heavy_vehicle') {
-            $rules['seating_capacity'] = 'nullable|integer|min:1|max:100';
+            $rules['seating_capacity_heavy'] = 'nullable|integer|min:1|max:100';
             $rules['payload_capacity_tons'] = 'nullable|numeric|min:0|max:100';
             $rules['transmission_type'] = 'required|in:manual,automatic';
         }

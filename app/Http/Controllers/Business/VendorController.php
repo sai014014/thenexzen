@@ -42,7 +42,7 @@ class VendorController extends Controller
                   ->orWhere('gstin', 'like', "%{$query}%")
                   ->orWhere('pan_number', 'like', "%{$query}%");
             })
-            ->select('id', 'vendor_name', 'mobile_number', 'vendor_type', 'gstin', 'pan_number')
+            ->select('id', 'vendor_name', 'mobile_number', 'vendor_type', 'gstin', 'pan_number', 'commission_type', 'commission_rate')
             ->limit(10)
             ->get();
         

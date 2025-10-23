@@ -324,6 +324,176 @@ if (!in_array($_SERVER['REMOTE_ADDR'], $allowed_ips) && !$force_access && !$is_c
                     $issues[] = "❌ Application key is not set - run 'php artisan key:generate'";
                 }
             }
+
+            // Check Laravel bootstrap files
+            if (file_exists('../bootstrap/app.php')) {
+                $successes[] = "✅ Laravel bootstrap file exists";
+            } else {
+                $issues[] = "❌ Laravel bootstrap file missing";
+            }
+
+            // Check if we can include Laravel files
+            try {
+                if (file_exists('../vendor/autoload.php')) {
+                    require_once '../vendor/autoload.php';
+                    $successes[] = "✅ Composer autoload can be included";
+                }
+            } catch (Exception $e) {
+                $issues[] = "❌ Composer autoload error: " . $e->getMessage();
+            }
+
+            // Check Laravel configuration files
+            $config_files = [
+                '../config/app.php' => 'App configuration',
+                '../config/database.php' => 'Database configuration',
+                '../config/mail.php' => 'Mail configuration',
+                '../config/session.php' => 'Session configuration'
+            ];
+
+            foreach ($config_files as $file => $description) {
+                if (file_exists($file)) {
+                    $successes[] = "✅ $description file exists";
+                } else {
+                    $issues[] = "❌ $description file missing";
+                }
+            }
+            ?>
+        </div>
+
+        <!-- HTTP 500 Specific Checks -->
+        <div class="section">
+            <h2>🚨 HTTP 500 Error Specific Checks</h2>
+            
+            <?php
+            // Check if index.php can be executed
+            if (file_exists('index.php')) {
+                $index_content = file_get_contents('index.php');
+                if (strpos($index_content, 'Laravel') !== false || strpos($index_content, 'artisan') !== false) {
+                    $successes[] = "✅ index.php appears to be a valid Laravel entry point";
+                } else {
+                    $issues[] = "❌ index.php doesn't appear to be a Laravel entry point";
+                }
+            }
+
+            // Check .htaccess file content
+            if (file_exists('.htaccess')) {
+                $htaccess_content = file_get_contents('.htaccess');
+                if (strpos($htaccess_content, 'RewriteEngine On') !== false) {
+                    $successes[] = "✅ .htaccess has RewriteEngine enabled";
+                } else {
+                    $issues[] = "❌ .htaccess missing RewriteEngine directive";
+                }
+                
+                if (strpos($htaccess_content, 'index.php') !== false) {
+                    $successes[] = "✅ .htaccess has index.php rewrite rule";
+                } else {
+                    $issues[] = "❌ .htaccess missing index.php rewrite rule";
+                }
+            } else {
+                $issues[] = "❌ .htaccess file missing - this will cause 500 errors";
+            }
+
+            // Check if mod_rewrite is enabled
+            if (function_exists('apache_get_modules')) {
+                if (in_array('mod_rewrite', apache_get_modules())) {
+                    $successes[] = "✅ mod_rewrite is enabled";
+                } else {
+                    $issues[] = "❌ mod_rewrite is not enabled - required for Laravel";
+                }
+            } else {
+                $warnings[] = "⚠️ Cannot check if mod_rewrite is enabled";
+            }
+
+            // Check if we can access Laravel routes
+            try {
+                if (file_exists('../vendor/autoload.php')) {
+                    require_once '../vendor/autoload.php';
+                    
+                    // Try to create a minimal Laravel app instance
+                    if (file_exists('../bootstrap/app.php')) {
+                        $app = require_once '../bootstrap/app.php';
+                        $successes[] = "✅ Laravel application can be bootstrapped";
+                    }
+                }
+            } catch (Exception $e) {
+                $issues[] = "❌ Laravel bootstrap error: " . $e->getMessage();
+            } catch (Error $e) {
+                $issues[] = "❌ Laravel fatal error: " . $e->getMessage();
+            }
+
+            // Check for common Laravel error patterns
+            $error_patterns = [
+                'Class not found' => 'Missing class files',
+                'Call to undefined function' => 'Missing PHP functions',
+                'Parse error' => 'Syntax errors in PHP files',
+                'Fatal error' => 'Critical PHP errors',
+                'Permission denied' => 'File permission issues'
+            ];
+
+            // Check if there are any error logs
+            $log_files = [
+                '../storage/logs/laravel.log',
+                '../storage/logs/laravel-' . date('Y-m-d') . '.log',
+                '../storage/logs/error.log'
+            ];
+
+            $found_logs = false;
+            foreach ($log_files as $log_file) {
+                if (file_exists($log_file) && filesize($log_file) > 0) {
+                    $found_logs = true;
+                    $log_content = file_get_contents($log_file);
+                    $log_size = filesize($log_file);
+                    
+                    if ($log_size > 0) {
+                        $warnings[] = "⚠️ Log file found: " . basename($log_file) . " ($log_size bytes)";
+                        
+                        // Check for recent errors
+                        $recent_errors = substr($log_content, -2000); // Last 2000 characters
+                        foreach ($error_patterns as $pattern => $description) {
+                            if (stripos($recent_errors, $pattern) !== false) {
+                                $issues[] = "❌ Recent error found: $description";
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!$found_logs) {
+                $warnings[] = "⚠️ No log files found - errors might not be logged";
+            }
+
+            // Check if we can write to storage/logs
+            if (is_dir('../storage/logs')) {
+                $test_log = '../storage/logs/test_' . time() . '.log';
+                if (file_put_contents($test_log, 'test log entry')) {
+                    unlink($test_log);
+                    $successes[] = "✅ Can write to storage/logs directory";
+                } else {
+                    $issues[] = "❌ Cannot write to storage/logs directory";
+                }
+            }
+
+            // Check if cache directories are writable
+            $cache_dirs = [
+                '../storage/framework/cache' => 'Framework cache',
+                '../storage/framework/sessions' => 'Session storage',
+                '../storage/framework/views' => 'View cache',
+                '../bootstrap/cache' => 'Bootstrap cache'
+            ];
+
+            foreach ($cache_dirs as $dir => $description) {
+                if (is_dir($dir)) {
+                    $test_file = $dir . '/test_' . time() . '.txt';
+                    if (file_put_contents($test_file, 'test')) {
+                        unlink($test_file);
+                        $successes[] = "✅ $description directory is writable";
+                    } else {
+                        $issues[] = "❌ $description directory is not writable";
+                    }
+                } else {
+                    $issues[] = "❌ $description directory does not exist";
+                }
+            }
             ?>
         </div>
 
@@ -391,6 +561,65 @@ if (!in_array($_SERVER['REMOTE_ADDR'], $allowed_ips) && !$force_access && !$is_c
             <?php endif; ?>
         </div>
 
+        <!-- Live Laravel Test -->
+        <div class="section">
+            <h2>🧪 Live Laravel Application Test</h2>
+            
+            <?php
+            // Test if we can actually run the Laravel application
+            try {
+                // Capture any output that might be generated
+                ob_start();
+                
+                // Try to include the Laravel bootstrap
+                if (file_exists('../vendor/autoload.php') && file_exists('../bootstrap/app.php')) {
+                    require_once '../vendor/autoload.php';
+                    
+                    // Try to create the application
+                    $app = require_once '../bootstrap/app.php';
+                    
+                    // Try to make a simple request
+                    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+                    $request = Illuminate\Http\Request::capture();
+                    
+                    // This will actually try to process the request
+                    $response = $kernel->handle($request);
+                    
+                    $output = ob_get_clean();
+                    
+                    if ($response instanceof Illuminate\Http\Response) {
+                        $successes[] = "✅ Laravel application can process requests successfully";
+                        $successes[] = "✅ HTTP Status: " . $response->getStatusCode();
+                    } else {
+                        $issues[] = "❌ Laravel application failed to process requests";
+                    }
+                } else {
+                    $issues[] = "❌ Cannot test Laravel application - missing core files";
+                }
+            } catch (Exception $e) {
+                $output = ob_get_clean();
+                $issues[] = "❌ Laravel Exception: " . $e->getMessage();
+                $issues[] = "❌ File: " . $e->getFile() . " Line: " . $e->getLine();
+            } catch (Error $e) {
+                $output = ob_get_clean();
+                $issues[] = "❌ PHP Fatal Error: " . $e->getMessage();
+                $issues[] = "❌ File: " . $e->getFile() . " Line: " . $e->getLine();
+            } catch (Throwable $e) {
+                $output = ob_get_clean();
+                $issues[] = "❌ Throwable Error: " . $e->getMessage();
+                $issues[] = "❌ File: " . $e->getFile() . " Line: " . $e->getLine();
+            }
+            
+            // Show any captured output
+            if (!empty($output)) {
+                echo '<div class="check-item warning">';
+                echo '<h3>Captured Output:</h3>';
+                echo '<div class="code">' . htmlspecialchars($output) . '</div>';
+                echo '</div>';
+            }
+            ?>
+        </div>
+
         <!-- Quick Fixes -->
         <div class="section">
             <h2>🔧 Quick Fixes</h2>
@@ -429,6 +658,16 @@ php artisan view:cache
                 <h4>Run Migrations:</h4>
                 <div class="code">
 php artisan migrate
+                </div>
+
+                <h4>Check Laravel Logs:</h4>
+                <div class="code">
+tail -f storage/logs/laravel.log
+                </div>
+
+                <h4>Test Laravel Routes:</h4>
+                <div class="code">
+php artisan route:list
                 </div>
             </div>
         </div>

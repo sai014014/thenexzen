@@ -83,7 +83,7 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <!-- Sidebar -->
+        <!-- Sidebar -->
             <nav class="col-md-3 col-lg-2 d-md-block sidebar">
                 <div class="position-sticky pt-3">
                     <div class="text-center mb-4">
@@ -92,26 +92,26 @@
                             NEXZEN
                         </h4>
                         <small class="text-white-50">Super Admin</small>
-                    </div>
-                    
+            </div>
+            
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('super-admin.dashboard') ? 'active' : '' }}" href="{{ route('super-admin.dashboard') }}">
-                                <i class="fas fa-tachometer-alt"></i>
-                                Dashboard
-                            </a>
+                    <a class="nav-link {{ request()->routeIs('super-admin.dashboard') ? 'active' : '' }}" href="{{ route('super-admin.dashboard') }}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('super-admin.businesses.*') ? 'active' : '' }}" href="{{ route('super-admin.businesses.index') }}">
-                                <i class="fas fa-building"></i>
-                                Businesses
-                            </a>
+                    <a class="nav-link {{ request()->routeIs('super-admin.businesses.*') ? 'active' : '' }}" href="{{ route('super-admin.businesses.index') }}">
+                        <i class="fas fa-building"></i>
+                        Businesses
+                    </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('super-admin.bugs.*') ? 'active' : '' }}" href="{{ route('super-admin.bugs.index') }}">
-                                <i class="fas fa-bug"></i>
-                                Bug Tracking
-                            </a>
+                    <a class="nav-link {{ request()->routeIs('super-admin.bugs.*') ? 'active' : '' }}" href="{{ route('super-admin.bugs.index') }}">
+                        <i class="fas fa-bug"></i>
+                        Bug Tracking
+                    </a>
                         </li>
                     </ul>
                 </div>
@@ -127,11 +127,32 @@
                             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAllCache()" id="clearCacheBtn">
                                 <i class="fas fa-trash-alt me-1"></i>
                                 Clear Cache
-                            </button>
+                </button>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="migrationDropdown" data-bs-toggle="dropdown">
+                                    <i class="fas fa-database me-1"></i>
+                                    Migrations
+                    </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="getMigrationStatus()">
+                                        <i class="fas fa-info-circle me-2"></i>Check Status
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="runMigrations()">
+                                        <i class="fas fa-play me-2"></i>Run Migrations
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="rollbackMigrations()">
+                                        <i class="fas fa-undo me-2"></i>Rollback Last Batch
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="resetMigrations()">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>Reset All Migrations
+                                    </a></li>
+                                </ul>
+                            </div>
                             <button type="button" class="btn btn-sm btn-outline-secondary">
                                 <i class="fas fa-download me-1"></i>
                                 Export
-                            </button>
+                    </button>
                         </div>
                         <div class="dropdown">
                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
@@ -148,11 +169,11 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('super-admin.logout') }}">
-                                        @csrf
+                                @csrf
                                         <button type="submit" class="dropdown-item">
                                             <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                        </button>
-                                    </form>
+                                </button>
+                            </form>
                                 </li>
                             </ul>
                         </div>
@@ -265,6 +286,185 @@
             }, 5000);
         }
         
+        // Migration Management Functions
+        function getMigrationStatus() {
+            const btn = document.querySelector('[onclick="getMigrationStatus()"]');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
+            
+            fetch('{{ route("super-admin.migrations.status") }}', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const status = data.data;
+                    let message = `Migration Status:\n\n`;
+                    message += `• Total Migration Files: ${status.total_migration_files}\n`;
+                    message += `• Ran Migrations: ${status.ran_migrations}\n`;
+                    message += `• Pending Migrations: ${status.pending_migrations}\n`;
+                    message += `• Migrations Table Exists: ${status.migrations_table_exists ? 'Yes' : 'No'}\n`;
+                    
+                    if (status.pending_migrations > 0) {
+                        message += `\nPending Migrations:\n`;
+                        status.pending_list.forEach(migration => {
+                            message += `• ${migration}\n`;
+                        });
+                    }
+                    
+                    showAlert('info', 'Migration Status', message);
+                } else {
+                    showAlert('error', 'Failed to get migration status', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Error', 'An error occurred while checking migration status');
+            })
+            .finally(() => {
+                // Restore button state
+                btn.innerHTML = originalText;
+            });
+        }
+        
+        function runMigrations() {
+            if (!confirm('Are you sure you want to run pending migrations? This will update your database structure.')) {
+                return;
+            }
+            
+            const btn = document.querySelector('[onclick="runMigrations()"]');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Running...';
+            
+            fetch('{{ route("super-admin.migrations.run") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let message = data.message;
+                    if (data.data.migrations_run > 0) {
+                        message += `\n\nMigrations Run: ${data.data.migrations_run}`;
+                        if (data.data.ran_migrations) {
+                            message += `\n\nRan Migrations:\n`;
+                            data.data.ran_migrations.forEach(migration => {
+                                message += `• ${migration}\n`;
+                            });
+                        }
+                    }
+                    showAlert('success', 'Migrations Completed', message);
+                } else {
+                    showAlert('error', 'Failed to run migrations', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Error', 'An error occurred while running migrations');
+            })
+            .finally(() => {
+                // Restore button state
+                btn.innerHTML = originalText;
+            });
+        }
+        
+        function rollbackMigrations() {
+            if (!confirm('Are you sure you want to rollback the last migration batch? This will undo recent database changes.')) {
+                return;
+            }
+            
+            const btn = document.querySelector('[onclick="rollbackMigrations()"]');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Rolling back...';
+            
+            fetch('{{ route("super-admin.migrations.rollback") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let message = data.message;
+                    if (data.data.migrations_rolled_back > 0) {
+                        message += `\n\nRolled Back: ${data.data.migrations_rolled_back} migration(s)`;
+                        if (data.data.rolled_back_migrations) {
+                            message += `\n\nRolled Back Migrations:\n`;
+                            data.data.rolled_back_migrations.forEach(migration => {
+                                message += `• ${migration}\n`;
+                            });
+                        }
+                    }
+                    showAlert('success', 'Rollback Completed', message);
+                } else {
+                    showAlert('error', 'Failed to rollback migrations', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Error', 'An error occurred while rolling back migrations');
+            })
+            .finally(() => {
+                // Restore button state
+                btn.innerHTML = originalText;
+            });
+        }
+        
+        function resetMigrations() {
+            if (!confirm('⚠️ DANGER: This will reset ALL migrations (rollback all and re-run them).\n\nThis action will:\n• Drop all tables\n• Re-run all migrations\n• Potentially cause data loss\n\nAre you absolutely sure you want to continue?')) {
+                return;
+            }
+            
+            const btn = document.querySelector('[onclick="resetMigrations()"]');
+            const originalText = btn.innerHTML;
+            
+            // Show loading state
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Resetting...';
+            
+            fetch('{{ route("super-admin.migrations.reset") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let message = data.message;
+                    if (data.data.migrations_reset > 0) {
+                        message += `\n\nReset: ${data.data.migrations_reset} migration(s)`;
+                    }
+                    showAlert('success', 'Migrations Reset', message);
+                } else {
+                    showAlert('error', 'Failed to reset migrations', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Error', 'An error occurred while resetting migrations');
+            })
+            .finally(() => {
+                // Restore button state
+                btn.innerHTML = originalText;
+            });
+        }
+        
         // Add some CSS for better button styling
         document.addEventListener('DOMContentLoaded', function() {
             const style = document.createElement('style');
@@ -280,9 +480,25 @@
                     cursor: not-allowed;
                 }
                 
+                #migrationDropdown:hover {
+                    background-color: #6f42c1 !important;
+                    border-color: #6f42c1 !important;
+                    color: white !important;
+                }
+                
+                .dropdown-menu {
+                    min-width: 200px;
+                }
+                
+                .dropdown-item.text-danger:hover {
+                    background-color: #dc3545 !important;
+                    color: white !important;
+                }
+                
                 .alert {
                     margin-bottom: 1rem;
                     border-radius: 8px;
+                    white-space: pre-line;
                 }
                 
                 .btn-group .btn {

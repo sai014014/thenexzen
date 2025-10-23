@@ -160,6 +160,12 @@ Route::prefix('super-admin')->name('super-admin.')->group(function () {
         // Cache Management Routes
         Route::post('/cache/clear', [\App\Http\Controllers\SuperAdmin\CacheController::class, 'clearAllCache'])->name('cache.clear');
         Route::get('/cache/status', [\App\Http\Controllers\SuperAdmin\CacheController::class, 'getCacheStatus'])->name('cache.status');
+        
+        // Migration Management Routes
+        Route::get('/migrations/status', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'getStatus'])->name('migrations.status');
+        Route::post('/migrations/run', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'runMigrations'])->name('migrations.run');
+        Route::post('/migrations/rollback', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'rollbackMigrations'])->name('migrations.rollback');
+        Route::post('/migrations/reset', [\App\Http\Controllers\SuperAdmin\MigrationController::class, 'resetMigrations'])->name('migrations.reset');
     });
 });
 

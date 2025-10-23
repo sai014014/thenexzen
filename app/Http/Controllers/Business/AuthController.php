@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\Business;
 use App\Models\BusinessAdmin;
@@ -16,6 +18,55 @@ use App\Mail\BusinessRegistrationOTP;
 
 class AuthController extends Controller
 {
+    /**
+     * Get email configuration (same as TestOTPController)
+     */
+    private function getEmailConfig()
+    {
+        return [
+            // Custom SMTP Configuration (Working configuration)
+            'custom' => [
+                'host' => 'mail.zenvueservices.com',
+                'port' => 587,
+                'encryption' => 'tls',
+                'username' => 'vinay@zenvueservices.com',
+                'password' => 'Zenvue@2025',
+                'from_address' => 'info@nexzen.com',
+                'from_name' => 'NexZen',
+            ],
+            'active' => 'custom',
+        ];
+    }
+
+    /**
+     * Get active email configuration
+     */
+    private function getActiveEmailConfig()
+    {
+        $config = $this->getEmailConfig();
+        $active = $config['active'] ?? 'custom';
+        return $config[$active] ?? $config['custom'];
+    }
+
+    /**
+     * Apply email configuration to Laravel config
+     */
+    private function applyEmailConfig()
+    {
+        $emailConfig = $this->getActiveEmailConfig();
+        
+        // Update mail configuration
+        Config::set([
+            'mail.mailers.smtp.host' => $emailConfig['host'],
+            'mail.mailers.smtp.port' => $emailConfig['port'],
+            'mail.mailers.smtp.encryption' => $emailConfig['encryption'],
+            'mail.mailers.smtp.username' => $emailConfig['username'],
+            'mail.mailers.smtp.password' => $emailConfig['password'],
+            'mail.from.address' => $emailConfig['from_address'],
+            'mail.from.name' => $emailConfig['from_name'],
+        ]);
+    }
+
     public function showLoginForm()
     {
         return view('business.auth.login');
@@ -128,7 +179,10 @@ class AuthController extends Controller
         ], 600);
 
         try {
-            // Send OTP via email
+            // Apply custom email configuration
+            $this->applyEmailConfig();
+            
+            // Send OTP via email using custom configuration
             Mail::to($request->admin_email)->send(new BusinessRegistrationOTP(
                 $otp,
                 $request->business_name,
@@ -309,6 +363,10 @@ class AuthController extends Controller
         Cache::put("otp_registration_{$request->session_id}", $otpData, 600);
 
         try {
+            // Apply custom email configuration
+            $this->applyEmailConfig();
+            
+            // Resend OTP email using custom configuration
             Mail::to($otpData['admin_email'])->send(new BusinessRegistrationOTP(
                 $otp,
                 $otpData['business_name'],

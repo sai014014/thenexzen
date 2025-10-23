@@ -1,4 +1,8 @@
 const globalFilterButton = document.getElementById("globalRecordsFilterButton");
+if (!globalFilterButton) {
+  console.warn("globalRecordsFilterButton element not found, skipping global filter initialization");
+  return;
+}
 console.log(globalFilterButton);
 
 const globalFilterDropdown = document.getElementById("globalRecordsDropdown");

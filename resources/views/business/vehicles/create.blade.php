@@ -67,6 +67,23 @@
                         </div>
 
                         <div class="col-md-4 mb-3">
+                            <label for="vehicle_image" class="form-label">Vehicle Image</label>
+                            <input type="file" 
+                                   class="form-control @error('vehicle_image') is-invalid @enderror" 
+                                   id="vehicle_image" 
+                                   name="vehicle_image" 
+                                   accept="image/*"
+                                   onchange="previewImage(this)">
+                            <div class="form-text">Upload a clear image of the vehicle (JPG, PNG, max 5MB)</div>
+                            @error('vehicle_image')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div id="imagePreview" class="mt-2" style="display: none;">
+                                <img id="previewImg" src="" alt="Vehicle Preview" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
                             <label for="vehicle_model" class="form-label">Vehicle Model *</label>
                             <select class="form-select @error('vehicle_model') is-invalid @enderror" 
                                     id="vehicle_model" 
@@ -366,12 +383,27 @@
                         </div>
 
                         <div class="col-md-4 mb-3" id="vendor_fields" style="display: none;">
-                            <label for="vendor_name" class="form-label">Vendor Name</label>
-                            <input type="text" 
-                                   class="form-control @error('vendor_name') is-invalid @enderror" 
-                                   id="vendor_name" 
-                                   name="vendor_name" 
-                                   value="{{ old('vendor_name') }}">
+                            <label for="vendor_search" class="form-label">Search Vendor</label>
+                            <div class="position-relative">
+                                <input type="text" 
+                                       class="form-control @error('vendor_name') is-invalid @enderror" 
+                                       id="vendor_search" 
+                                       placeholder="Type to search vendors..."
+                                       autocomplete="off">
+                                <input type="hidden" id="vendor_id" name="vendor_id" value="{{ old('vendor_id') }}">
+                                <input type="hidden" id="vendor_name" name="vendor_name" value="{{ old('vendor_name') }}">
+                                <div id="vendor_dropdown" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                                    <!-- Vendor options will be populated here -->
+                                </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="openAddVendorModal()">
+                                        <i class="fas fa-plus me-1"></i>Add New Vendor
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="testVendorSearch()">
+                                        <i class="fas fa-search me-1"></i>Test Search
+                                    </button>
+                                </div>
+                            </div>
                             @error('vendor_name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -599,18 +631,300 @@
     </div>
 </div>
 
+<!-- Add Vendor Modal -->
+<div class="modal fade" id="addVendorModal" tabindex="-1" aria-labelledby="addVendorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addVendorModalLabel">Add New Vendor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addVendorForm">
+                    <div class="mb-3">
+                        <label for="new_vendor_name" class="form-label">Vendor Name *</label>
+                        <input type="text" class="form-control" id="new_vendor_name" name="vendor_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_vendor_mobile" class="form-label">Mobile Number *</label>
+                        <input type="tel" class="form-control" id="new_vendor_mobile" name="mobile_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_vendor_type" class="form-label">Vendor Type *</label>
+                        <select class="form-select" id="new_vendor_type" name="vendor_type" required>
+                            <option value="">Select Type</option>
+                            <option value="individual">Individual</option>
+                            <option value="company">Company</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_vendor_id_number" class="form-label">ID Number (Aadhar/GSTIN)</label>
+                        <input type="text" class="form-control" id="new_vendor_id_number" name="id_number">
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_vendor_address" class="form-label">Address</label>
+                        <textarea class="form-control" id="new_vendor_address" name="address" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewVendor()">
+                    <i class="fas fa-save me-1"></i>Save Vendor
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+// Global variables
+let vehicleTypeSelect, carSpecs, bikeSpecs, heavyVehicleSpecs, transmissionCarHeavy, transmissionBike;
+let ownershipTypeSelect, vendorFields, commissionTypeField, commissionValueField;
+let vendorSearchTimeout, vendorSearchInput, vendorDropdown, vendorIdInput, vendorNameInput;
+
+// Custom fetch function to avoid common.js conflicts
+function customFetch(url, options = {}) {
+    // Use XMLHttpRequest instead of fetch to avoid common.js interception
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(options.method || 'GET', url);
+        
+        // Set headers
+        if (options.headers) {
+            Object.keys(options.headers).forEach(key => {
+                xhr.setRequestHeader(key, options.headers[key]);
+            });
+        }
+        
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const response = {
+                        ok: true,
+                        status: xhr.status,
+                        json: () => Promise.resolve(JSON.parse(xhr.responseText))
+                    };
+                    resolve(response);
+                } catch (e) {
+                    reject(new Error('Invalid JSON response'));
+                }
+            } else {
+                reject(new Error(`HTTP error! status: ${xhr.status}`));
+            }
+        };
+        
+        xhr.onerror = function() {
+            reject(new Error('Network error'));
+        };
+        
+        // Send request
+        if (options.body) {
+            xhr.send(options.body);
+        } else {
+            xhr.send();
+        }
+    });
+}
+
+// Image preview function
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+// Add vendor modal functions
+function openAddVendorModal() {
+    const modal = new bootstrap.Modal(document.getElementById('addVendorModal'));
+    modal.show();
+}
+
+function saveNewVendor() {
+    const form = document.getElementById('addVendorForm');
+    const formData = new FormData(form);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    customFetch('/business/vendors', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('Vendor creation response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Vendor creation response:', data);
+        if (data.success) {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addVendorModal'));
+            modal.hide();
+            
+            // Clear form
+            form.reset();
+            
+            // Select the new vendor
+            selectVendor(data.vendor);
+            
+            // Show success message
+            showAlert('Vendor added successfully!', 'success');
+        } else {
+            showAlert(data.message || 'Error adding vendor', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding vendor:', error);
+        showAlert(`Error adding vendor: ${error.message}`, 'danger');
+    });
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('.card-body').firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Vendor search functions
+function searchVendors(query) {
+    console.log('Searching vendors with query:', query);
+    
+    if (!vendorDropdown) {
+        console.error('Vendor dropdown element not found');
+        return;
+    }
+    
+    // First test basic routing
+    const testUrl = `/business/test-route`;
+    console.log('Testing basic routing with:', testUrl);
+    
+    customFetch(testUrl, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => {
+        console.log('Test route response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Test route response:', data);
+    })
+    .catch(error => {
+        console.error('Test route error:', error);
+    });
+    
+    const url = `/business/vendors/search?q=${encodeURIComponent(query)}`;
+    console.log('Search URL:', url);
+    
+    customFetch(url, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Search response:', data);
+        if (data.success && data.vendors && data.vendors.length > 0) {
+            console.log('Found vendors:', data.vendors.length);
+            displayVendorOptions(data.vendors);
+        } else {
+            console.log('No vendors found or error in response');
+            vendorDropdown.innerHTML = '<div class="dropdown-item text-muted">No vendors found</div>';
+            vendorDropdown.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error searching vendors:', error);
+        vendorDropdown.innerHTML = `<div class="dropdown-item text-danger">Error: ${error.message}</div>`;
+        vendorDropdown.style.display = 'block';
+    });
+}
+
+function displayVendorOptions(vendors) {
+    vendorDropdown.innerHTML = '';
+    vendors.forEach(vendor => {
+        const option = document.createElement('div');
+        option.className = 'dropdown-item';
+        option.style.cursor = 'pointer';
+        option.innerHTML = `
+            <div class="fw-bold">${vendor.vendor_name}</div>
+            <small class="text-muted">${vendor.mobile_number} • ${vendor.vendor_type}</small>
+        `;
+        option.addEventListener('click', () => selectVendor(vendor));
+        vendorDropdown.appendChild(option);
+    });
+    vendorDropdown.style.display = 'block';
+}
+
+function selectVendor(vendor) {
+    vendorSearchInput.value = vendor.vendor_name;
+    vendorIdInput.value = vendor.id;
+    vendorNameInput.value = vendor.vendor_name;
+    vendorDropdown.style.display = 'none';
+}
+
+// Test function for vendor search
+function testVendorSearch() {
+    console.log('Testing vendor search...');
+    searchVendors('test');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    const vehicleTypeSelect = document.getElementById('vehicle_type');
-    const carSpecs = document.getElementById('car_specs');
-    const bikeSpecs = document.getElementById('bike_specs');
-    const heavyVehicleSpecs = document.getElementById('heavy_vehicle_specs');
-    const transmissionCarHeavy = document.getElementById('transmission_car_heavy');
-    const transmissionBike = document.getElementById('transmission_bike');
-    const ownershipTypeSelect = document.getElementById('ownership_type');
-    const vendorFields = document.getElementById('vendor_fields');
-    const commissionTypeField = document.getElementById('commission_type_field');
-    const commissionValueField = document.getElementById('commission_value_field');
+    // Initialize variables
+    vehicleTypeSelect = document.getElementById('vehicle_type');
+    carSpecs = document.getElementById('car_specs');
+    bikeSpecs = document.getElementById('bike_specs');
+    heavyVehicleSpecs = document.getElementById('heavy_vehicle_specs');
+    transmissionCarHeavy = document.getElementById('transmission_car_heavy');
+    transmissionBike = document.getElementById('transmission_bike');
+    ownershipTypeSelect = document.getElementById('ownership_type');
+    vendorFields = document.getElementById('vendor_fields');
+    commissionTypeField = document.getElementById('commission_type_field');
+    commissionValueField = document.getElementById('commission_value_field');
+    
+    // Initialize vendor search elements
+    vendorSearchInput = document.getElementById('vendor_search');
+    vendorDropdown = document.getElementById('vendor_dropdown');
+    vendorIdInput = document.getElementById('vendor_id');
+    vendorNameInput = document.getElementById('vendor_name');
+    
+    console.log('Vendor elements initialized:');
+    console.log('vendorSearchInput:', vendorSearchInput);
+    console.log('vendorDropdown:', vendorDropdown);
+    console.log('vendorIdInput:', vendorIdInput);
+    console.log('vendorNameInput:', vendorNameInput);
 
     function toggleVehicleSpecs() {
         const vehicleType = vehicleTypeSelect.value;
@@ -670,6 +984,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Vendor search event listener
+    if (vendorSearchInput) {
+        console.log('Vendor search input found, adding event listener');
+        vendorSearchInput.addEventListener('input', function() {
+            console.log('Vendor search input changed:', this.value);
+            clearTimeout(vendorSearchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                if (vendorDropdown) {
+                    vendorDropdown.style.display = 'none';
+                }
+                return;
+            }
+            
+            vendorSearchTimeout = setTimeout(() => {
+                searchVendors(query);
+            }, 300);
+        });
+    } else {
+        console.error('Vendor search input not found');
+    }
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#vendor_fields')) {
+            if (vendorDropdown) {
+                vendorDropdown.style.display = 'none';
+            }
+        }
+    });
+
     // Form submission with validation
     document.getElementById('vehicleForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -709,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Seating capacity:', document.getElementById('seating_capacity').value);
         console.log('Car specs visible:', document.getElementById('car_specs').style.display);
         
-        fetch(this.action, {
+        customFetch(this.action, {
             method: 'POST',
             body: formData,
             headers: {
@@ -917,18 +1263,8 @@ $(document).ready(function() {
     let vehicleModels = [];
     let currentVehicleType = '';
 
-    // Initialize Select2 for better search experience
-    $('#vehicle_make').select2({
-        placeholder: 'Search and select vehicle make...',
-        allowClear: true,
-        width: '100%'
-    });
-
-    $('#vehicle_model').select2({
-        placeholder: 'Search and select vehicle model...',
-        allowClear: true,
-        width: '100%'
-    });
+    // Initialize regular select elements
+    // Note: Select2 removed to avoid conflicts
 
     // Load vehicle makes when vehicle type changes
     $('#vehicle_type').on('change', function() {

@@ -104,6 +104,10 @@ class VehicleController extends Controller
             $data['business_id'] = $business->id;
 
             // Handle file uploads
+            if ($request->hasFile('vehicle_image')) {
+                $data['vehicle_image_path'] = $this->uploadDocument($request->file('vehicle_image'), 'vehicle_images');
+            }
+
             if ($request->hasFile('insurance_document')) {
                 $data['insurance_document_path'] = $this->uploadDocument($request->file('insurance_document'), 'insurance');
             }
@@ -450,6 +454,7 @@ class VehicleController extends Controller
             'insurance_provider' => 'required|string|max:100',
             'policy_number' => 'required|string|max:100',
             'insurance_expiry_date' => 'required|date|after_or_equal:today',
+            'vehicle_image' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
             'insurance_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'rc_number' => 'required|string|max:100',
             'rc_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',

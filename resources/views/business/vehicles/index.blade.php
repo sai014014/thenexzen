@@ -168,8 +168,81 @@
     tr:nth-child(4n+4) .price-tooltip {
         border-left: 4px solid #34a853;
     }
+
+    /* Search and Add Vehicle Section Styling */
+    .search-container .input-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .search-container .input-group-text {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+    }
+
+    .search-container .form-control {
+        border: 1px solid #dee2e6;
+        border-left: none;
+    }
+
+    .search-container .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .add-vehicle-container .btn {
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .add-vehicle-container .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Responsive design for search and add section */
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .search-container .input-group {
+            width: 100% !important;
+        }
+        
+        .add-vehicle-container {
+            width: 100%;
+        }
+        
+        .add-vehicle-container .btn {
+            width: 100%;
+        }
+    }
 </style>
 <div class="main-content">
+    <!-- Search and Add Vehicle Section -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="search-container">
+            <div class="input-group" style="width: 300px;">
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="vehicleSearch" class="form-control" placeholder="Search vehicles...">
+            </div>
+        </div>
+        <div class="add-vehicle-container">
+            <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add Vehicle
+            </a>
+        </div>
+    </div>
+    
     <div class="record-count">{{ $vehicles->total() }} Records Found, Page {{ $vehicles->currentPage() }} of {{ $vehicles->lastPage() }}</div>
     <div class="filter-section">
         <div class="table-responsive">
@@ -190,7 +263,18 @@
                     <tr>
                         <td class="vechicle_title">
                             <div class="d-flex align-items-center">
-                                <img src="{{ asset('images/vehicle-brands/suzuki.svg') }}" alt="{{ $vehicle->vehicle_make }}" class="me-2" style="width: 30px; height: 30px;">
+                                @php
+                                    $brandIcon = 'images/vehicle-brands/' . strtolower(str_replace(' ', '-', $vehicle->vehicle_make)) . '.svg';
+                                    $brandIconPath = public_path($brandIcon);
+                                    $defaultIcon = 'images/vehicle-brands/default.svg';
+                                @endphp
+                                @if(file_exists($brandIconPath))
+                                    <img src="{{ asset($brandIcon) }}" alt="{{ $vehicle->vehicle_make }}" class="me-2" style="width: 30px; height: 30px;">
+                                @else
+                                    <div class="brand-icon-placeholder me-2 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; background: #f8f9fa; border-radius: 4px; font-size: 12px; font-weight: bold; color: #6c757d;">
+                                        {{ strtoupper(substr($vehicle->vehicle_make, 0, 2)) }}
+                                    </div>
+                                @endif
                                 <div>
                                     <div class="fw-bold">{{ $vehicle->vehicle_make }} {{ $vehicle->vehicle_model }}</div>
                                     <small class="text-muted">{{ $vehicle->registration_number }}</small>
@@ -240,8 +324,7 @@
                             </span>
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('business.vehicles.show', $vehicle) }}" class="text-primary me-2 text-decoration-none">View</a>
-                            <a href="#" onclick="confirmDelete({{ $vehicle->id }}, '{{ $vehicle->vehicle_make }} {{ $vehicle->vehicle_model }}')" class="text-danger text-decoration-none">Delete</a>
+                            <a href="{{ route('business.vehicles.show', $vehicle) }}" class="text-primary text-decoration-none">View</a>
                         </td>
                     </tr>
                     @endforeach
@@ -294,30 +377,40 @@
     const RECORDS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
     const VEHICLE_STATUS_ARRAY = ['Active', 'Inactive', 'Under Maintenance'];
 
-    function confirmDelete(vehicleId, vehicleName) {
-        if (confirm(`Are you sure you want to delete "${vehicleName}"? This action cannot be undone.`)) {
-            // Create a form and submit it
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `{{ url('business/vehicles') }}/${vehicleId}`;
+    // Live search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('vehicleSearch');
+        const tableBody = document.getElementById('vehicleTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
             
-            // Add CSRF token
-            const csrfToken = document.createElement('input');
-            csrfToken.type = 'hidden';
-            csrfToken.name = '_token';
-            csrfToken.value = '{{ csrf_token() }}';
-            form.appendChild(csrfToken);
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
             
-            // Add method override
-            const methodField = document.createElement('input');
-            methodField.type = 'hidden';
-            methodField.name = '_method';
-            methodField.value = 'DELETE';
-            form.appendChild(methodField);
-            
-            document.body.appendChild(form);
-            form.submit();
-        }
-    }
+            // Update record count
+            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+            const recordCount = document.querySelector('.record-count');
+            if (recordCount) {
+                recordCount.textContent = `${visibleRows.length} Records Found (filtered from ${rows.length} total)`;
+            }
+        });
+        
+        // Clear search functionality
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                this.value = '';
+                this.dispatchEvent(new Event('input'));
+            }
+        });
+    });
+
 </script>
 @endsection

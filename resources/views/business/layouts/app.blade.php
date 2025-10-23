@@ -321,14 +321,7 @@
         });
     </script>
     
-    <!-- jQuery -->
-    <script src="{{ asset('dist/jquery.min.js') }}"></script>
-    
-    <!-- Bootstrap JS -->
-    <script src="{{ asset('dist/bootstrap/bootstrap.bundle.min.js') }}"></script>
-    
-    <!-- Common JS -->
-    <script src="{{ asset('dist/js/common.js') }}"></script>
+    <!-- Dashboard JS -->
     <script src="{{ asset('dist/js/dashboard/dashboard.js') }}"></script>
     
     @stack('scripts')

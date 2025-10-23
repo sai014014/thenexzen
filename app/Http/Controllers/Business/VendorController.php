@@ -12,6 +12,47 @@ use Illuminate\Validation\Rule;
 class VendorController extends Controller
 {
     /**
+     * Search vendors for AJAX requests.
+     */
+    public function search(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        
+        if (!$businessAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required.'
+            ], 401);
+        }
+        
+        $business = $businessAdmin->business;
+        $query = $request->get('q', '');
+        
+        if (strlen($query) < 2) {
+            return response()->json([
+                'success' => true,
+                'vendors' => []
+            ]);
+        }
+        
+        $vendors = $business->vendors()
+            ->where(function ($q) use ($query) {
+                $q->where('vendor_name', 'like', "%{$query}%")
+                  ->orWhere('mobile_number', 'like', "%{$query}%")
+                  ->orWhere('gstin', 'like', "%{$query}%")
+                  ->orWhere('pan_number', 'like', "%{$query}%");
+            })
+            ->select('id', 'vendor_name', 'mobile_number', 'vendor_type', 'gstin', 'pan_number')
+            ->limit(10)
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'vendors' => $vendors
+        ]);
+    }
+
+    /**
      * Display a listing of vendors.
      */
     public function index(Request $request)
@@ -115,7 +156,14 @@ class VendorController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => 'Vendor registered successfully!',
-                    'redirect_url' => route('business.vendors.show', $vendor)
+                    'vendor' => [
+                        'id' => $vendor->id,
+                        'vendor_name' => $vendor->vendor_name,
+                        'mobile_number' => $vendor->mobile_number,
+                        'vendor_type' => $vendor->vendor_type,
+                        'gstin' => $vendor->gstin,
+                        'pan_number' => $vendor->pan_number
+                    ]
                 ]);
             }
 

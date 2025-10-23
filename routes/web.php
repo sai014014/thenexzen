@@ -176,6 +176,11 @@ Route::prefix('business')->name('business.')->group(function () {
     Route::get('/api/vehicle-makes', [\App\Http\Controllers\Api\VehicleApiController::class, 'getMakes'])->name('api.vehicle-makes');
     Route::get('/api/vehicle-models', [\App\Http\Controllers\Api\VehicleApiController::class, 'getModels'])->name('api.vehicle-models');
     Route::get('/api/vehicle-makes-with-models', [\App\Http\Controllers\Api\VehicleApiController::class, 'getMakesWithModels'])->name('api.vehicle-makes-with-models');
+    
+    // Test route for debugging
+    Route::get('/test-route', function() {
+        return response()->json(['success' => true, 'message' => 'Test route working']);
+    });
 
     Route::middleware(['business_admin', 'check.business.status'])->group(function () {
         Route::post('/logout', [BusinessAuthController::class, 'logout'])->name('logout');
@@ -195,6 +200,7 @@ Route::prefix('business')->name('business.')->group(function () {
         
         // Vendor Management Routes
         Route::resource('vendors', \App\Http\Controllers\Business\VendorController::class);
+        Route::get('/vendors/search', [\App\Http\Controllers\Business\VendorController::class, 'search'])->name('vendors.search');
         Route::get('/vendors/{vendor}/download/{type}', [\App\Http\Controllers\Business\VendorController::class, 'downloadDocument'])->name('vendors.download-document');
         
         // Booking Management Routes

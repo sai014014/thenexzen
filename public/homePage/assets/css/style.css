@@ -70,10 +70,10 @@ svg {
 
 a {
   transition: all 0.3s ease-in-out;
-  text-decoration: none;
+  text-decoration: none !important;
 }
-a:hover {
-  text-decoration: none;
+a:hover, a:focus, a:active, a:visited {
+  text-decoration: none !important;
 }
 
 button {
@@ -84,10 +84,16 @@ button {
 
 
 
+/* Global text decoration removal */
+* {
+  text-decoration: none !important;
+}
+
 h1 {
   font-family: "Poppins", sans-serif !important;
   margin-top: 0;
   color: #fff;
+  text-decoration: none !important;
 }
 
 h2 {

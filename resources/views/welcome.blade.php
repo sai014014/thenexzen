@@ -911,6 +911,57 @@
     
     <!-- Custom dropdown styles -->
     <style>
+        /* Text decoration removal for all menus and texts */
+        a, a:hover, a:focus, a:active, a:visited {
+            text-decoration: none !important;
+        }
+        
+        /* Navigation menu links */
+        .site-main-menu a, 
+        .site-main-menu a:hover, 
+        .site-main-menu a:focus, 
+        .site-main-menu a:active, 
+        .site-main-menu a:visited {
+            text-decoration: none !important;
+        }
+        
+        /* Footer menu links */
+        .footer-menu a, 
+        .footer-menu a:hover, 
+        .footer-menu a:focus, 
+        .footer-menu a:active, 
+        .footer-menu a:visited {
+            text-decoration: none !important;
+        }
+        
+        /* Social media links */
+        .social-share-link a, 
+        .social-share-link a:hover, 
+        .social-share-link a:focus, 
+        .social-share-link a:active, 
+        .social-share-link a:visited {
+            text-decoration: none !important;
+        }
+        
+        /* All text elements */
+        h1, h2, h3, h4, h5, h6, p, span, div, li {
+            text-decoration: none !important;
+        }
+        
+        /* Button links */
+        .pix-btn, .pix-btn:hover, .pix-btn:focus, .pix-btn:active, .pix-btn:visited {
+            text-decoration: none !important;
+        }
+        
+        /* Accordion links */
+        .panel-title a, 
+        .panel-title a:hover, 
+        .panel-title a:focus, 
+        .panel-title a:active, 
+        .panel-title a:visited {
+            text-decoration: none !important;
+        }
+        
         .dropdown-toggle::after {
             display: inline-block !important;
             margin-left: 0.5em !important;
@@ -964,6 +1015,7 @@
         .dropdown-menu .dropdown-item:hover {
             color: #1e2125 !important;
             background-color: #e9ecef !important;
+            text-decoration: none !important;
         }
         
         /* Force dropdown to be visible when Bootstrap shows it */

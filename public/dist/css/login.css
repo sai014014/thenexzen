@@ -1,0 +1,242 @@
+body {
+  background-color: #f5f5f5;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  margin-bottom: 20px;
+}
+
+.logo img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.login {
+  height: 100%;
+}
+.login .row {
+  height: 100%;
+}
+.logo {
+  height: 100%;
+}
+.fixed_position {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.login .card {
+  background-color: transparent;
+  padding: 30px 20px;
+  border: 0px;
+  border-radius: 10px;
+  box-shadow: none;
+  width: 50%; /* Adjust the width as needed */
+  box-sizing: border-box;
+}
+
+.card h1 {
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 28px;
+  color: #000;
+  font-weight: bold;
+  font-family: "Poppins", sans-serif !important;
+}
+
+.card form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: 12px;
+}
+.remember {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  color: #000;
+  font-size: 14px;
+}
+.card label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #000;
+}
+.welcom_text {
+  position: relative;
+}
+.welcom_text svg {
+  position: absolute;
+  right: 43px;
+  top: -40px;
+}
+.card input[type="text"],
+.card input[type="password"] {
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure consistent height and appearance across all inputs */
+.card input[type="text"],
+.card input[type="password"],
+.card input[type="email"],
+.card input[type="tel"],
+.loginInput {
+  height: 44px;
+  line-height: 1.4;
+  font-size: 16px; /* prevent mobile zoom */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.card button[type="submit"] {
+  background-color: #000;
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
+}
+.submit:hover {
+  background: #000;
+}
+.register {
+  margin-top: 15px;
+}
+.loginSubmit {
+  margin-top: 12px;
+}
+.register p {
+  text-align: center;
+  color: #555;
+  font-size: 13px;
+}
+.register p a {
+  text-align: center;
+  color: #000;
+  font-size: 13px;
+}
+.loginInput {
+  background-color: #fff !important;
+  background-image: none !important;
+  border: 1px solid #d8dadc;
+  border-radius: 10px;
+}
+.loginInput:focus {
+  outline: 0px;
+  border: 1px solid #d8dadc;
+}
+#errorMessage {
+  color: red;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.checkbox-wrapper {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.custom-checkbox {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border: 2px solid #555;
+  border-radius: 30px;
+  transition: all 0.2s ease;
+}
+
+.checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+}
+
+.checkmark::before {
+  content: "✓";
+  color: white;
+  font-size: 14px;
+}
+
+.checkbox-input:checked + .custom-checkbox {
+  background-color: #000;
+  border-color: #000;
+}
+
+.checkbox-input:checked + .custom-checkbox .checkmark {
+  display: block;
+}
+.remember .forgot {
+  cursor: pointer;
+  margin-bottom: 0px;
+  font-weight: 500;
+}
+@media (max-width: 768px) {
+  .login .card {
+    width: 100%;
+  }
+  .login {
+    min-height: 100vh;
+    padding: 20px 12px;
+  }
+  .login .row {
+    height: auto;
+  }
+  .logo {
+    height: auto;
+    margin-bottom: 24px;
+  }
+  .welcom_text svg {
+    position: absolute;
+    right: 29px;
+    top: -22px;
+  }
+}
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .login .card {
+    width: 100%;
+  }
+  .welcom_text svg {
+    position: absolute;
+    right: 15px;
+    top: -36px;
+  }
+}
+@media screen and (min-device-width: 820px) and (max-device-width: 1180px) and (orientation: landscape) {
+  .login .card {
+    width: 100%;
+  }
+  .welcom_text svg {
+    position: absolute;
+    right: 70px;
+    top: -40px;
+  }
+}
+/* ========== */

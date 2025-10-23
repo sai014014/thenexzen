@@ -1,6 +1,2 @@
-# Only ignore exactly what the server requested
-bootstrap/
+# Only ignore .env file
 .env
-public/
-storage/
-node_modules/

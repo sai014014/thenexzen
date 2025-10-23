@@ -61,10 +61,27 @@ Route::prefix('test-otp')->group(function () {
     Route::post('/test-smtp-connection', [TestOTPController::class, 'testSMTPConnection'])->name('test.otp.test.smtp.connection');
 });
 
-// Alternative routes without prefix (backup)
+// Alternative routes without prefix (backup) - These should work
 Route::get('/test-otp-check-config', [TestOTPController::class, 'checkConfig']);
 Route::post('/test-otp-send-basic', [TestOTPController::class, 'sendBasic']);
 Route::post('/test-otp-send-otp', [TestOTPController::class, 'sendOTP']);
+Route::post('/test-otp-send-custom-smtp', [TestOTPController::class, 'sendCustomSMTP']);
+
+// Simple working routes for testing
+Route::get('/email-config', function() {
+    $controller = new \App\Http\Controllers\TestOTPController();
+    return $controller->checkConfig();
+});
+
+Route::post('/email-test-basic', function(\Illuminate\Http\Request $request) {
+    $controller = new \App\Http\Controllers\TestOTPController();
+    return $controller->sendBasic($request);
+});
+
+Route::post('/email-test-otp', function(\Illuminate\Http\Request $request) {
+    $controller = new \App\Http\Controllers\TestOTPController();
+    return $controller->sendOTP($request);
+});
 
 Route::get('/', function () {
     return view('welcome');

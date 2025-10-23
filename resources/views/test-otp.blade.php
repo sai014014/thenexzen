@@ -256,7 +256,7 @@
                 return;
             }
 
-            fetch('/test-otp/send-basic', {
+            fetch('/email-test-basic', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -295,7 +295,7 @@
                 return;
             }
 
-            fetch('/test-otp/send-otp', {
+            fetch('/email-test-otp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -374,8 +374,8 @@
         function checkConfiguration() {
             addLog('Checking email configuration...', 'info');
             
-            // Try the main route first, then fallback to backup route
-            fetch('/test-otp/check-config', {
+            // Use the simple working route
+            fetch('/email-config', {
                 method: 'GET',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -390,26 +390,6 @@
             .then(data => {
                 addLog('Configuration check completed', 'info');
                 showResult(`📋 Configuration Status:<br><pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
-            })
-            .catch(error => {
-                addLog(`Main route failed, trying backup route: ${error.message}`, 'info');
-                // Try backup route
-                return fetch('/test-otp-check-config', {
-                    method: 'GET',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-            })
-            .then(response => {
-                if (response && response.ok) {
-                    return response.json();
-                }
-                throw new Error('Both routes failed');
-            })
-            .then(data => {
-                addLog('Configuration check completed via backup route', 'info');
-                showResult(`📋 Configuration Status (Backup Route):<br><pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
             })
             .catch(error => {
                 addLog(`Configuration check error: ${error.message}`, 'error');

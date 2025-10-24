@@ -230,6 +230,10 @@
 /* Dashboard Content */
 .dashboard-content {
   padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto; /* Allow horizontal scrolling when zoomed */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 /* Stats Cards */
@@ -238,6 +242,9 @@
     gap: 20px;
     margin-bottom: 30px;
     flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto; /* Allow horizontal scrolling when needed */
 }
 
 .stats-card {
@@ -308,6 +315,10 @@
     display: flex;
     gap: 20px;
     margin-bottom: 30px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto; /* Allow horizontal scrolling when needed */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
 .chart-card {
@@ -415,6 +426,9 @@
 
 .table-container {
     overflow-x: auto;
+    width: 100%;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .bookings-table {

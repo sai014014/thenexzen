@@ -7,6 +7,9 @@ html {
   margin: 0;
   background: #f4f7fe;
   font-family: 'Poppins', sans-serif;
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto; /* Center the body content */
 }
 h1 {
   color: #fff;
@@ -31,7 +34,7 @@ p {
   height: calc(100vh - 26px); /* Adjust height to account for top/bottom margins */
   position: fixed;
   top: 13px;
-  left: 13px;
+  left: calc(50% - 600px + 13px); /* Position relative to centered body */
   color: white;
   padding: 0px 15px 15px 15px;
   display: flex;
@@ -597,22 +600,37 @@ p {
   overflow-x: auto; /* Allow horizontal scrolling when needed */
   background: #f8f9fa;
   min-height: calc(100vh - 150px); /* Adjust min-height to account for header */
-  width: calc(100vw - 276px); /* Ensure content takes remaining width */
-  max-width: calc(100vw - 276px); /* Prevent content from exceeding viewport */
+  width: calc(100% - 276px); /* Use percentage instead of viewport width */
+  max-width: calc(100% - 276px); /* Prevent content from exceeding container */
   box-sizing: border-box; /* Include padding in width calculation */
+  font-size: 90%; /* Reduce font size for better fit */
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
+  body {
+    width: 95%; /* Increase width on smaller screens */
+    max-width: 100%; /* Remove max-width constraint on smaller screens */
+  }
+  
+  .sidebar {
+    left: calc(50% - 47.5% + 13px); /* Adjust for 95% body width */
+  }
+  
   .main-content {
     margin-left: 276px; /* Keep same as desktop for consistency */
     padding: 15px 20px; /* Reduce padding on smaller screens */
-    width: calc(100vw - 276px); /* Ensure responsive width */
-    max-width: calc(100vw - 276px); /* Prevent overflow */
+    width: calc(100% - 276px); /* Use percentage for responsive width */
+    max-width: calc(100% - 276px); /* Prevent overflow */
   }
 }
 
 @media (max-width: 768px) {
+  body {
+    width: 100%; /* Full width on mobile */
+    max-width: 100%;
+  }
+  
   .sidebar {
     width: 200px;
     left: 5px;
@@ -623,8 +641,8 @@ p {
   .main-content {
     margin-left: 210px; /* 200px sidebar + 5px left margin + 5px right margin */
     padding: 10px 15px; /* Further reduce padding on mobile */
-    width: calc(100vw - 210px); /* Ensure responsive width on mobile */
-    max-width: calc(100vw - 210px); /* Prevent overflow on mobile */
+    width: calc(100% - 210px); /* Use percentage for responsive width on mobile */
+    max-width: calc(100% - 210px); /* Prevent overflow on mobile */
   }
   
   .header {

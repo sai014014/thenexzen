@@ -4,111 +4,121 @@
 @section('page-title', 'Dashboard')
 
 @section('content')
-<div class="dashboard-content">
+<div class="dashboard-content dashboard-page">
 <!-- Stats Cards Row -->
 <div class="stats-row">
     <div class="stats-card">
         <div class="stats-content">
             <div class="stats-info">
-                <h3 class="stats-title">Net Earnings</h3>
+                <div class="stats-title">
+                    <h3>Net Earnings</h3>
+                    <div class="stats-icon earnings">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="8" fill="#6B6ADE"/>
+                            <path d="M20 8C20.5523 8 21 8.44772 21 9V11H23C23.5523 11 24 11.4477 24 12C24 12.5523 23.5523 13 23 13H21V15C21 15.5523 20.5523 16 20 16C19.4477 16 19 15.5523 19 15V13H17C16.4477 13 16 12.5523 16 12C16 11.4477 16.4477 11 17 11H19V9C19 8.44772 19.4477 8 20 8Z" fill="white"/>
+                            <path d="M12 20C12 18.8954 12.8954 18 14 18H26C27.1046 18 28 18.8954 28 20V28C28 29.1046 27.1046 30 26 30H14C12.8954 30 12 29.1046 12 28V20Z" fill="white"/>
+                        </svg>
+                    </div>
+                </div>
                 <div class="stats-value">₹{{ number_format($totalEarnings ?? 0) }}</div>
                 <div class="stats-change {{ ($earningsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
                     <i class="fas fa-arrow-{{ ($earningsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
                     <span>{{ abs($earningsChange ?? 0) }}% {{ ($earningsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
-            <div class="stats-icon earnings">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="40" height="40" rx="8" fill="#6B6ADE"/>
-                    <path d="M20 8C20.5523 8 21 8.44772 21 9V11H23C23.5523 11 24 11.4477 24 12C24 12.5523 23.5523 13 23 13H21V15C21 15.5523 20.5523 16 20 16C19.4477 16 19 15.5523 19 15V13H17C16.4477 13 16 12.5523 16 12C16 11.4477 16.4477 11 17 11H19V9C19 8.44772 19.4477 8 20 8Z" fill="white"/>
-                    <path d="M12 20C12 18.8954 12.8954 18 14 18H26C27.1046 18 28 18.8954 28 20V28C28 29.1046 27.1046 30 26 30H14C12.8954 30 12 29.1046 12 28V20Z" fill="white"/>
-                </svg>
-            </div>
         </div>
     </div>
 
     <div class="stats-card">
         <div class="stats-content">
             <div class="stats-info">
-                <h3 class="stats-title">Bookings</h3>
+                <div class="stats-title">
+                    <h3>Bookings</h3>
+                    <div class="stats-icon bookings">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="8" fill="#FFD700"/>
+                            <path d="M12 10C10.8954 10 10 10.8954 10 12V28C10 29.1046 10.8954 30 12 30H28C29.1046 30 30 29.1046 30 28V12C30 10.8954 29.1046 10 28 10H12ZM12 12H28V28H12V12Z" fill="white"/>
+                            <path d="M14 14C13.4477 14 13 14.4477 13 15C13 15.5523 13.4477 16 14 16H26C26.5523 16 27 15.5523 27 15C27 14.4477 26.5523 14 26 14H14Z" fill="white"/>
+                            <path d="M14 18C13.4477 18 13 18.4477 13 19C13 19.5523 13.4477 20 14 20H26C26.5523 20 27 19.5523 27 19C27 18.4477 26.5523 18 26 18H14Z" fill="white"/>
+                            <path d="M14 22C13.4477 22 13 22.4477 13 23C13 23.5523 13.4477 24 14 24H26C26.5523 24 27 23.5523 27 23C27 22.4477 26.5523 22 26 22H14Z" fill="white"/>
+                        </svg>
+                    </div>
+                </div>
                 <div class="stats-value">{{ $totalBookings ?? 0 }}</div>
                 <div class="stats-change {{ ($bookingsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
                     <i class="fas fa-arrow-{{ ($bookingsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
                     <span>{{ abs($bookingsChange ?? 0) }}% {{ ($bookingsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
-            <div class="stats-icon bookings">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="40" height="40" rx="8" fill="#FFD700"/>
-                    <path d="M12 10C10.8954 10 10 10.8954 10 12V28C10 29.1046 10.8954 30 12 30H28C29.1046 30 30 29.1046 30 28V12C30 10.8954 29.1046 10 28 10H12ZM12 12H28V28H12V12Z" fill="white"/>
-                    <path d="M14 14C13.4477 14 13 14.4477 13 15C13 15.5523 13.4477 16 14 16H26C26.5523 16 27 15.5523 27 15C27 14.4477 26.5523 14 26 14H14Z" fill="white"/>
-                    <path d="M14 18C13.4477 18 13 18.4477 13 19C13 19.5523 13.4477 20 14 20H26C26.5523 20 27 19.5523 27 19C27 18.4477 26.5523 18 26 18H14Z" fill="white"/>
-                    <path d="M14 22C13.4477 22 13 22.4477 13 23C13 23.5523 13.4477 24 14 24H26C26.5523 24 27 23.5523 27 23C27 22.4477 26.5523 22 26 22H14Z" fill="white"/>
-                </svg>
-            </div>
         </div>
     </div>
 
     <div class="stats-card">
         <div class="stats-content">
             <div class="stats-info">
-                <h3 class="stats-title">Vendors</h3>
+                <div class="stats-title">
+                    <h3>Vendors</h3>
+                    <div class="stats-icon vendors">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="8" fill="#32CD32"/>
+                            <path d="M12 8C10.8954 8 10 8.89543 10 10V30C10 31.1046 10.8954 32 12 32H28C29.1046 32 30 31.1046 30 30V10C30 8.89543 29.1046 8 28 8H12ZM12 10H28V30H12V10Z" fill="white"/>
+                            <path d="M14 12C13.4477 12 13 12.4477 13 13C13 13.5523 13.4477 14 14 14H26C26.5523 14 27 13.5523 27 13C27 12.4477 26.5523 12 26 12H14Z" fill="white"/>
+                            <path d="M14 16C13.4477 16 13 16.4477 13 17C13 17.5523 13.4477 18 14 18H26C26.5523 18 27 17.5523 27 17C27 16.4477 26.5523 16 26 16H14Z" fill="white"/>
+                            <path d="M14 20C13.4477 20 13 20.4477 13 21C13 21.5523 13.4477 22 14 22H26C26.5523 22 27 21.5523 27 21C27 20.4477 26.5523 20 26 20H14Z" fill="white"/>
+                        </svg>
+                    </div>
+                </div>
                 <div class="stats-value">{{ $totalVendors ?? 0 }}</div>
                 <div class="stats-change {{ ($vendorsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
                     <i class="fas fa-arrow-{{ ($vendorsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
                     <span>{{ abs($vendorsChange ?? 0) }}% {{ ($vendorsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
-            <div class="stats-icon vendors">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="40" height="40" rx="8" fill="#32CD32"/>
-                    <path d="M12 8C10.8954 8 10 8.89543 10 10V30C10 31.1046 10.8954 32 12 32H28C29.1046 32 30 31.1046 30 30V10C30 8.89543 29.1046 8 28 8H12ZM12 10H28V30H12V10Z" fill="white"/>
-                    <path d="M14 12C13.4477 12 13 12.4477 13 13C13 13.5523 13.4477 14 14 14H26C26.5523 14 27 13.5523 27 13C27 12.4477 26.5523 12 26 12H14Z" fill="white"/>
-                    <path d="M14 16C13.4477 16 13 16.4477 13 17C13 17.5523 13.4477 18 14 18H26C26.5523 18 27 17.5523 27 17C27 16.4477 26.5523 16 26 16H14Z" fill="white"/>
-                    <path d="M14 20C13.4477 20 13 20.4477 13 21C13 21.5523 13.4477 22 14 22H26C26.5523 22 27 21.5523 27 21C27 20.4477 26.5523 20 26 20H14Z" fill="white"/>
-                </svg>
-            </div>
         </div>
     </div>
 
     <div class="stats-card">
         <div class="stats-content">
             <div class="stats-info">
-                <h3 class="stats-title">Vehicles</h3>
+                <div class="stats-title">
+                    <h3>Vehicles</h3>
+                    <div class="stats-icon vehicles">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="8" fill="#FF8C00"/>
+                            <path d="M8 20C8 18.8954 8.89543 18 10 18H30C31.1046 18 32 18.8954 32 20V24C32 25.1046 31.1046 26 30 26H10C8.89543 26 8 25.1046 8 24V20Z" fill="white"/>
+                            <circle cx="12" cy="22" r="2" fill="white"/>
+                            <circle cx="28" cy="22" r="2" fill="white"/>
+                            <path d="M14 16C14 14.8954 14.8954 14 16 14H24C25.1046 14 26 14.8954 26 16V18H14V16Z" fill="white"/>
+                        </svg>
+                    </div>
+                </div>
                 <div class="stats-value">{{ $totalVehicles ?? 0 }}</div>
                 <div class="stats-change {{ ($vehiclesChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
                     <i class="fas fa-arrow-{{ ($vehiclesChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
                     <span>{{ abs($vehiclesChange ?? 0) }}% {{ ($vehiclesChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
-            <div class="stats-icon vehicles">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="40" height="40" rx="8" fill="#FF8C00"/>
-                    <path d="M8 20C8 18.8954 8.89543 18 10 18H30C31.1046 18 32 18.8954 32 20V24C32 25.1046 31.1046 26 30 26H10C8.89543 26 8 25.1046 8 24V20Z" fill="white"/>
-                    <circle cx="12" cy="22" r="2" fill="white"/>
-                    <circle cx="28" cy="22" r="2" fill="white"/>
-                    <path d="M14 16C14 14.8954 14.8954 14 16 14H24C25.1046 14 26 14.8954 26 16V18H14V16Z" fill="white"/>
-                </svg>
-            </div>
         </div>
     </div>
 
     <div class="stats-card">
         <div class="stats-content">
             <div class="stats-info">
-                <h3 class="stats-title">Customers</h3>
+                <div class="stats-title">
+                    <h3>Customers</h3>
+                    <div class="stats-icon customers">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="8" fill="#4169E1"/>
+                            <circle cx="20" cy="14" r="4" fill="white"/>
+                            <path d="M12 28C12 24.6863 14.6863 22 18 22H22C25.3137 22 28 24.6863 28 28V30H12V28Z" fill="white"/>
+                        </svg>
+                    </div>
+                </div>
                 <div class="stats-value">{{ $totalCustomers ?? 0 }}</div>
                 <div class="stats-change {{ ($customersChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
                     <i class="fas fa-arrow-{{ ($customersChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
                     <span>{{ abs($customersChange ?? 0) }}% {{ ($customersChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
-            </div>
-            <div class="stats-icon customers">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="40" height="40" rx="8" fill="#4169E1"/>
-                    <circle cx="20" cy="14" r="4" fill="white"/>
-                    <path d="M12 28C12 24.6863 14.6863 22 18 22H22C25.3137 22 28 24.6863 28 28V30H12V28Z" fill="white"/>
-                </svg>
             </div>
         </div>
     </div>
@@ -132,7 +142,7 @@
             <h3>Vehicle Status</h3>
         </div>
         <div class="donut-chart-container donut-small">
-            <canvas id="vehicleStatusChart" width="140" height="140"></canvas>
+            <canvas id="vehicleStatusChart" width="280" height="280"></canvas>
             <div class="donut-center">
                 <span class="center-value">{{ $totalVehicles ?? 0 }}</span>
             </div>
@@ -157,24 +167,40 @@
 <!-- Current Bookings Table -->
 <div class="bookings-table-card">
     <div class="table-header">
-        <h3>Current Bookings</h3>
+        <h3>Ongoing Bookings</h3>
     </div>
     <div class="table-container">
         @if(isset($recentBookings) && $recentBookings->count() > 0)
             <table class="bookings-table">
                 <thead>
                     <tr>
-                        <th>Vehicle</th>
-                        <th>Driver</th>
-                        <th>Date of Booking</th>
-                        <th>Earnings</th>
+                        <th>Booking ID</th>
+                        <th>Customer</th>
+                        <th>Vehicle Details</th>
+                        <th>Start Date & Time</th>
+                        <th>End Date & Time</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Amount Due</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($recentBookings as $booking)
                         <tr>
+                            <td>
+                                <div class="booking-id">
+                                    #{{ $booking->booking_number ?? $booking->id ?? 'N/A' }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="customer-name">ravella 
+                                    @if($booking->customer)
+                                        {{ $booking->customer->full_name ?? 'N/A' }}
+                                    @else
+                                        Customer #{{ $booking->customer_id ?? 'N/A' }}
+                                    @endif
+                                </div>
+                            </td>
                             <td>
                                 <div class="vehicle-info">
                                     <div class="vehicle-logo">
@@ -185,19 +211,60 @@
                                         @endif
                                     </div>
                                     <div class="vehicle-details">
-                                        <div class="vehicle-name">{{ $booking->vehicle->vehicle_make ?? 'N/A' }} {{ $booking->vehicle->vehicle_model ?? '' }}</div>
-                                        <div class="vehicle-number">{{ $booking->vehicle->vehicle_number ?? 'N/A' }}</div>
+                                        <div class="vehicle-make">{{ $booking->vehicle->vehicle_make ?? 'N/A' }}</div>
+                                        <div class="vehicle-model">{{ $booking->vehicle->vehicle_model ?? 'N/A' }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ $booking->customer->name ?? 'N/A' }}</td>
-                            <td>{{ $booking->created_at->format('M d, Y H:i') }}</td>
                             <td>
-                                @if($booking->status === 'completed')
-                                    ₹{{ number_format($booking->total_amount ?? 0, 2) }}
-                                @else
-                                    -
-                                @endif
+                                <div class="date-time">
+                                    @if($booking->pickup_date)
+                                        {{ \Carbon\Carbon::parse($booking->pickup_date)->format('M d, Y') }}
+                                    @elseif($booking->start_date)
+                                        {{ \Carbon\Carbon::parse($booking->start_date)->format('M d, Y') }}
+                                    @elseif($booking->created_at)
+                                        {{ $booking->created_at->format('M d, Y') }}
+                                    @else
+                                        N/A
+                                    @endif
+                                    <br>
+                                    <small>
+                                        @if($booking->pickup_time)
+                                            {{ \Carbon\Carbon::parse($booking->pickup_time)->format('g:i A') }}
+                                        @elseif($booking->start_time)
+                                            {{ \Carbon\Carbon::parse($booking->start_time)->format('g:i A') }}
+                                        @elseif($booking->created_at)
+                                            {{ $booking->created_at->format('g:i A') }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </small>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-time">
+                                    @if($booking->return_date)
+                                        {{ \Carbon\Carbon::parse($booking->return_date)->format('M d, Y') }}
+                                    @elseif($booking->end_date)
+                                        {{ \Carbon\Carbon::parse($booking->end_date)->format('M d, Y') }}
+                                    @elseif($booking->created_at)
+                                        {{ $booking->created_at->addDays(7)->format('M d, Y') }}
+                                    @else
+                                        N/A
+                                    @endif
+                                    <br>
+                                    <small>
+                                        @if($booking->return_time)
+                                            {{ \Carbon\Carbon::parse($booking->return_time)->format('g:i A') }}
+                                        @elseif($booking->end_time)
+                                            {{ \Carbon\Carbon::parse($booking->end_time)->format('g:i A') }}
+                                        @elseif($booking->created_at)
+                                            {{ $booking->created_at->addDays(7)->format('g:i A') }}
+                                        @else
+                                            N/A
+                                        @endif
+                                    </small>
+                                </div>
                             </td>
                             <td>
                                 <span class="status-badge {{ strtolower(str_replace(' ', '-', $booking->status ?? 'pending')) }}">
@@ -206,7 +273,12 @@
                                 </span>
                             </td>
                             <td>
-                                <button class="view-details-btn">VIEW DETAILS</button>
+                                <div class="amount-due">
+                                    ₹{{ number_format($booking->total_amount ?? 0, 2) }}
+                                </div>
+                            </td>
+                            <td>
+                                <a href="{{ route('business.bookings.show', $booking->id) }}" class="view-details-btn">View</a>
                             </td>
                         </tr>
                     @endforeach
@@ -215,9 +287,9 @@
         @else
             <div class="no-data-message">
                 <div class="no-data-icon">📋</div>
-                <h4>No Bookings Found</h4>
-                <p>Start by creating your first booking to see data here.</p>
-                <a href="{{ route('business.bookings.create') }}" class="btn btn-primary">Create First Booking</a>
+                <h4>No Ongoing Bookings</h4>
+                <p>There are currently no ongoing bookings. Create a new booking to get started.</p>
+                <a href="{{ route('business.bookings.create') }}" class="btn btn-primary">Create New Booking</a>
             </div>
         @endif
     </div>
@@ -227,347 +299,331 @@
 
 @push('styles')
 <style>
-/* Dashboard Content */
-.dashboard-content {
-  padding: 20px;
+/* Custom Dashboard Header Styles */
+body.business-dashboard-page .header {
+  height: 100px !important;
+  zoom: 0.9;
+  background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+  box-shadow: 0 4px 20px rgba(107, 106, 222, 0.3);
+}
+
+body.business-dashboard-page .header h1 {
+  font-size: 30px;
+  font-weight: 400;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 290px !important; /* Closer to sidebar but aligned with stats */
+}
+
+body.business-dashboard-page .header .title_uptext {
+  font-size: 16px;
+  opacity: 0.9;
+  font-weight: 500;
+  margin-left: 290px !important; /* Closer to sidebar but aligned with stats */
+}
+
+/* Custom header elements for dashboard */
+body.business-dashboard-page .header .head_right {
+  gap: 20px;
+}
+
+body.business-dashboard-page .header .select-button {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+body.business-dashboard-page .header .select-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Adjust main content margin for shorter header */
+body.business-dashboard-page .main-content {
+  margin-top: 100px !important;
+  zoom: 0.9;
+}
+
+/* Dashboard Stats Text Wrapping */
+body.business-dashboard-page .stats-title {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.3;
+}
+
+body.business-dashboard-page .stats-value {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+body.business-dashboard-page .stats-change {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  flex-wrap: wrap;
+  line-height: 1.2;
+}
+
+body.business-dashboard-page .stats-title h3 {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 600;
+  color: #666;
+}
+
+body.business-dashboard-page .stats-icon {
+  width: 32px;
+  height: 32px;
+}
+
+body.business-dashboard-page .stats-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+body.business-dashboard-page .stats-value {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 8px 0 6px 0;
+  color: #333;
+}
+
+body.business-dashboard-page .stats-change {
+  font-size: 11px;
+  gap: 3px;
+}
+
+body.business-dashboard-page .stats-change i {
+  font-size: 10px;
+}
+
+body.business-dashboard-page .stats-row {
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+/* Vehicle Status Chart - 70% of section size */
+body.business-dashboard-page .donut-chart-container {
+  width: 70%;
+  max-width: 280px;
+  height: 280px;
+  margin: 0 auto 20px auto;
+}
+
+body.business-dashboard-page .donut-chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 280px !important;
+  max-height: 280px !important;
+}
+
+body.business-dashboard-page .donut-center {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+body.business-dashboard-page .chart-legend {
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+body.business-dashboard-page .legend-item {
+  font-size: 13px;
+  gap: 6px;
+}
+
+body.business-dashboard-page .legend-color {
+  width: 14px;
+  height: 14px;
+}
+
+body.business-dashboard-page .stats-content {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+body.business-dashboard-page .stats-info {
   width: 100%;
-  max-width: 100%;
-  overflow-x: auto; /* Allow horizontal scrolling when zoomed */
-  box-sizing: border-box; /* Include padding in width calculation */
+  flex: 1;
 }
 
-/* Stats Cards */
-.stats-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto; /* Allow horizontal scrolling when needed */
+body.business-dashboard-page .stats-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 8px;
 }
 
-.stats-card {
-    flex: 1;
-    min-width: 200px;
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
+body.business-dashboard-page .stats-icon {
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: center;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
-.stats-card:hover {
-    transform: translateY(-2px);
+body.business-dashboard-page .stats-change {
+  margin-top: 12px;
 }
 
-.stats-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* Header Icons Spacing */
+body.business-dashboard-page .head_right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.stats-info {
-    flex: 1;
+body.business-dashboard-page .profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.stats-title {
-    font-size: 14px;
-    color: #666;
-    margin: 0 0 8px 0;
-    font-weight: 500;
+body.business-dashboard-page .scan,
+body.business-dashboard-page .notify,
+body.business-dashboard-page .profile_menu {
+  margin: 0 5px;
 }
 
-.stats-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #333;
-    margin: 0 0 8px 0;
+/* Bookings Table Styling */
+body.business-dashboard-page .bookings-table thead tr {
+  background-color: #f1f4f9 !important;
 }
 
-.stats-change {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 500;
+body.business-dashboard-page .bookings-table thead th {
+  background-color: #f1f4f9 !important;
+  color: #333;
+  font-weight: 600;
+  padding: 15px 12px;
+  border-bottom: 1px solid #e1e5e9;
+  text-align: left;
+  vertical-align: top;
 }
 
-.stats-change.positive {
-    color: #10B981;
+body.business-dashboard-page .bookings-table tbody td {
+  padding: 15px 12px;
+  vertical-align: top;
+  text-align: left;
 }
 
-.stats-change.negative {
-    color: #EF4444;
+body.business-dashboard-page .booking-id {
+  font-weight: 600;
+  color: #6B6ADE;
+  font-family: 'Courier New', monospace;
 }
 
-.stats-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+body.business-dashboard-page .customer-name {
+  font-weight: 500;
+  color: #333;
 }
 
-/* Charts Row */
-.charts-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 30px;
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto; /* Allow horizontal scrolling when needed */
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+body.business-dashboard-page .vehicle-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
 }
 
-.chart-card {
-    flex: 1;
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+body.business-dashboard-page .vehicle-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.chart-header h3 {
-    margin: 0 0 20px 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
+body.business-dashboard-page .vehicle-placeholder {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B6ADE;
 }
 
-.chart-container {
-    position: relative;
-    height: 200px;
-}
-.earnings-container{ height: 340px; }
-.earnings-large{ flex: 2; }
-
-/* Net Earnings Chart */
-.earnings-chart {
-    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
-    color: white;
+body.business-dashboard-page .vehicle-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.earnings-chart .chart-header h3 {
-    color: white;
+body.business-dashboard-page .vehicle-make {
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
 }
 
-/* Vehicle Status Chart */
-.vehicle-chart {
-    text-align: center;
+body.business-dashboard-page .vehicle-model {
+  color: #666;
+  font-size: 12px;
 }
 
-.donut-chart-container {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 20px;
-}
-.donut-small .donut-center{ font-size: 18px; }
-.vehicle-small{ max-width: 420px; }
-
-.donut-center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 24px;
-    font-weight: 700;
-    color: #333;
+body.business-dashboard-page .date-time {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
 }
 
-.chart-legend {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
+body.business-dashboard-page .date-time small {
+  color: #666;
+  font-size: 11px;
 }
 
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: #666;
+body.business-dashboard-page .amount-due {
+  font-weight: 600;
+  color: #059669;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
 }
 
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+body.business-dashboard-page .view-details-btn {
+  background: #6B6ADE;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.legend-color.available {
-    background-color: #10B981;
+body.business-dashboard-page .view-details-btn:hover {
+  background: #5a5acf;
+  color: white;
+  text-decoration: none;
 }
 
-.legend-color.booked {
-    background-color: #F59E0B;
+/* Status Column Alignment */
+body.business-dashboard-page .status-badge {
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
 }
 
-.legend-color.maintenance {
-    background-color: #EF4444;
+body.business-dashboard-page .status-dot {
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
 }
 
-/* Bookings Table */
-.bookings-table-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.table-header h3 {
-    margin: 0 0 20px 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-}
-
-.table-container {
-    overflow-x: auto;
-    width: 100%;
-    max-width: 100%;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-}
-
-.bookings-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.bookings-table th {
-    text-align: left;
-    padding: 12px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #666;
-    border-bottom: 1px solid #E5E7EB;
-}
-
-.bookings-table td {
-    padding: 16px 0;
-    font-size: 14px;
-    color: #333;
-    border-bottom: 1px solid #F3F4F6;
-}
-
-.vehicle-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.vehicle-logo img {
-    border-radius: 4px;
-}
-
-.vehicle-placeholder {
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #6B6ADE;
-    color: white;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.vehicle-details {
-    display: flex;
-    flex-direction: column;
-}
-
-.vehicle-name {
-    font-weight: 600;
-    color: #333;
-}
-
-.vehicle-number {
-    font-size: 12px;
-    color: #666;
-}
-
-.status-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.status-badge.in-route .status-dot,
-.status-badge.pending .status-dot {
-    background-color: #3B82F6;
-}
-
-.status-badge.completed .status-dot {
-    background-color: #10B981;
-}
-
-.status-badge.cancelled .status-dot {
-    background-color: #EF4444;
-}
-
-.view-details-btn {
-    background: #6B6ADE;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.view-details-btn:hover {
-    background-color: #5A5ACF;
-}
-
-/* No Data Message */
-.no-data-message {
-    text-align: center;
-    padding: 60px 20px;
-    color: #666;
-}
-
-.no-data-icon {
-    font-size: 48px;
-    margin-bottom: 20px;
-}
-
-.no-data-message h4 {
-    margin: 0 0 10px 0;
-    color: #333;
-}
-
-.no-data-message p {
-    margin: 0 0 20px 0;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .stats-row {
-        flex-direction: column;
-    }
-    
-    .charts-row {
-        flex-direction: column;
-    }
-    
-    .chart-legend {
-        flex-direction: column;
-        align-items: center;
-    }
+/* Ensure status column content aligns with header */
+body.business-dashboard-page .bookings-table tbody td:nth-child(6) {
+  text-align: left;
+  padding-left: 12px;
 }
 </style>
 @endpush

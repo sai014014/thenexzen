@@ -338,11 +338,7 @@ const data = {
 };
 
 // Create chart
-const earningsChartElement = getElement("earningsChart");
-if (!earningsChartElement) {
-  console.warn("earningsChart element not found, skipping chart creation");
-} else {
-  const ctx = earningsChartElement.getContext("2d");
+const ctx = getElement("earningsChart").getContext("2d");
 
 // Custom plugin for line shadow
 const lineShadowPlugin = {
@@ -357,22 +353,21 @@ const lineShadowPlugin = {
   },
 };
 
-  // Initialize chart
-  const chart = new Chart(ctx, {
-    type: "line",
-    data: data,
-    options: options,
-    plugins: [lineShadowPlugin],
-  });
+// Initialize chart
+const chart = new Chart(ctx, {
+  type: "line",
+  data: data,
+  options: options,
+  plugins: [lineShadowPlugin],
+});
 
-  // Handle tooltip hide on mouse leave
-  document
-    .querySelector(".chart-container")
-    ?.addEventListener("mouseleave", () => {
-      tooltip?.classList.remove("visible");
-      getElement("earningsValue")?.classList.remove("visible");
-    });
-}
+// Handle tooltip hide on mouse leave
+document
+  .querySelector(".chart-container")
+  ?.addEventListener("mouseleave", () => {
+    tooltip?.classList.remove("visible");
+    getElement("earningsValue")?.classList.remove("visible");
+  });
 
 // doughnut chart of vehicles
 function fetchVehiclesSummaryData(params) {
@@ -399,12 +394,7 @@ function fetchVehiclesSummaryData(params) {
 }
 
 function renderDoughnutChart(counts) {
-  const doughnutChartElement = document.getElementById("doughnutChart");
-  if (!doughnutChartElement) {
-    console.warn("doughnutChart element not found, skipping doughnut chart creation");
-    return;
-  }
-  const ctx = doughnutChartElement.getContext("2d");
+  const ctx = document.getElementById("doughnutChart").getContext("2d");
 
   if (window.vehicleChart) {
     window.vehicleChart.destroy();

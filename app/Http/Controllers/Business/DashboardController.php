@@ -61,11 +61,11 @@ class DashboardController extends Controller
         $vehiclesChange = 0;
         $customersChange = 0;
 
-        // Get recent bookings
+        // Get ongoing bookings sorted by end date & time (ascending)
         $recentBookings = $business->bookings()
             ->with(['vehicle', 'customer'])
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->orderBy('created_at', 'desc')
+            ->where('status', 'ongoing')
+            ->orderBy('end_date_time', 'asc')
             ->limit(10)
             ->get();
 

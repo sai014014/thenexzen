@@ -20,7 +20,7 @@
     
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
-<body>
+<body class="<?php echo e(request()->routeIs('business.dashboard') ? 'business-dashboard-page' : ''); ?>">
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="logo">
@@ -154,7 +154,7 @@
             <div class="col-md-6">
                 <div class="head_left">
                     <div class="header_title">
-                        <div class="title_uptext">LOREM IPSUM</div>
+                        <div class="title_uptext"></div>
                         <h1><?php echo $__env->yieldContent('page-title', 'Dashboard'); ?></h1>
                     </div>
     </div>

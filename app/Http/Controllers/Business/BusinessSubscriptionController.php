@@ -86,6 +86,9 @@ class BusinessSubscriptionController extends Controller
             'trial_ends_at' => $trialEndsAt,
             'starts_at' => now(),
             'expires_at' => $trialEndsAt, // For trial subscriptions, expires_at should match trial_ends_at
+            'amount_paid' => 0,
+            'auto_renew' => false,
+            'module_access' => $package->getEnabledModules(),
         ]);
 
         return response()->json([

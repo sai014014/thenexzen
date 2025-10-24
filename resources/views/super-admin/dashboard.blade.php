@@ -162,6 +162,7 @@
                         <thead>
                             <tr>
                                 <th>Business Name</th>
+                                <th>Client ID</th>
                                 <th>Type</th>
                                 <th>Status</th>
                                 <th>Created</th>
@@ -172,6 +173,7 @@
                                 @foreach($recent_businesses as $business)
                                 <tr>
                                     <td>{{ $business->business_name }}</td>
+                                    <td><span class="badge bg-secondary font-monospace">{{ $business->client_id }}</span></td>
                                     <td>{{ ucfirst($business->business_type) }}</td>
                                     <td>
                                         <span class="badge badge-{{ $business->status == 'active' ? 'success' : ($business->status == 'inactive' ? 'warning' : 'danger') }}">
@@ -183,7 +185,7 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">
+                                    <td colspan="5" class="text-center text-muted py-4">
                                         <i class="fas fa-building fa-2x mb-2"></i>
                                         <p class="mb-0">No businesses found</p>
                                     </td>

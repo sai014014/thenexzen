@@ -237,6 +237,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Business Name</th>
+                                    <th>Client ID</th>
                                     <th>Email</th>
                                     <th>Subscription Status</th>
                                     <th>Trial Ends</th>
@@ -260,6 +261,7 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <td><span class="badge bg-secondary font-monospace">{{ $subscription->business->client_id ?? 'N/A' }}</span></td>
                                     <td>{{ $subscription->business->email ?? 'N/A' }}</td>
                                     <td>
                                         <span class="badge bg-{{ $subscription->status === 'active' ? 'success' : ($subscription->status === 'trial' ? 'warning' : 'secondary') }}">

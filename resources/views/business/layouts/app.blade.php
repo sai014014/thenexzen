@@ -20,7 +20,7 @@
     
     @stack('styles')
 </head>
-<body>
+<body class="{{ request()->routeIs('business.dashboard') ? 'business-dashboard-page' : '' }}">
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="logo">
@@ -154,7 +154,7 @@
             <div class="col-md-6">
                 <div class="head_left">
                     <div class="header_title">
-                        <div class="title_uptext">LOREM IPSUM</div>
+                        <div class="title_uptext"></div>
                         <h1>@yield('page-title', 'Dashboard')</h1>
                     </div>
     </div>

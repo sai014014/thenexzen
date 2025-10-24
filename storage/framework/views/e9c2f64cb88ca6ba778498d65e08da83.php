@@ -268,14 +268,12 @@ function approveSubscription(subscriptionId) {
             })
         })
         .then(response => {
-            console.log('Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log('Response data:', data);
             if (data.success) {
                 alert('Subscription approved successfully!');
                 location.reload();
@@ -285,7 +283,7 @@ function approveSubscription(subscriptionId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while approving the subscription: ' + error.message);
+            alert('An error occurred while approving the subscription');
         });
     }
 }
@@ -305,14 +303,12 @@ function rejectSubscription(subscriptionId) {
             })
         })
         .then(response => {
-            console.log('Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log('Response data:', data);
             if (data.success) {
                 alert('Subscription rejected successfully!');
                 location.reload();
@@ -322,7 +318,7 @@ function rejectSubscription(subscriptionId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while rejecting the subscription: ' + error.message);
+            alert('An error occurred while rejecting the subscription');
         });
     }
 }

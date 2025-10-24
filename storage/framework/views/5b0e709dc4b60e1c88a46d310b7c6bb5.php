@@ -9,7 +9,7 @@
     <title>TheNexZen</title>
 
     <link rel="icon" type="image/png" sizes="32x32"
-        href="{{ asset('homePage/assets/img/businesslogowhite.svg') }}" />
+        href="<?php echo e(asset('homePage/assets/img/businesslogowhite.svg')); ?>" />
     <meta name="msapplication-TileColor" content="#fa7070" />
     <meta name="theme-color" content="#fa7070" />
 
@@ -27,12 +27,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet" />
     <!-- Dependency Styles -->
-    <link rel="stylesheet" href="{{ asset('homePage/dependencies/bootstrap/css/bootstrap.min.css') }}"
+    <link rel="stylesheet" href="<?php echo e(asset('homePage/dependencies/bootstrap/css/bootstrap.min.css')); ?>"
         type="text/css" />
 
-    <link rel="stylesheet" href="{{ asset('homePage/dependencies/wow/css/animate.css') }}" type="text/css" />
+    <link rel="stylesheet" href="<?php echo e(asset('homePage/dependencies/wow/css/animate.css')); ?>" type="text/css" />
     <!-- Site Stylesheet -->
-    <link rel="stylesheet" href="{{ asset('homePage/assets/css/style.css') }}" type="text/css" />
+    <link rel="stylesheet" href="<?php echo e(asset('homePage/assets/css/style.css')); ?>" type="text/css" />
     </head>
 
 <body id="home-version-1" class="home-color-two" data-style="default">
@@ -78,13 +78,13 @@
         <!--=        Navbar         =-->
         <!--=========================-->
         <header class="site-header header-two toggle-light header_trans-fixed" data-top="992">
-        <div class="container">
+            <div class="container">
                 <div class="header-inner">
                     <div class="site-mobile-logo">
-                        <a href="{{ url('/') }}" class="logo">
-                            <img src="{{ asset('homePage/assets/img/businesslogowhite.svg') }}" alt="site logo"
+                        <a href="<?php echo e(url('/')); ?>" class="logo">
+                            <img src="<?php echo e(asset('homePage/assets/img/businesslogowhite.svg')); ?>" alt="site logo"
                                 class="main-logo" />
-                            <img src="{{ asset('homePage/assets/img/businesslogo.svg') }}" alt="site logo"
+                            <img src="<?php echo e(asset('homePage/assets/img/businesslogo.svg')); ?>" alt="site logo"
                                 class="sticky-logo" />
                         </a>
                     </div>
@@ -98,17 +98,17 @@
                     <!-- /.toggle-menu -->
                     <nav class="site-nav nav-two">
                         <div class="close-menu">
-                            <img src="{{ asset('homePage/assets/img/businesslogo.svg') }}" alt="site logo"
+                            <img src="<?php echo e(asset('homePage/assets/img/businesslogo.svg')); ?>" alt="site logo"
                                 class="main-logo" />
                             <span>Close</span>
                             <i class="ei ei-icon_close"></i>
                         </div>
 
                         <div class="site-logo">
-                            <a href="{{ url('/') }}" class="logo">
-                                <img src="{{ asset('homePage/assets/img/businesslogowhite.svg') }}" alt="site logo"
+                            <a href="<?php echo e(url('/')); ?>" class="logo">
+                                <img src="<?php echo e(asset('homePage/assets/img/businesslogowhite.svg')); ?>" alt="site logo"
                                     class="main-logo" />
-                                <img src="{{ asset('homePage/assets/img/businesslogo.svg') }}" alt="site logo"
+                                <img src="<?php echo e(asset('homePage/assets/img/businesslogo.svg')); ?>" alt="site logo"
                                     class="sticky-logo" />
                             </a>
                         </div>
@@ -116,24 +116,24 @@
                         <div class="menu-wrapper" data-top="992">
                             <ul class="site-main-menu">
                                 <li class="home">
-                                    <a href="{{ url('/') }}">Home</a>
+                                    <a href="<?php echo e(url('/')); ?>">Home</a>
                                 </li>
-                                <li><a href="{{ route('contact') }}">Contact</a></li>
+                                <li><a href="<?php echo e(route('contact')); ?>">Contact</a></li>
                             </ul>
                             <div class="nav-right">
                                 <div class="dropdown">
                                     <button class="nav-btn style-two dropdown-toggle" type="button" id="loginDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                         Login
-            </button>
+                                    </button>
                                     <ul class="dropdown-menu" aria-labelledby="loginDropdown">
-                                        <li><a class="dropdown-item" href="{{ route('business.login') }}">Business Login</a></li>
-                                        <li><a class="dropdown-item" href="{{ route('super-admin.login') }}">Super Admin Login</a></li>
-                </ul>
-            </div>
-        </div>
+                                        <li><a class="dropdown-item" href="<?php echo e(route('business.login')); ?>">Business Login</a></li>
+                                        <li><a class="dropdown-item" href="<?php echo e(route('super-admin.login')); ?>">Super Admin Login</a></li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                         <!-- /.menu-wrapper -->
-    </nav>
+                    </nav>
                     <!-- /.site-nav -->
                 </div>
                 <!-- /.header-inner -->
@@ -147,15 +147,15 @@
         <!--==========================-->
         <section class="banner banner-gritt">
             <div class="decor1">
-                <img src="{{ asset('homePage/assets/img/bannerdecor1.svg') }}" alt="" />
+                <img src="<?php echo e(asset('homePage/assets/img/bannerdecor1.svg')); ?>" alt="" />
             </div>
-        <div class="container">
+            <div class="container">
                 <div class="banner-content-wrap-four">
                     <div class="row">
                         <div class="col-lg-5 col-md-12">
                             <div class="banner-content">
                                 <div class="star_decor">
-                                    <img src="{{ asset('homePage/assets/img/star.svg') }}" alt="" />
+                                    <img src="<?php echo e(asset('homePage/assets/img/star.svg')); ?>" alt="" />
                                 </div>
                                 <h1>Effortless Car Rental Management with The NexZen</h1>
 
@@ -170,7 +170,7 @@
                             <!-- /.promo-mockup -->
                         </div>
                         <div class="promo-mockup wow pixFadeUp text-center">
-                            <img src="{{ asset('homePage/assets/img/dashboard.svg') }}" class="ban_img" alt="" />
+                            <img src="<?php echo e(asset('homePage/assets/img/dashboard.svg')); ?>" class="ban_img" alt="" />
                         </div>
                     </div>
                 </div>
@@ -186,7 +186,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="featuresection-title color-two text-center">
-                            <img class="managestar1" src="{{ asset('homePage/assets/img/managedecor3.svg') }}"
+                            <img class="managestar1" src="<?php echo e(asset('homePage/assets/img/managedecor3.svg')); ?>"
                                 alt="" />
                             <h4 class="sub-title wow pixFadeUp">Included Capabilities</h4>
                             <h2 class="title wow pixFadeUp" data-wow-delay="0.3s">
@@ -198,11 +198,11 @@
                 <div class="row mt-4">
                     <div class="col-lg-6">
                         <div class="management two wow pixFadeUp" data-wow-delay="0.4s">
-                            <img class="managestar2" src="{{ asset('homePage/assets/img/magedecor2.svg') }}"
+                            <img class="managestar2" src="<?php echo e(asset('homePage/assets/img/magedecor2.svg')); ?>"
                                 alt="" />
                             <div class="icon_text">
                                 <div class="icon_management">
-                                    <img src="{{ asset('homePage/assets/img/manage_icon.svg') }}" alt="" />
+                                    <img src="<?php echo e(asset('homePage/assets/img/manage_icon.svg')); ?>" alt="" />
                                 </div>
                                 <div class="text_management">
                                     <h4>Booking Management</h4>
@@ -235,8 +235,8 @@
                         <div class="management two wow pixFadeUp" data-wow-delay="0.5s">
                             <div class="icon_text">
                                 <div class="icon_management">
-                                    <img src="{{ asset('homePage/assets/img/manage_icon.svg') }}" alt="" />
-                                    </div>
+                                    <img src="<?php echo e(asset('homePage/assets/img/manage_icon.svg')); ?>" alt="" />
+                                </div>
                                 <div class="text_management">
                                     <h4>Vendor Management</h4>
                                     <p>
@@ -267,12 +267,12 @@
                     <div class="col-lg-6">
                         <div class="management two wow pixFadeUp" data-wow-delay="0.6s">
                             <div class="men">
-                                <img class="men_img" src="{{ asset('homePage/assets/img/managemandecor.svg') }}"
+                                <img class="men_img" src="<?php echo e(asset('homePage/assets/img/managemandecor.svg')); ?>"
                                     alt="" />
                             </div>
                             <div class="icon_text">
                                 <div class="icon_management">
-                                    <img src="{{ asset('homePage/assets/img/manage_icon.svg') }}" alt="" />
+                                    <img src="<?php echo e(asset('homePage/assets/img/manage_icon.svg')); ?>" alt="" />
                                 </div>
                                 <div class="text_management">
                                     <h4>Vehicle Management</h4>
@@ -303,11 +303,11 @@
                     </div>
                     <div class="col-lg-6">
                         <div class="management two wow pixFadeUp" data-wow-delay="0.7s">
-                            <img class="managestar3" src="{{ asset('homePage/assets/img/managedecor3.svg') }}"
+                            <img class="managestar3" src="<?php echo e(asset('homePage/assets/img/managedecor3.svg')); ?>"
                                 alt="" />
                             <div class="icon_text">
                                 <div class="icon_management">
-                                    <img src="{{ asset('homePage/assets/img/manage_icon.svg') }}" alt="" />
+                                    <img src="<?php echo e(asset('homePage/assets/img/manage_icon.svg')); ?>" alt="" />
                                 </div>
                                 <div class="text_management">
                                     <h4>Customer Management</h4>
@@ -346,13 +346,13 @@
                 <div class="row chooseus_row">
                     <div class="col-lg-7">
                         <div class="chooseus_img">
-                            <!-- <img src="{{ asset('homePage/assets/img/chooseus.svg') }}" alt="" /> -->
+                            <!-- <img src="<?php echo e(asset('homePage/assets/img/chooseus.svg')); ?>" alt="" /> -->
 
                             <div class="carousel-frame">
                                 <div class="carousel-slide">
-                                    <img src="{{ asset('homePage/assets/img/chooseus.svg') }}" />
-                                    <img src="{{ asset('homePage/assets/img/chooseus.svg') }}" />
-                                    <img src="{{ asset('homePage/assets/img/chooseus.svg') }}" />
+                                    <img src="<?php echo e(asset('homePage/assets/img/chooseus.svg')); ?>" />
+                                    <img src="<?php echo e(asset('homePage/assets/img/chooseus.svg')); ?>" />
+                                    <img src="<?php echo e(asset('homePage/assets/img/chooseus.svg')); ?>" />
                                 </div>
                                 <i class="carousel-prev"></i>
                                 <i class="carousel-next"></i>
@@ -366,7 +366,7 @@
                     </div>
                     <div class="col-lg-5">
                         <div class="chooseus_text">
-                            <img class="managestar3" src="{{ asset('homePage/assets/img/managedecor3.svg') }}"
+                            <img class="managestar3" src="<?php echo e(asset('homePage/assets/img/managedecor3.svg')); ?>"
                                 alt="" />
                             <h4 class="sub-title wow pixFadeUp">Why choose NexZen Go?</h4>
                         </div>
@@ -441,7 +441,7 @@
                             </div>
                             <!-- /.pricing-header -->
                             <div class="trail_btn">
-                                <a href="{{ route('business.login') }}" class="pix-btn btn-outline-two">Start a free
+                                <a href="<?php echo e(route('business.login')); ?>" class="pix-btn btn-outline-two">Start a free
                                     trial</a>
                                 <span>No credit card required</span>
                             </div>
@@ -456,7 +456,7 @@
 
                             <div class="action text-left"></div>
                             <div class="pricing_dec">
-                                <img class="dec_women" src="{{ asset('homePage/assets/img/price_decor.svg') }}"
+                                <img class="dec_women" src="<?php echo e(asset('homePage/assets/img/price_decor.svg')); ?>"
                                     alt="" />
                             </div>
                         </div>
@@ -488,7 +488,7 @@
                             </div>
                             <!-- /.pricing-header -->
                             <div class="trail_btn">
-                                <a href="{{ route('business.login') }}" class="pix-btn btn-outline-two">Start a free
+                                <a href="<?php echo e(route('business.login')); ?>" class="pix-btn btn-outline-two">Start a free
                                     trial</a>
                                 <span>No credit card required</span>
                             </div>
@@ -503,7 +503,7 @@
                                 <li class="not">24/7 chat support</li>
                             </ul>
                             <div class="cash_svg">
-                                <img src="{{ asset('homePage/assets/img/cash.svg') }}" alt="" />
+                                <img src="<?php echo e(asset('homePage/assets/img/cash.svg')); ?>" alt="" />
                             </div>
                             <div class="action text-left"></div>
                         </div>
@@ -534,7 +534,7 @@
                             </div>
                             <!-- /.pricing-header -->
                             <div class="trail_btn">
-                                <a href="{{ route('business.login') }}" class="pix-btn btn-outline-two">Start a free
+                                <a href="<?php echo e(route('business.login')); ?>" class="pix-btn btn-outline-two">Start a free
                                     trial</a>
                                 <span>No credit card required</span>
                             </div>
@@ -564,7 +564,7 @@
         <!--=         Contact         =-->
         <!--===========================-->
         <section class="contactus">
-            <img class="contactbg_img" src="{{ asset('homePage/assets/img/contactbg.svg') }}" alt="" />
+            <img class="contactbg_img" src="<?php echo e(asset('homePage/assets/img/contactbg.svg')); ?>" alt="" />
             <div class="container">
                 <div class="row contactus_row">
                     <div class="col-lg-6">
@@ -572,7 +572,7 @@
                             <div class="contact_title two wow pixFadeUp" data-wow-delay="0.4s">
                                 <h3>Start your</h3>
                                 <h3>14 days free trial</h3>
-                                <img class="title_dec" src="{{ asset('homePage/assets/img/titledec.svg') }}"
+                                <img class="title_dec" src="<?php echo e(asset('homePage/assets/img/titledec.svg')); ?>"
                                     alt="" />
                             </div>
                             <div class="contact_sub">
@@ -603,10 +603,10 @@
                             <div class="callus">
                                 <p>Give us a call at</p>
                                 <span>+91 90140 12010</span>
-                        </div>
-                            <img class="managestar2" src="{{ asset('homePage/assets/img/magedecor2.svg') }}"
+                            </div>
+                            <img class="managestar2" src="<?php echo e(asset('homePage/assets/img/magedecor2.svg')); ?>"
                                 alt="" />
-                            <img class="managestar3" src="{{ asset('homePage/assets/img/managedecor3.svg') }}"
+                            <img class="managestar3" src="<?php echo e(asset('homePage/assets/img/managedecor3.svg')); ?>"
                                 alt="" />
                         </div>
                     </div>
@@ -654,15 +654,15 @@
                     <div class="col-lg-12">
                         <div class="accor_head">
                             <h2>Frequently asked questions:</h2>
-                            <img class="managestar3" src="{{ asset('homePage/assets/img/managedecor3.svg') }}"
+                            <img class="managestar3" src="<?php echo e(asset('homePage/assets/img/managedecor3.svg')); ?>"
                                 alt="" />
                             <img class="questindec two wow pixFadeUp" data-wow-delay="0.4s"
-                                src="{{ asset('homePage/assets/img/questindec.svg') }}" alt="" />
+                                src="<?php echo e(asset('homePage/assets/img/questindec.svg')); ?>" alt="" />
                         </div>
                     </div>
                     <div class="col-lg-12">
                         <div class="accor_content">
-                            <img class="managestar2" src="{{ asset('homePage/assets/img/magedecor2.svg') }}"
+                            <img class="managestar2" src="<?php echo e(asset('homePage/assets/img/magedecor2.svg')); ?>"
                                 alt="" />
                             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                                 <div class="panel panel-default">
@@ -729,9 +729,9 @@
                                                 laoreet lectus, blandit posuere tortor aliquam vitae.
                                                 Curabitur molestie eros.
                                             </p>
-            </div>
-        </div>
-    </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="panel panel-default">
                                     <div class="panel-heading" role="tab" id="headingthree">
@@ -798,7 +798,7 @@
                             <div class="col-lg-4 col-md-6 col-sm-6">
                                 <div class="widget footer-widget widget-about">
                                     <a href="#" class="footer-logo"><img
-                                            src="{{ asset('homePage/assets/img/businesslogowhite.svg') }}"
+                                            src="<?php echo e(asset('homePage/assets/img/businesslogowhite.svg')); ?>"
                                             alt="" /></a>
                                     <p>Tosser amongst jolly good do one no biggie hunky.</p>
 
@@ -902,9 +902,9 @@
     <!-- /#site -->
     <!-- Dependency Scripts -->
 
-    <script src="{{ asset('homePage/dependencies/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('homePage/dependencies/wow/js/wow.min.js') }}"></script>
-
+    <script src="<?php echo e(asset('homePage/dependencies/jquery/jquery.min.js')); ?>"></script>
+    <script src="<?php echo e(asset('homePage/dependencies/wow/js/wow.min.js')); ?>"></script>
+    
     <!-- Bootstrap 5 CSS and JS for dropdown -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -1038,10 +1038,10 @@
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDk2HrmqE4sWSei0XdKGbOMOHN3Mm2Bf-M&amp;ver=2.1.6">
     </script>
     <!-- Site Scripts -->
-    <script src="{{ asset('dist/js/common.js') }}"></script>
-    <script src="{{ asset('homePage/assets/js/header.js') }}"></script>
-    <script src="{{ asset('homePage/assets/js/app.js') }}"></script>
-    <script src="{{ asset('homePage/assets/js/home.js') }}"></script>
+    <script src="<?php echo e(asset('dist/js/common.js')); ?>"></script>
+    <script src="<?php echo e(asset('homePage/assets/js/header.js')); ?>"></script>
+    <script src="<?php echo e(asset('homePage/assets/js/app.js')); ?>"></script>
+    <script src="<?php echo e(asset('homePage/assets/js/home.js')); ?>"></script>
     
     <!-- Initialize Bootstrap dropdowns -->
     <script>
@@ -1078,4 +1078,4 @@
     </script>
     </body>
 
-</html>
+</html><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/welcome.blade.php ENDPATH**/ ?>

@@ -56,6 +56,24 @@ class Booking extends Model
         'advance_amount' => 0,
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($booking) {
+            if (empty($booking->booking_number)) {
+                // Generate new format booking ID
+                $business = $booking->business;
+                if ($business) {
+                    $booking->booking_number = self::generateBookingId($business, $booking->start_date_time);
+                } else {
+                    // Fallback to old format if no business
+                    $booking->booking_number = self::generateBookingNumber();
+                }
+            }
+        });
+    }
+
     /**
      * Get the business that owns the booking.
      */
@@ -90,6 +108,14 @@ class Booking extends Model
         } while (static::where('booking_number', $bookingNumber)->exists());
         
         return $bookingNumber;
+    }
+    
+    /**
+     * Generate a unique booking ID in new format: <ClientID>-<YYMMDD>-<XXXX>
+     */
+    public static function generateBookingId(Business $business, Carbon $bookingDate = null): string
+    {
+        return \App\Helpers\BookingIdGenerator::generate($business, $bookingDate);
     }
 
     /**

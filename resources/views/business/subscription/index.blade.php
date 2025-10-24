@@ -154,7 +154,7 @@
                 <div class="row">
                     @foreach($availablePackages as $package)
                         <div class="col-md-4 mb-3">
-                            <div class="package-card h-100">
+                            <div class="package-card h-100" data-package-id="{{ $package->id }}">
                                 <div class="card h-100">
                                     <div class="card-header text-center">
                                         <h6 class="mb-0">{{ $package->package_name }}</h6>
@@ -169,6 +169,11 @@
                                         </ul>
                                     </div>
                                     <div class="card-footer text-center">
+                                        @if(!$hasSubscriptionHistory)
+                                            <button class="btn btn-success btn-sm me-2" onclick="startTrialForPackage({{ $package->id }})">
+                                                <i class="fas fa-play"></i> Start Trial
+                                            </button>
+                                        @endif
                                         <button class="btn btn-outline-primary btn-sm" onclick="upgradeToPackage({{ $package->id }})">
                                             <i class="fas fa-arrow-up"></i> Upgrade
                                         </button>
@@ -264,6 +269,61 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Subscription</button>
                 <button type="button" class="btn btn-danger" onclick="confirmCancel()">Cancel Subscription</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trial Package Selection Modal -->
+<div class="modal fade" id="trialPackageModal" tabindex="-1" aria-labelledby="trialPackageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="trialPackageModalLabel">
+                    <i class="fas fa-rocket me-2"></i>Start Your Free Trial
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-gift fa-3x text-success mb-3"></i>
+                    <h4 class="text-success">Choose Your Trial Package</h4>
+                    <p class="text-muted">Select a package to start your free trial. No credit card required!</p>
+                </div>
+                
+                @if($availablePackages->count() > 0)
+                    <div class="row">
+                        @foreach($availablePackages as $package)
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100 border-success">
+                                    <div class="card-header bg-light text-center">
+                                        <h6 class="mb-0 text-success">{{ $package->package_name }}</h6>
+                                        <h4 class="text-primary mt-2">{{ $package->formatted_price }}/month</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted small">{{ $package->description }}</p>
+                                        <ul class="list-unstyled small">
+                                            <li><i class="fas fa-check text-success me-2"></i>{{ $package->vehicle_capacity_display }} vehicles</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>{{ ucfirst($package->support_type) }} support</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>{{ $package->trial_period_days }} days trial</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer text-center">
+                                        <button class="btn btn-success w-100" onclick="startTrialForPackage({{ $package->id }})">
+                                            <i class="fas fa-play me-2"></i>Start {{ $package->trial_period_days }}-Day Trial
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                        <h5 class="text-warning">No Packages Available</h5>
+                        <p class="text-muted">Please contact support for available trial options.</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -371,11 +431,13 @@ function showAvailablePackages() {
 }
 
 function startTrial() {
-    // Find the first available package (usually the starter package)
-    const firstPackage = document.querySelector('.package-card');
-    if (firstPackage) {
-        const packageId = firstPackage.dataset.packageId;
-        
+    // Show package selection modal
+    const modal = new bootstrap.Modal(document.getElementById('trialPackageModal'));
+    modal.show();
+}
+
+function startTrialForPackage(packageId) {
+    if (confirm('Are you sure you want to start a free trial for this package?')) {
         fetch('{{ route("business.subscription.start-trial") }}', {
             method: 'POST',
             headers: {
@@ -396,10 +458,9 @@ function startTrial() {
             }
         })
         .catch(error => {
-            alert('❌ An error occurred while starting the trial.');
+            console.error('Error:', error);
+            alert('❌ An error occurred while starting the trial');
         });
-    } else {
-        alert('❌ No packages available for trial.');
     }
 }
 

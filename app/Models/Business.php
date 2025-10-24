@@ -11,6 +11,7 @@ class Business extends Model
     use HasFactory;
 
     protected $fillable = [
+        'client_id',
         'business_name',
         'business_slug',
         'business_type',
@@ -46,6 +47,10 @@ class Business extends Model
         static::creating(function ($business) {
             if (empty($business->business_slug)) {
                 $business->business_slug = Str::slug($business->business_name);
+            }
+            
+            if (empty($business->client_id)) {
+                $business->client_id = \App\Helpers\ClientIdGenerator::generateUnique();
             }
         });
     }

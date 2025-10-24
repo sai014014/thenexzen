@@ -1,26 +1,26 @@
-@extends('super-admin.layouts.app')
 
-@section('title', 'Manage Businesses - The NexZen Super Admin')
-@section('page-title', 'Manage Businesses')
 
-@section('styles')
-@vite(['resources/css/super-admin-businesses.css'])
-@endsection
+<?php $__env->startSection('title', 'Manage Businesses - The NexZen Super Admin'); ?>
+<?php $__env->startSection('page-title', 'Manage Businesses'); ?>
 
-@section('content')
+<?php $__env->startSection('styles'); ?>
+<?php echo app('Illuminate\Foundation\Vite')(['resources/css/super-admin-businesses.css']); ?>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h4 class="mb-0">Business Management</h4>
         <p class="text-muted mb-0">Manage all businesses in the system</p>
     </div>
-    <a href="{{ route('super-admin.businesses.create') }}" class="btn btn-primary">
+    <a href="<?php echo e(route('super-admin.businesses.create')); ?>" class="btn btn-primary">
         <i class="fas fa-plus me-2"></i>Add New Business
     </a>
 </div>
 
 <div class="card">
     <div class="card-body p-0">
-        @if($businesses->count() > 0)
+        <?php if($businesses->count() > 0): ?>
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead>
@@ -36,99 +36,102 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($businesses as $business)
+                        <?php $__currentLoopData = $businesses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $business): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="me-3">
-                                        @if($business->logo)
-                                            <img src="{{ $business->logo }}" alt="{{ $business->business_name }}" class="rounded-circle" width="50" height="50">
-                                        @else
+                                        <?php if($business->logo): ?>
+                                            <img src="<?php echo e($business->logo); ?>" alt="<?php echo e($business->business_name); ?>" class="rounded-circle" width="50" height="50">
+                                        <?php else: ?>
                                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                                                 <i class="fas fa-building"></i>
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0">{{ $business->business_name }}</h6>
-                                        <small class="text-muted">{{ $business->email }}</small>
-                                        @if($business->website)
-                                            <br><small><a href="{{ $business->website }}" target="_blank" class="text-decoration-none">{{ $business->website }}</a></small>
-                                        @endif
+                                        <h6 class="mb-0"><?php echo e($business->business_name); ?></h6>
+                                        <small class="text-muted"><?php echo e($business->email); ?></small>
+                                        <?php if($business->website): ?>
+                                            <br><small><a href="<?php echo e($business->website); ?>" target="_blank" class="text-decoration-none"><?php echo e($business->website); ?></a></small>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </td>
                             <td>
                                 <span class="badge bg-secondary font-monospace">
-                                    {{ $business->client_id }}
+                                    <?php echo e($business->client_id); ?>
+
                                 </span>
                             </td>
                             <td>
                                 <span class="badge bg-info">
-                                    {{ ucfirst(str_replace('_', ' ', $business->business_type)) }}
+                                    <?php echo e(ucfirst(str_replace('_', ' ', $business->business_type))); ?>
+
                                 </span>
                             </td>
                             <td>
                                 <div>
-                                    <small class="text-muted">{{ $business->city }}, {{ $business->state }}</small>
-                                    <br><small class="text-muted">{{ $business->country }}</small>
+                                    <small class="text-muted"><?php echo e($business->city); ?>, <?php echo e($business->state); ?></small>
+                                    <br><small class="text-muted"><?php echo e($business->country); ?></small>
                                 </div>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <form class="status-form" data-business-id="{{ $business->id }}" style="display: inline;">
-                                        @csrf
+                                    <form class="status-form" data-business-id="<?php echo e($business->id); ?>" style="display: inline;">
+                                        <?php echo csrf_field(); ?>
                                         <select class="form-select form-select-sm status-select" name="status" style="width: auto; min-width: 100px;">
-                                            <option value="active" {{ $business->status === 'active' ? 'selected' : '' }}>Active</option>
-                                            <option value="inactive" {{ $business->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                            <option value="suspended" {{ $business->status === 'suspended' ? 'selected' : '' }}>Suspended</option>
+                                            <option value="active" <?php echo e($business->status === 'active' ? 'selected' : ''); ?>>Active</option>
+                                            <option value="inactive" <?php echo e($business->status === 'inactive' ? 'selected' : ''); ?>>Inactive</option>
+                                            <option value="suspended" <?php echo e($business->status === 'suspended' ? 'selected' : ''); ?>>Suspended</option>
                                         </select>
-                                        <button type="submit" class="btn btn-sm btn-outline-primary ms-1" style="display: none;" id="status-submit-{{ $business->id }}">Update</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-primary ms-1" style="display: none;" id="status-submit-<?php echo e($business->id); ?>">Update</button>
                                     </form>
-                                    @if($business->is_verified)
+                                    <?php if($business->is_verified): ?>
                                         <br><small class="text-success ms-2"><i class="fas fa-check-circle"></i> Verified</small>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </td>
                             <td>
-                                <span class="badge bg-primary">{{ $business->businessAdmins->count() }}</span>
+                                <span class="badge bg-primary"><?php echo e($business->businessAdmins->count()); ?></span>
                             </td>
                             <td>
-                                <small class="text-muted">{{ $business->created_at->format('M d, Y') }}</small>
+                                <small class="text-muted"><?php echo e($business->created_at->format('M d, Y')); ?></small>
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('super-admin.businesses.show', $business) }}" class="btn btn-outline-primary btn-sm" title="View">
+                                    <a href="<?php echo e(route('super-admin.businesses.show', $business)); ?>" class="btn btn-outline-primary btn-sm" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('super-admin.businesses.edit', $business) }}" class="btn btn-outline-warning btn-sm" title="Edit">
+                                    <a href="<?php echo e(route('super-admin.businesses.edit', $business)); ?>" class="btn btn-outline-warning btn-sm" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-outline-danger btn-sm" title="Delete" onclick="confirmDelete({{ $business->id }})">
+                                    <button type="button" class="btn btn-outline-danger btn-sm" title="Delete" onclick="confirmDelete(<?php echo e($business->id); ?>)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
             
             <!-- Pagination -->
             <div class="d-flex justify-content-center mt-4">
-                {{ $businesses->links() }}
+                <?php echo e($businesses->links()); ?>
+
             </div>
-        @else
+        <?php else: ?>
             <div class="text-center py-5">
                 <i class="fas fa-building fa-4x text-muted mb-4"></i>
                 <h4 class="text-muted">No businesses found</h4>
                 <p class="text-muted">Get started by creating your first business.</p>
-                <a href="{{ route('super-admin.businesses.create') }}" class="btn btn-primary">
+                <a href="<?php echo e(route('super-admin.businesses.create')); ?>" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Create First Business
                 </a>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
@@ -147,8 +150,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteForm" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="btn btn-danger">Delete Business</button>
                 </form>
             </div>
@@ -308,4 +311,6 @@ function showAlert(type, message) {
     }, 5000);
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('super-admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/super-admin/businesses/index.blade.php ENDPATH**/ ?>

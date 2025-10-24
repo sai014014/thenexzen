@@ -7,131 +7,7 @@
 <!-- Main Content -->
 <link rel="stylesheet" href="{{ asset('dist/css/VehicleManagement/vehicleManagement_view.css') }}">
 
-<!-- Vehicle Statistics Cards -->
-<div class="vehicle-stats-container">
-    <div class="vehicle-stat-card">
-        <div class="stat-icon">
-            <i class="fas fa-car"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-number">{{ $vehicles->total() }}</div>
-            <div class="stat-label">All Vehicles</div>
-        </div>
-    </div>
-    <div class="vehicle-stat-card">
-        <div class="stat-icon">
-            <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-number">{{ $vehicles->where('vehicle_status', 'active')->count() }}</div>
-            <div class="stat-label">Available Vehicles</div>
-        </div>
-    </div>
-    <div class="vehicle-stat-card">
-        <div class="stat-icon">
-            <i class="fas fa-calendar-check"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-number">{{ $vehicles->where('vehicle_status', 'booked')->count() }}</div>
-            <div class="stat-label">Booked Vehicles</div>
-        </div>
-    </div>
-    @if($capacityStatus)
-    <div class="vehicle-stat-card">
-        <div class="stat-icon">
-            <i class="fas fa-layer-group"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-number">{{ $capacityStatus['unlimited'] ? '∞' : $capacityStatus['remaining'] }}</div>
-            <div class="stat-label">{{ $capacityStatus['unlimited'] ? 'Unlimited' : 'Remaining Slots' }}</div>
-        </div>
-    </div>
-    @endif
-</div>
 <style>
-    /* Vehicle Statistics Cards */
-    .vehicle-stats-container {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        padding: 0 1rem;
-    }
-    
-    .vehicle-stat-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex: 1;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .vehicle-stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-    
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-    }
-    
-    .vehicle-stat-card:nth-child(1) .stat-icon {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    
-    .vehicle-stat-card:nth-child(2) .stat-icon {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-    
-    .vehicle-stat-card:nth-child(3) .stat-icon {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
-    
-    .stat-content {
-        flex: 1;
-    }
-    
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #2d3748;
-        line-height: 1;
-        margin-bottom: 0.25rem;
-    }
-    
-    .stat-label {
-        font-size: 0.875rem;
-        color: #718096;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    @media (max-width: 768px) {
-        .vehicle-stats-container {
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        
-        .vehicle-stat-card {
-            padding: 1rem;
-        }
-        
-        .stat-number {
-            font-size: 1.5rem;
-        }
-    }
-
     .price-tooltip {
         position: absolute;
         background-color: #fff;
@@ -337,15 +213,9 @@
                     <i class="fas fa-plus me-2"></i>Add Vehicle
                 </a>
             @elseif($capacityStatus && !$capacityStatus['can_add'])
-                <button class="btn btn-secondary" disabled title="{{ $capacityStatus['message'] }}">
-                    <i class="fas fa-ban me-2"></i>Add Vehicle (Limit Reached)
+                <button class="btn btn-primary" onclick="showVehicleLimitModal()">
+                    <i class="fas fa-plus me-2"></i>Add Vehicle
                 </button>
-                <div class="mt-2">
-                    <small class="text-danger">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        {{ $capacityStatus['message'] }}
-                    </small>
-                </div>
             @else
                 <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Add Vehicle
@@ -489,6 +359,41 @@
     </div>
 </div>
 
+<!-- Vehicle Limit Modal -->
+<div class="modal fade" id="vehicleLimitModal" tabindex="-1" aria-labelledby="vehicleLimitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="vehicleLimitModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Vehicle Limit Reached
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-4">
+                    <i class="fas fa-car fa-4x text-warning mb-3"></i>
+                    <h4 class="text-warning mb-3">Vehicle Capacity Limit Reached</h4>
+                    <p class="text-muted mb-4">
+                        @if($capacityStatus)
+                            {{ $capacityStatus['message'] }}
+                        @else
+                            You have reached the maximum number of vehicles allowed for your subscription package.
+                        @endif
+                    </p>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ route('business.subscription.index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-arrow-up me-2"></i>Upgrade Package
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-lg" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const RECORDS_PER_PAGE = 10;
     const RECORDS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
@@ -616,6 +521,12 @@
         statusFilter.addEventListener('change', applyFilters);
         fuelTypeFilter.addEventListener('change', applyFilters);
     });
+
+    // Function to show vehicle limit modal
+    function showVehicleLimitModal() {
+        const modal = new bootstrap.Modal(document.getElementById('vehicleLimitModal'));
+        modal.show();
+    }
 
 </script>
 @endsection

@@ -196,4 +196,82 @@ class BusinessSubscriptionController extends Controller
             'packages' => $packages
         ]);
     }
+
+    /**
+     * Pause the current subscription
+     */
+    public function pause(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        $business = $businessAdmin->business;
+
+        $request->validate([
+            'reason' => 'nullable|string|max:500'
+        ]);
+
+        // Get current active subscription
+        $subscription = BusinessSubscription::where('business_id', $business->id)
+            ->whereIn('status', ['active', 'trial'])
+            ->first();
+
+        if (!$subscription) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active subscription found'
+            ], 400);
+        }
+
+        if ($subscription->is_paused) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Subscription is already paused'
+            ], 400);
+        }
+
+        if ($subscription->pause($request->reason)) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Subscription paused successfully'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to pause subscription'
+        ], 500);
+    }
+
+    /**
+     * Resume the current subscription
+     */
+    public function resume()
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        $business = $businessAdmin->business;
+
+        // Get current paused subscription
+        $subscription = BusinessSubscription::where('business_id', $business->id)
+            ->whereIn('status', ['active', 'trial'])
+            ->where('is_paused', true)
+            ->first();
+
+        if (!$subscription) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No paused subscription found'
+            ], 400);
+        }
+
+        if ($subscription->resume()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Subscription resumed successfully'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to resume subscription'
+        ], 500);
+    }
 }

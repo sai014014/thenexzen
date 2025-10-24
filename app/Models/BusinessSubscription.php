@@ -26,6 +26,11 @@ class BusinessSubscription extends Model
         'auto_renew',
         'used_features',
         'module_access',
+        'is_paused',
+        'paused_at',
+        'resumed_at',
+        'paused_days',
+        'pause_reason',
     ];
 
     protected $casts = [
@@ -37,6 +42,9 @@ class BusinessSubscription extends Model
         'auto_renew' => 'boolean',
         'used_features' => 'array',
         'module_access' => 'array',
+        'is_paused' => 'boolean',
+        'paused_at' => 'datetime',
+        'resumed_at' => 'datetime',
     ];
 
     public function business(): BelongsTo
@@ -273,6 +281,95 @@ class BusinessSubscription extends Model
             'message' => $canAdd 
                 ? "You can add {$remaining} more vehicle(s). Current: {$current}/{$capacity}"
                 : "Vehicle limit reached ({$current}/{$capacity}). Please contact admin or upgrade your package."
+        ];
+    }
+
+    /**
+     * Pause the subscription
+     */
+    public function pause($reason = null)
+    {
+        if ($this->status !== 'active' || $this->is_paused) {
+            return false;
+        }
+
+        $this->update([
+            'is_paused' => true,
+            'paused_at' => now(),
+            'pause_reason' => $reason,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Resume the subscription
+     */
+    public function resume()
+    {
+        if (!$this->is_paused) {
+            return false;
+        }
+
+        // Calculate paused days (round to avoid decimal issues)
+        $pausedDays = $this->paused_at ? round($this->paused_at->diffInDays(now())) : 0;
+        $totalPausedDays = $this->paused_days + $pausedDays;
+
+        // Extend expiry date by the paused days
+        $newExpiryDate = $this->expires_at->copy()->addDays($pausedDays);
+
+        $this->update([
+            'is_paused' => false,
+            'resumed_at' => now(),
+            'paused_days' => $totalPausedDays,
+            'expires_at' => $newExpiryDate,
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Check if subscription is paused
+     */
+    public function isPaused()
+    {
+        return $this->is_paused;
+    }
+
+    /**
+     * Get remaining days considering pause
+     */
+    public function getRemainingDays()
+    {
+        if ($this->is_paused) {
+            return $this->expires_at->diffInDays(now());
+        }
+        
+        return $this->expires_at->diffInDays(now());
+    }
+
+    /**
+     * Get pause status information
+     */
+    public function getPauseStatus()
+    {
+        if (!$this->is_paused) {
+            return [
+                'is_paused' => false,
+                'paused_days' => $this->paused_days,
+                'total_paused_days' => $this->paused_days,
+            ];
+        }
+
+        $currentPausedDays = $this->paused_at ? round($this->paused_at->diffInDays(now())) : 0;
+        $totalPausedDays = $this->paused_days + $currentPausedDays;
+
+        return [
+            'is_paused' => true,
+            'paused_at' => $this->paused_at,
+            'paused_days' => $currentPausedDays,
+            'total_paused_days' => $totalPausedDays,
+            'pause_reason' => $this->pause_reason,
         ];
     }
 }

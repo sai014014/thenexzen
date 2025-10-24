@@ -1,47 +1,47 @@
-@extends('business.layouts.app')
 
-@section('title', 'Subscription Management')
-@section('page-title', 'My Subscription')
 
-@section('content')
+<?php $__env->startSection('title', 'Subscription Management'); ?>
+<?php $__env->startSection('page-title', 'My Subscription'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <!-- No Subscription / Trial Ended Message -->
-    @if(!$currentSubscription)
+    <?php if(!$currentSubscription): ?>
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card border-warning">
                     <div class="card-header bg-warning text-dark">
                         <h5 class="mb-0">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            @if(!$hasSubscriptionHistory)
+                            <?php if(!$hasSubscriptionHistory): ?>
                                 Welcome! Start Your Free Trial
-                            @else
+                            <?php else: ?>
                                 Subscription Required
-                            @endif
+                            <?php endif; ?>
                         </h5>
                     </div>
                     <div class="card-body text-center py-5">
-                        @if(!$hasSubscriptionHistory)
+                        <?php if(!$hasSubscriptionHistory): ?>
                             <i class="fas fa-rocket fa-4x text-primary mb-4"></i>
                             <h4 class="text-primary mb-3">Get Started with Your Free Trial</h4>
                             <p class="text-muted mb-4">
                                 Experience the full power of our vehicle management system with a free trial. 
                                 No credit card required!
                             </p>
-                        @else
+                        <?php else: ?>
                             <i class="fas fa-lock fa-4x text-warning mb-4"></i>
                             <h4 class="text-warning mb-3">Subscription Required</h4>
                             <p class="text-muted mb-4">
                                 Your trial period has ended. Please choose a subscription plan to continue using our services.
                             </p>
-                        @endif
+                        <?php endif; ?>
                         
                         <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            @if(!$hasSubscriptionHistory)
+                            <?php if(!$hasSubscriptionHistory): ?>
                                 <button class="btn btn-primary btn-lg me-md-2" onclick="startTrial()">
                                     <i class="fas fa-play me-2"></i>Start Free Trial
                                 </button>
-                            @endif
+                            <?php endif; ?>
                             <button class="btn btn-outline-primary btn-lg" onclick="showPackages()">
                                 <i class="fas fa-list me-2"></i>View All Packages
                             </button>
@@ -50,88 +50,81 @@
                 </div>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Current Subscription Card -->
-    @if($currentSubscription)
+    <?php if($currentSubscription): ?>
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Current Subscription</h5>
-                    <span class="badge bg-light text-primary fs-6">{{ $currentSubscription->status_display }}</span>
+                    <span class="badge bg-light text-primary fs-6"><?php echo e($currentSubscription->status_display); ?></span>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-8">
-                        <h4 class="text-primary">{{ $currentSubscription->subscriptionPackage->package_name }}</h4>
-                        <p class="text-muted mb-3">{{ $currentSubscription->subscriptionPackage->description }}</p>
+                        <h4 class="text-primary"><?php echo e($currentSubscription->subscriptionPackage->package_name); ?></h4>
+                        <p class="text-muted mb-3"><?php echo e($currentSubscription->subscriptionPackage->description); ?></p>
                         
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="subscription-detail">
-                                    <strong>Price:</strong> {{ $currentSubscription->subscriptionPackage->formatted_price }}/month
+                                    <strong>Price:</strong> <?php echo e($currentSubscription->subscriptionPackage->formatted_price); ?>/month
                                 </div>
                                 <div class="subscription-detail">
-                                    <strong>Vehicle Capacity:</strong> {{ $currentSubscription->subscriptionPackage->vehicle_capacity_display }}
+                                    <strong>Vehicle Capacity:</strong> <?php echo e($currentSubscription->subscriptionPackage->vehicle_capacity_display); ?>
+
                                 </div>
                                 <div class="subscription-detail">
-                                    <strong>Support:</strong> {{ ucfirst($currentSubscription->subscriptionPackage->support_type) }}
+                                    <strong>Support:</strong> <?php echo e(ucfirst($currentSubscription->subscriptionPackage->support_type)); ?>
+
                                 </div>
-                                @if($currentSubscription->is_trial)
+                                <?php if($currentSubscription->is_trial): ?>
                                 <div class="subscription-detail">
-                                    <strong>Trial Period:</strong> {{ $currentSubscription->subscriptionPackage->trial_period_days }} days
+                                    <strong>Trial Period:</strong> <?php echo e($currentSubscription->subscriptionPackage->trial_period_days); ?> days
                                 </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             <div class="col-md-6">
                                 <div class="subscription-detail">
                                     <strong>Status:</strong> 
-                                    <span class="badge bg-{{ $currentSubscription->is_paused ? 'warning' : ($currentSubscription->is_active ? 'success' : ($currentSubscription->is_trial ? 'warning' : 'secondary')) }}">
-                                        {{ $currentSubscription->is_paused ? 'Paused' : $currentSubscription->status_display }}
+                                    <span class="badge bg-<?php echo e($currentSubscription->is_active ? 'success' : ($currentSubscription->is_trial ? 'warning' : 'secondary')); ?>">
+                                        <?php echo e($currentSubscription->status_display); ?>
+
                                     </span>
-                                    @if($currentSubscription->is_paused)
-                                        <small class="text-muted d-block">Paused on {{ $currentSubscription->paused_at->format('M d, Y') }}</small>
-                                    @endif
                                 </div>
                                 <div class="subscription-detail">
-                                    <strong>Expires:</strong> {{ $currentSubscription->expires_at->format('M d, Y') }}
+                                    <strong>Expires:</strong> <?php echo e($currentSubscription->expires_at->format('M d, Y')); ?>
+
                                 </div>
                                 <div class="subscription-detail">
-                                    <strong>Days Remaining:</strong> {{ $currentSubscription->days_remaining }}
+                                    <strong>Days Remaining:</strong> <?php echo e($currentSubscription->days_remaining); ?>
+
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4 text-end">
                         <div class="subscription-actions">
-                            @if($currentSubscription->is_active)
-                                @if($currentSubscription->is_paused)
-                                    <button class="btn btn-success me-2" onclick="resumeSubscription()">
-                                        <i class="fas fa-play"></i> Resume
-                                    </button>
-                                @else
-                                    <button class="btn btn-warning me-2" onclick="pauseSubscription()">
-                                        <i class="fas fa-pause"></i> Pause
-                                    </button>
-                                @endif
-                                <button class="btn btn-outline-danger me-2" onclick="cancelSubscription({{ $currentSubscription->id }})">
+                            <?php if($currentSubscription->is_active): ?>
+                                <button class="btn btn-outline-danger me-2" onclick="cancelSubscription(<?php echo e($currentSubscription->id); ?>)">
                                     <i class="fas fa-times"></i> Cancel
                                 </button>
-                                <button class="btn btn-success" onclick="renewSubscription({{ $currentSubscription->id }})">
+                                <button class="btn btn-success" onclick="renewSubscription(<?php echo e($currentSubscription->id); ?>)">
                                     <i class="fas fa-sync"></i> Renew
                                 </button>
-                            @elseif($currentSubscription->is_trial)
+                            <?php elseif($currentSubscription->is_trial): ?>
                                 <button class="btn btn-primary" onclick="upgradeSubscription()">
                                     <i class="fas fa-arrow-up"></i> Upgrade Now
                                 </button>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    @else
+    <?php else: ?>
         <div class="card mb-4">
             <div class="card-body text-center py-5">
                 <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
@@ -142,7 +135,7 @@
                 </button>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Available Packages -->
     <div class="card mb-4" id="available-packages">
@@ -150,41 +143,41 @@
             <h5 class="mb-0">Available Packages</h5>
         </div>
         <div class="card-body">
-            @if($availablePackages->count() > 0)
+            <?php if($availablePackages->count() > 0): ?>
                 <div class="row">
-                    @foreach($availablePackages as $package)
+                    <?php $__currentLoopData = $availablePackages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $package): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="col-md-4 mb-3">
                             <div class="package-card h-100">
                                 <div class="card h-100">
                                     <div class="card-header text-center">
-                                        <h6 class="mb-0">{{ $package->package_name }}</h6>
-                                        <h4 class="text-primary mt-2">{{ $package->formatted_price }}/month</h4>
+                                        <h6 class="mb-0"><?php echo e($package->package_name); ?></h6>
+                                        <h4 class="text-primary mt-2"><?php echo e($package->formatted_price); ?>/month</h4>
                                     </div>
                                     <div class="card-body">
-                                        <p class="text-muted small">{{ $package->description }}</p>
+                                        <p class="text-muted small"><?php echo e($package->description); ?></p>
                                         <ul class="list-unstyled small">
-                                            <li><i class="fas fa-check text-success me-2"></i>{{ $package->vehicle_capacity_display }} vehicles</li>
-                                            <li><i class="fas fa-check text-success me-2"></i>{{ ucfirst($package->status) }} support</li>
-                                            <li><i class="fas fa-check text-success me-2"></i>{{ $package->trial_period_days }} days trial</li>
+                                            <li><i class="fas fa-check text-success me-2"></i><?php echo e($package->vehicle_capacity_display); ?> vehicles</li>
+                                            <li><i class="fas fa-check text-success me-2"></i><?php echo e(ucfirst($package->status)); ?> support</li>
+                                            <li><i class="fas fa-check text-success me-2"></i><?php echo e($package->trial_period_days); ?> days trial</li>
                                         </ul>
                                     </div>
                                     <div class="card-footer text-center">
-                                        <button class="btn btn-outline-primary btn-sm" onclick="upgradeToPackage({{ $package->id }})">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="upgradeToPackage(<?php echo e($package->id); ?>)">
                                             <i class="fas fa-arrow-up"></i> Upgrade
                                         </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
-            @else
+            <?php else: ?>
                 <div class="text-center py-4">
                     <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
                     <h5 class="text-muted">No Packages Available</h5>
                     <p class="text-muted">Please contact support for available subscription options.</p>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
@@ -194,7 +187,7 @@
             <h5 class="mb-0">Subscription History</h5>
         </div>
         <div class="card-body">
-            @if($subscriptionHistory->count() > 0)
+            <?php if($subscriptionHistory->count() > 0): ?>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
@@ -208,34 +201,36 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($subscriptionHistory as $subscription)
+                            <?php $__currentLoopData = $subscriptionHistory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subscription): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
-                                    <td>{{ $subscription->subscriptionPackage->package_name }}</td>
+                                    <td><?php echo e($subscription->subscriptionPackage->package_name); ?></td>
                                     <td>
-                                        <span class="badge bg-{{ $subscription->status === 'active' ? 'success' : ($subscription->status === 'trial' ? 'warning' : 'secondary') }}">
-                                            {{ $subscription->status_display }}
+                                        <span class="badge bg-<?php echo e($subscription->status === 'active' ? 'success' : ($subscription->status === 'trial' ? 'warning' : 'secondary')); ?>">
+                                            <?php echo e($subscription->status_display); ?>
+
                                         </span>
                                     </td>
-                                    <td>{{ $subscription->starts_at->format('M d, Y') }}</td>
-                                    <td>{{ $subscription->expires_at->format('M d, Y') }}</td>
-                                    <td>{{ $subscription->subscriptionPackage->currency }} {{ number_format($subscription->amount_paid, 2) }}</td>
+                                    <td><?php echo e($subscription->starts_at->format('M d, Y')); ?></td>
+                                    <td><?php echo e($subscription->expires_at->format('M d, Y')); ?></td>
+                                    <td><?php echo e($subscription->subscriptionPackage->currency); ?> <?php echo e(number_format($subscription->amount_paid, 2)); ?></td>
                                     <td>
-                                        <a href="{{ route('business.subscription.show', $subscription) }}" class="btn btn-sm btn-outline-info">
+                                        <a href="<?php echo e(route('business.subscription.show', $subscription)); ?>" class="btn btn-sm btn-outline-info">
                                             <i class="fas fa-eye"></i> View
                                         </a>
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
-                {{ $subscriptionHistory->links() }}
-            @else
+                <?php echo e($subscriptionHistory->links()); ?>
+
+            <?php else: ?>
                 <div class="text-center py-4">
                     <i class="fas fa-history fa-3x text-muted mb-3"></i>
                     <p class="text-muted">No subscription history found.</p>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -285,7 +280,7 @@ function confirmCancel() {
         return;
     }
     
-    fetch(`{{ url('/business/subscription') }}/${subscriptionId}/cancel`, {
+    fetch(`<?php echo e(url('/business/subscription')); ?>/${subscriptionId}/cancel`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -311,7 +306,7 @@ function confirmCancel() {
 
 function renewSubscription(subscriptionId) {
     if (confirm('Are you sure you want to renew your subscription for another month?')) {
-        fetch(`{{ url('/business/subscription') }}/${subscriptionId}/renew`, {
+        fetch(`<?php echo e(url('/business/subscription')); ?>/${subscriptionId}/renew`, {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -335,7 +330,7 @@ function renewSubscription(subscriptionId) {
 
 function upgradeToPackage(packageId) {
     if (confirm('Are you sure you want to upgrade to this package? Your current subscription will be cancelled and replaced with the new one.')) {
-        fetch('{{ url("/business/subscription/upgrade") }}', {
+        fetch('<?php echo e(url("/business/subscription/upgrade")); ?>', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -376,7 +371,7 @@ function startTrial() {
     if (firstPackage) {
         const packageId = firstPackage.dataset.packageId;
         
-        fetch('{{ route("business.subscription.start-trial") }}', {
+        fetch('<?php echo e(route("business.subscription.start-trial")); ?>', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -413,63 +408,6 @@ function showPackages() {
         document.querySelector('.card:has(.card-header h5:contains("Available Packages"))')?.scrollIntoView({ behavior: 'smooth' });
     }
 }
-
-function pauseSubscription() {
-    const reason = prompt('Please provide a reason for pausing your subscription (optional):');
-    
-    if (reason === null) {
-        return; // User cancelled
-    }
-
-    fetch('{{ route("business.subscription.pause") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            reason: reason
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ ' + data.message);
-            location.reload();
-        } else {
-            alert('❌ ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('❌ An error occurred while pausing the subscription');
-    });
-}
-
-function resumeSubscription() {
-    if (confirm('Are you sure you want to resume your subscription?')) {
-        fetch('{{ route("business.subscription.resume") }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('✅ ' + data.message);
-                location.reload();
-            } else {
-                alert('❌ ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('❌ An error occurred while resuming the subscription');
-        });
-    }
-}
 </script>
 
 <style>
@@ -495,4 +433,6 @@ function resumeSubscription() {
     font-weight: 600;
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('business.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/business/subscription/index.blade.php ENDPATH**/ ?>

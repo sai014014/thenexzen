@@ -594,9 +594,12 @@ p {
   margin-top: 150px; /* Add space for fixed header */
   margin-left: 276px; /* 250px sidebar + 13px left margin + 13px right margin */
   padding: 20px 30px; /* Add proper padding for content */
-  overflow-x: hidden;
+  overflow-x: auto; /* Allow horizontal scrolling when needed */
   background: #f8f9fa;
   min-height: calc(100vh - 150px); /* Adjust min-height to account for header */
+  width: calc(100vw - 276px); /* Ensure content takes remaining width */
+  max-width: calc(100vw - 276px); /* Prevent content from exceeding viewport */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 /* Responsive Design */
@@ -604,6 +607,8 @@ p {
   .main-content {
     margin-left: 276px; /* Keep same as desktop for consistency */
     padding: 15px 20px; /* Reduce padding on smaller screens */
+    width: calc(100vw - 276px); /* Ensure responsive width */
+    max-width: calc(100vw - 276px); /* Prevent overflow */
   }
 }
 
@@ -618,11 +623,54 @@ p {
   .main-content {
     margin-left: 210px; /* 200px sidebar + 5px left margin + 5px right margin */
     padding: 10px 15px; /* Further reduce padding on mobile */
+    width: calc(100vw - 210px); /* Ensure responsive width on mobile */
+    max-width: calc(100vw - 210px); /* Prevent overflow on mobile */
   }
   
   .header {
     padding: 15px 10px; /* Reduce header padding on mobile */
   }
+}
+
+/* Zoom-friendly styles */
+@media (min-resolution: 1.5dppx) {
+  .main-content {
+    overflow-x: auto; /* Ensure scrolling is available on high DPI displays */
+  }
+}
+
+/* Handle very wide content */
+.main-content * {
+  max-width: 100%; /* Prevent any child element from exceeding container width */
+  box-sizing: border-box; /* Include padding/borders in width calculations */
+}
+
+/* Ensure tables and wide content are scrollable */
+.main-content table {
+  min-width: 100%; /* Ensure tables take full width */
+  table-layout: auto; /* Allow table to adjust column widths */
+}
+
+.main-content .table-container,
+.main-content .table-responsive {
+  overflow-x: auto; /* Allow horizontal scrolling for tables */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Fix for dashboard content that might overflow */
+.dashboard-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto; /* Allow scrolling if content is too wide */
+}
+
+/* Ensure charts and wide elements don't overflow */
+.chart-container,
+.charts-row,
+.stats-row {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto; /* Allow scrolling for wide charts */
 }
 .logout-btn {
   color: #fff;

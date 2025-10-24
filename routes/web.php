@@ -174,6 +174,8 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::post('/subscription/upgrade', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'upgrade'])->name('subscription.upgrade');
         Route::post('/subscription/start-trial', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'startTrial'])->name('subscription.start-trial');
         Route::post('/subscription/{subscription}/renew', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'renew'])->name('subscription.renew');
+        Route::post('/subscription/pause', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'pause'])->name('subscription.pause');
+        Route::post('/subscription/resume', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'resume'])->name('subscription.resume');
         Route::get('/subscription/packages/available', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'getAvailablePackages'])->name('subscription.packages.available');
     });
 

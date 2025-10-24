@@ -46,6 +46,12 @@ class CheckBusinessSubscription
                 ->with('warning', 'Your trial period has ended. Please choose a subscription plan to continue.');
         }
 
+        // If subscription is paused, redirect to subscription page
+        if ($subscription->is_paused) {
+            return redirect()->route('business.subscription.index')
+                ->with('info', 'Your subscription is currently paused. Please resume it to access the business portal.');
+        }
+
         return $next($request);
     }
 }

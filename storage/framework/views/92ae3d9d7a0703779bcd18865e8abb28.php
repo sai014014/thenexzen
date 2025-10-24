@@ -31,15 +31,16 @@
         <?php
             $business = auth('business_admin')->user()->business;
             $subscription = $business->subscriptions()->whereIn('status', ['active', 'trial'])->first();
-            $canAccessVehicles = $subscription ? $subscription->canAccessModule('vehicles') : true;
-            $canAccessBookings = $subscription ? $subscription->canAccessModule('bookings') : true;
-            $canAccessCustomers = $subscription ? $subscription->canAccessModule('customers') : true;
-            $canAccessVendors = $subscription ? $subscription->canAccessModule('vendors') : true;
-            $canAccessReports = $subscription ? $subscription->canAccessModule('reports') : true;
-            $canAccessNotifications = $subscription ? $subscription->canAccessModule('notifications') : true;
-            $canAccessSubscription = $subscription ? $subscription->canAccessModule('subscription') : true;
+            $canAccessVehicles = $subscription ? $subscription->canAccessModule('vehicles') : false;
+            $canAccessBookings = $subscription ? $subscription->canAccessModule('bookings') : false;
+            $canAccessCustomers = $subscription ? $subscription->canAccessModule('customers') : false;
+            $canAccessVendors = $subscription ? $subscription->canAccessModule('vendors') : false;
+            $canAccessReports = $subscription ? $subscription->canAccessModule('reports') : false;
+            $canAccessNotifications = $subscription ? $subscription->canAccessModule('notifications') : false;
+            $canAccessSubscription = true; // Always allow access to subscription management
         ?>
         
+        <?php if($subscription): ?>
         <a href="<?php echo e(route('business.dashboard')); ?>" class="nav-link <?php echo e(request()->routeIs('business.dashboard') ? 'menuActive' : ''); ?> dashboard-link">
             <svg width="31" height="30" viewBox="0 0 31 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="0.5" width="30" height="30" rx="8" fill="white" />
@@ -48,6 +49,7 @@
             </svg>
                         Dashboard
                     </a>
+        <?php endif; ?>
 
         <?php if($canAccessBookings): ?>
         <a href="<?php echo e(route('business.bookings.index')); ?>" class="nav-link <?php echo e(request()->routeIs('business.bookings.*') ? 'menuActive' : ''); ?> data-link">
@@ -75,8 +77,8 @@
                     </clipPath>
                 </defs>
             </svg>
-            Vehicles
-        </a>
+                        Vehicles
+                    </a>
         <?php endif; ?>
 
         <?php if($canAccessVendors): ?>
@@ -103,8 +105,8 @@
                 <path d="M16.7453 9.39199C16.1752 8.77646 15.3789 8.4375 14.5 8.4375C13.6164 8.4375 12.8175 8.77441 12.25 9.38613C11.6764 10.0046 11.3969 10.8451 11.4625 11.7527C11.5926 13.5434 12.9552 15 14.5 15C16.0448 15 17.4051 13.5437 17.5372 11.7533C17.6037 10.8539 17.3225 10.0151 16.7453 9.39199Z" fill="#6B6ADE" />
                 <path d="M19.6564 21.5625H9.34392C9.20894 21.5643 9.07526 21.5359 8.95262 21.4795C8.82997 21.4231 8.72145 21.34 8.63493 21.2364C8.4445 21.0088 8.36775 20.6979 8.42458 20.3836C8.67185 19.0119 9.44353 17.8597 10.6564 17.0508C11.734 16.3327 13.0989 15.9375 14.5002 15.9375C15.9014 15.9375 17.2664 16.333 18.3439 17.0508C19.5568 17.8594 20.3285 19.0116 20.5757 20.3833C20.6326 20.6977 20.5558 21.0085 20.3654 21.2361C20.2789 21.3398 20.1704 21.4229 20.0478 21.4794C19.9251 21.5358 19.7914 21.5642 19.6564 21.5625Z" fill="#6B6ADE" />
             </svg>
-            Customers
-        </a>
+                        Customers
+                    </a>
         <?php endif; ?>
 
         <?php if($canAccessReports): ?>
@@ -121,8 +123,8 @@
                     </clipPath>
                 </defs>
             </svg>
-            Reports
-        </a>
+                        Reports
+                    </a>
         <?php endif; ?>
 
         <?php if($canAccessNotifications): ?>

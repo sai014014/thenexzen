@@ -496,7 +496,6 @@ function changeMainImage(thumbnail, imageSrc) {
 }
 
 function updateStatus(status) {
-    console.log('Updating status to:', status);
     
     fetch(`/business/vehicles/<?php echo e($vehicle->id); ?>/toggle-availability`, {
         method: 'POST',
@@ -520,7 +519,6 @@ function updateStatus(status) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         showAlert('An error occurred while updating status', 'danger');
     });
 }

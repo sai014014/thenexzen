@@ -270,8 +270,7 @@
         }
     }
 </style>
-<div class="main-content">
-    <!-- Search and Add Vehicle Section -->
+<!-- Search and Add Vehicle Section -->
     <!-- Filter Options -->
     <div class="filter-container mb-3">
         <div class="row g-3">
@@ -389,7 +388,7 @@
                                 @if($vehicle->seating_capacity)
                                     {{ $vehicle->seating_capacity }} Seats
                                 @elseif($vehicle->payload_capacity_tons)
-                                    {{ $vehicle->payload_capacity_tons }} Tons
+                                {{ $vehicle->payload_capacity_tons }} Tons
                                 @endif
                             @endif
                         </td>

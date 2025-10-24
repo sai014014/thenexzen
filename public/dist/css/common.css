@@ -28,7 +28,7 @@ p {
   width: 250px;
   box-shadow: -6px 5px 14px 3px #0000002e;
   font-family: 'Poppins', sans-serif;
-  height: 97%;
+  height: calc(100vh - 26px); /* Adjust height to account for top/bottom margins */
   position: fixed;
   top: 13px;
   left: 13px;
@@ -279,24 +279,18 @@ p {
 
 /* Header */
 .header {
-  height: 170px;
-  background: transparent;
+  height: 150px;
+  width: 100%;
+  object-fit: cover;
+  background-color: #6B6ADE;
   padding: 20px 15px;
   position: fixed;
   top: 0;
-  left: 270px;
+  left: 0px;
   right: 0;
-  z-index: 998;
+  z-index: 100;
 }
-.border_bg {
-  left: 0;
-  top: 0;
-  position: fixed;
-  z-index: -1;
-  height: inherit;
-  width: 100%;
-  object-fit: cover;
-}
+
 .head_left {
   display: grid;
   gap: 30px;
@@ -597,12 +591,38 @@ p {
 
 /* Main Content */
 .main-content {
-  margin-top: 0;
-  margin-left: 270px;
-  padding: 0;
+  margin-top: 150px; /* Add space for fixed header */
+  margin-left: 276px; /* 250px sidebar + 13px left margin + 13px right margin */
+  padding: 20px 30px; /* Add proper padding for content */
   overflow-x: hidden;
   background: #f8f9fa;
-  min-height: 100vh;
+  min-height: calc(100vh - 150px); /* Adjust min-height to account for header */
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .main-content {
+    margin-left: 276px; /* Keep same as desktop for consistency */
+    padding: 15px 20px; /* Reduce padding on smaller screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+    left: 5px;
+    top: 5px;
+    height: calc(100vh - 10px);
+  }
+  
+  .main-content {
+    margin-left: 210px; /* 200px sidebar + 5px left margin + 5px right margin */
+    padding: 10px 15px; /* Further reduce padding on mobile */
+  }
+  
+  .header {
+    padding: 15px 10px; /* Reduce header padding on mobile */
+  }
 }
 .logout-btn {
   color: #fff;

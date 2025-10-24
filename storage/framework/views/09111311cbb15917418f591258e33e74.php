@@ -268,8 +268,7 @@
         }
     }
 </style>
-<div class="main-content">
-    <!-- Search and Add Vehicle Section -->
+<!-- Search and Add Vehicle Section -->
     <!-- Filter Options -->
     <div class="filter-container mb-3">
         <div class="row g-3">
@@ -389,7 +388,7 @@
                                 <?php if($vehicle->seating_capacity): ?>
                                     <?php echo e($vehicle->seating_capacity); ?> Seats
                                 <?php elseif($vehicle->payload_capacity_tons): ?>
-                                    <?php echo e($vehicle->payload_capacity_tons); ?> Tons
+                                <?php echo e($vehicle->payload_capacity_tons); ?> Tons
                                 <?php endif; ?>
                             <?php endif; ?>
                         </td>

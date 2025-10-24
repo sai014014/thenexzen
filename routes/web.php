@@ -210,6 +210,12 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::post('/vehicles/{vehicleId}/images/{imageId}/set-primary', [\App\Http\Controllers\Business\VehicleController::class, 'setPrimaryImage'])->name('vehicles.images.set-primary');
         
         
+        // Notifications Management Routes
+        Route::resource('notifications', \App\Http\Controllers\Business\NotificationsController::class);
+        Route::post('/notifications/{notification}/snooze', [\App\Http\Controllers\Business\NotificationsController::class, 'snooze'])->name('notifications.snooze');
+        Route::post('/notifications/{notification}/complete', [\App\Http\Controllers\Business\NotificationsController::class, 'markCompleted'])->name('notifications.complete');
+        Route::get('/notifications/count', [\App\Http\Controllers\Business\NotificationsController::class, 'getNotificationCount'])->name('notifications.count');
+        
         // Customer Management Routes
         Route::resource('customers', \App\Http\Controllers\Business\CustomerController::class);
         Route::patch('/customers/{customer}/status', [\App\Http\Controllers\Business\CustomerController::class, 'updateStatus'])->name('customers.update-status');

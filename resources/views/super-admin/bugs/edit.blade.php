@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (confirm('Are you sure you want to delete this attachment?')) {
             console.log('Deleting attachment with ID:', attachmentId);
             
-            fetch(`{{ route('super-admin.bug-attachments.destroy', '') }}/${attachmentId}`, {
+            fetch(`{{ route('super-admin.bug-attachments.destroy', ':attachment') }}`.replace(':attachment', attachmentId), {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

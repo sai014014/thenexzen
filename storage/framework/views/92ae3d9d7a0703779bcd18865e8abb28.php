@@ -102,6 +102,14 @@
             </svg>
                         Reports
                     </a>
+
+        <a href="<?php echo e(route('business.notifications.index')); ?>" class="nav-link <?php echo e(request()->routeIs('business.notifications.*') ? 'menuActive' : ''); ?> notifications-link">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="30" height="30" rx="8" fill="white" />
+                <path d="M15 2.5C10.8575 2.5 7.5 5.8575 7.5 10V12.5L5 15V17.5H25V15L22.5 12.5V10C22.5 5.8575 19.1425 2.5 15 2.5ZM15 20C13.625 20 12.5 18.875 12.5 17.5H17.5C17.5 18.875 16.375 20 15 20Z" fill="#6B6ADE" />
+            </svg>
+            Notifications
+        </a>
         </nav>
 
     <!-- Header -->
@@ -194,7 +202,6 @@
                 </div>
             </div>
         </div>
-        <img class="border_bg" src="<?php echo e(asset('images/header_bg.svg')); ?>" alt="Logo">
     </header>
 
     <!-- Main Content -->

@@ -1324,10 +1324,7 @@ function previewMultipleImages(input) {
 
 // Delete image function
 function deleteImage(vehicleId, imageId) {
-    console.log('deleteImage called with vehicleId:', vehicleId, 'imageId:', imageId);
-    
     if (confirm('Are you sure you want to delete this image?')) {
-        console.log('User confirmed deletion');
         
         fetch(`<?php echo e(url('/business/vehicles')); ?>/${vehicleId}/images/${imageId}`, {
             method: 'DELETE',
@@ -1337,11 +1334,9 @@ function deleteImage(vehicleId, imageId) {
             },
         })
         .then(response => {
-            console.log('Delete response status:', response.status);
             return response.json();
         })
         .then(data => {
-            console.log('Delete response data:', data);
             if (data.success) {
                 // Remove the image element from DOM
                 const imageElement = document.querySelector(`[data-image-id="${imageId}"]`);
@@ -1367,7 +1362,6 @@ function deleteImage(vehicleId, imageId) {
             }
         })
         .catch(error => {
-            console.error('Delete error:', error);
             showAlert('An error occurred while deleting the image', 'danger');
         });
     }
@@ -1375,7 +1369,6 @@ function deleteImage(vehicleId, imageId) {
 
 // Set primary image function
 function setPrimaryImage(vehicleId, imageId) {
-    console.log('setPrimaryImage called with vehicleId:', vehicleId, 'imageId:', imageId);
     
     fetch(`<?php echo e(url('/business/vehicles')); ?>/${vehicleId}/images/${imageId}/set-primary`, {
         method: 'POST',
@@ -1385,11 +1378,9 @@ function setPrimaryImage(vehicleId, imageId) {
         },
     })
     .then(response => {
-        console.log('Set primary response status:', response.status);
         return response.json();
     })
     .then(data => {
-        console.log('Set primary response data:', data);
         if (data.success) {
             // Remove primary badge from all images
             document.querySelectorAll('.badge.bg-success').forEach(badge => {
@@ -1428,7 +1419,6 @@ function setPrimaryImage(vehicleId, imageId) {
         }
     })
     .catch(error => {
-        console.error('Set primary error:', error);
         showAlert('An error occurred while updating the primary image', 'danger');
     });
 }
@@ -1527,7 +1517,6 @@ function searchVendors(query) {
             }
         })
         .catch(error => {
-            console.error('Error searching vendors:', error);
             displayNoVendorsFound();
         });
     }, 300);
@@ -1659,14 +1648,13 @@ function saveNewVendor() {
             selectVendor(data.vendor);
             
             // Show success message
-            alert('Vendor added successfully!');
+            showAlert('Vendor added successfully!', 'success');
         } else {
-            alert('Error adding vendor: ' + (data.message || 'Unknown error'));
+            showAlert('Error adding vendor: ' + (data.message || 'Unknown error'), 'danger');
         }
     })
     .catch(error => {
-        console.error('Error adding vendor:', error);
-        alert('Error adding vendor: ' + error.message);
+        showAlert('Error adding vendor: ' + error.message, 'danger');
     });
 }
 
@@ -1807,7 +1795,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             } else {
                 return response.text().then(text => {
-                    console.error('Server error response:', text);
                     throw new Error('Server error: ' + response.status + ' - ' + text);
                 });
             }
@@ -1832,9 +1819,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .catch(error => {
-            console.error('Error details:', error);
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
             showErrorAlert('An error occurred while updating the vehicle: ' + error.message);
             resetSubmitButton(submitBtn, originalText);
         });
@@ -2075,8 +2059,6 @@ $(document).ready(function() {
                 }
             },
             error: function(xhr, status, error) {
-                console.error('Error loading vehicle makes:', error);
-                console.error('Response:', xhr.responseText);
                 showAlert('Error loading vehicle makes. Please try again.', 'danger');
             }
         });
@@ -2140,8 +2122,6 @@ $(document).ready(function() {
                 $('#vehicle_model').trigger('change');
             },
             error: function(xhr, status, error) {
-                console.error('Error loading vehicle models:', error);
-                console.error('Response:', xhr.responseText);
                 showAlert('Error loading vehicle models. Please try again.', 'danger');
             }
         });

@@ -77,19 +77,20 @@
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label for="vehicle_image" class="form-label">Vehicle Image</label>
+                            <label for="vehicle_images" class="form-label">Vehicle Images</label>
                             <input type="file" 
-                                   class="form-control @error('vehicle_image') is-invalid @enderror" 
-                                   id="vehicle_image" 
-                                   name="vehicle_image" 
+                                   class="form-control @error('vehicle_images') is-invalid @enderror" 
+                                   id="vehicle_images" 
+                                   name="vehicle_images[]" 
                                    accept="image/*"
-                                   onchange="previewImage(this)">
-                            <div class="form-text">Upload a clear image of the vehicle (JPG, PNG, max 5MB)</div>
-                            @error('vehicle_image')
+                                   multiple
+                                   onchange="previewMultipleImages(this)">
+                            <div class="form-text">Upload multiple images of the vehicle (JPG, PNG, max 5MB each)</div>
+                            @error('vehicle_images')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div id="imagePreview" class="mt-2" style="display: none;">
-                                <img id="previewImg" src="" alt="Vehicle Preview" class="img-thumbnail" style="max-width: 200px; max-height: 150px;">
+                            <div id="imagePreviewContainer" class="mt-2" style="display: none;">
+                                <div class="row" id="imagePreviews"></div>
                             </div>
                         </div>
 
@@ -837,20 +838,41 @@ function customFetch(url, options = {}) {
     });
 }
 
-// Image preview function
-function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
+// Multiple image preview function
+function previewMultipleImages(input) {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreviews = document.getElementById('imagePreviews');
     
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            previewImg.src = e.target.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
+    // Clear previous previews
+    imagePreviews.innerHTML = '';
+    
+    if (input.files && input.files.length > 0) {
+        previewContainer.style.display = 'block';
+        
+        Array.from(input.files).forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const colDiv = document.createElement('div');
+                    colDiv.className = 'col-md-3 mb-2';
+                    colDiv.innerHTML = `
+                        <div class="position-relative">
+                            <img src="${e.target.result}" 
+                                 alt="Preview ${index + 1}" 
+                                 class="img-thumbnail" 
+                                 style="width: 100%; height: 120px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0">
+                                <span class="badge bg-primary">${index + 1}</span>
+                            </div>
+                        </div>
+                    `;
+                    imagePreviews.appendChild(colDiv);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     } else {
-        preview.style.display = 'none';
+        previewContainer.style.display = 'none';
     }
 }
 

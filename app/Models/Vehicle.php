@@ -166,6 +166,30 @@ class Vehicle extends Model
         return $this->hasMany(Booking::class);
     }
 
+    /**
+     * Get the images for the vehicle.
+     */
+    public function images()
+    {
+        return $this->hasMany(VehicleImage::class)->ordered();
+    }
+
+    /**
+     * Get the primary image for the vehicle.
+     */
+    public function primaryImage()
+    {
+        return $this->hasOne(VehicleImage::class)->where('is_primary', true);
+    }
+
+    /**
+     * Get the first image for the vehicle (fallback if no primary).
+     */
+    public function firstImage()
+    {
+        return $this->hasOne(VehicleImage::class)->ordered();
+    }
+
     public function isLeased(): bool
     {
         return $this->ownership_type === 'leased';

@@ -205,6 +205,11 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::post('/vehicles/{vehicle}/toggle-availability', [\App\Http\Controllers\Business\VehicleController::class, 'toggleAvailability'])->name('vehicles.toggle-availability');
         Route::get('/vehicles/{vehicle}/download/{type}', [\App\Http\Controllers\Business\VehicleController::class, 'downloadDocument'])->name('vehicles.download-document');
         
+        // Vehicle Image Management Routes
+        Route::delete('/vehicles/{vehicleId}/images/{imageId}', [\App\Http\Controllers\Business\VehicleController::class, 'deleteImage'])->name('vehicles.images.delete');
+        Route::post('/vehicles/{vehicleId}/images/{imageId}/set-primary', [\App\Http\Controllers\Business\VehicleController::class, 'setPrimaryImage'])->name('vehicles.images.set-primary');
+        
+        
         // Customer Management Routes
         Route::resource('customers', \App\Http\Controllers\Business\CustomerController::class);
         Route::patch('/customers/{customer}/status', [\App\Http\Controllers\Business\CustomerController::class, 'updateStatus'])->name('customers.update-status');

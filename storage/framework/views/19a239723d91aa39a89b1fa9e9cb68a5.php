@@ -2,477 +2,367 @@
 <?php $__env->startSection('page-title', 'Vehicle Details'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="row">
-    <div class="col-lg-8">
-        <!-- Vehicle Information Card -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-car me-2"></i>Vehicle Information
-                </h5>
-                <div>
-                    <a href="<?php echo e(route('business.vehicles.edit', $vehicle)); ?>" class="btn btn-warning btn-sm me-2">
-                        <i class="fas fa-edit"></i> Edit
-                    </a>
-                    <a href="<?php echo e(route('business.vehicles.index')); ?>" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 text-center mb-4">
-                        <?php if($vehicle->vehicle_image_path && file_exists(public_path('storage/' . $vehicle->vehicle_image_path))): ?>
-                            <img src="<?php echo e(asset('storage/' . $vehicle->vehicle_image_path)); ?>" 
-                                 alt="<?php echo e($vehicle->vehicle_make); ?> <?php echo e($vehicle->vehicle_model); ?>" 
-                                 class="img-fluid rounded" 
-                                 style="height: 200px; width: 100%; object-fit: cover;">
-                        <?php else: ?>
-                            <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <i class="fas fa-<?php echo e($vehicle->vehicle_type === 'car' ? 'car' : ($vehicle->vehicle_type === 'bike_scooter' ? 'motorcycle' : 'truck')); ?> fa-4x"></i>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="col-md-8">
-                        <h4 class="mb-3"><?php echo e($vehicle->vehicle_make); ?> <?php echo e($vehicle->vehicle_model); ?></h4>
-                        <div class="row">
-                            <div class="col-sm-6 mb-3">
-                                <strong>Vehicle Type:</strong><br>
-                                <span class="badge bg-info"><?php echo e($vehicle->vehicle_type_display); ?></span>
-                            </div>
-                             <div class="col-sm-6 mb-3">
-                                 <strong>Status:</strong><br>
-                                 <span class="badge bg-<?php echo e($vehicle->status_badge_class); ?>"><?php echo e($vehicle->status_display); ?></span>
-                                 <br><span class="badge bg-<?php echo e($vehicle->availability_status_badge_class); ?>"><?php echo e($vehicle->availability_status); ?></span>
-                                 <?php if($currentBookings->count() > 0): ?>
-                                     <br><small class="text-dark" style="opacity: 1 !important;">
-                                         <strong style="opacity: 1 !important;">Booked Periods:</strong><br>
-                                         <?php $__currentLoopData = $currentBookings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $booking): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                             <span class="badge bg-info me-1 mb-1" style="opacity: 1 !important;">
-                                                 <?php echo e(\Carbon\Carbon::parse($booking->start_date_time)->format('M d, Y H:i')); ?> - 
-                                                 <?php echo e(\Carbon\Carbon::parse($booking->end_date_time)->format('M d, Y H:i')); ?>
-
-                                             </span><br>
-                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                     </small>
-                                 <?php elseif($vehicle->unavailable_from || $vehicle->unavailable_until): ?>
-                                     <br><small class="text-muted">
-                                         <strong>Manual Unavailability:</strong><br>
-                                         <?php if($vehicle->unavailable_from): ?>
-                                             From: <?php echo e(\Carbon\Carbon::parse($vehicle->unavailable_from)->format('M d, Y H:i')); ?>
-
-                                         <?php endif; ?>
-                                         <?php if($vehicle->unavailable_from && $vehicle->unavailable_until): ?>
-                                             <br>
-                                         <?php endif; ?>
-                                         <?php if($vehicle->unavailable_until): ?>
-                                             Until: <?php echo e(\Carbon\Carbon::parse($vehicle->unavailable_until)->format('M d, Y H:i')); ?>
-
-                                         <?php endif; ?>
-                                     </small>
-                                 <?php endif; ?>
-                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-sm-6 mb-3">
-                                <strong>Year:</strong><br>
-                                <span class="text-muted"><?php echo e($vehicle->vehicle_year); ?></span>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <strong>Fuel Type:</strong><br>
-                                <span class="badge bg-secondary"><?php echo e($vehicle->fuel_type_display); ?></span>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-sm-6 mb-3">
-                                <strong>Vehicle Number:</strong><br>
-                                <span class="text-muted"><?php echo e($vehicle->vehicle_number); ?></span>
-                            </div>
-                            <div class="col-sm-6 mb-3">
-                                <strong>Transmission:</strong><br>
-                                <span class="text-muted"><?php echo e($vehicle->transmission_type_display); ?></span>
-                            </div>
-                        </div>
-
-                        <?php if($vehicle->mileage): ?>
-                        <div class="row">
-                            <div class="col-sm-6 mb-3">
-                                <strong>Mileage:</strong><br>
-                                <span class="text-muted"><?php echo e($vehicle->mileage); ?> km/l</span>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="<?php echo e(route('business.vehicles.index')); ?>" class="btn btn-link text-decoration-none">
+                    <i class="fas fa-arrow-left me-2"></i>Back to list
+                </a>
             </div>
         </div>
-
-        <!-- Vehicle Specifications Card -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-cogs me-2"></i>Vehicle Specifications
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <?php if($vehicle->vehicle_type === 'car' && $vehicle->seating_capacity): ?>
-                    <div class="col-md-6 mb-3">
-                        <strong>Seating Capacity:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->seating_capacity); ?> Seater</span>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if($vehicle->vehicle_type === 'bike_scooter' && $vehicle->engine_capacity_cc): ?>
-                    <div class="col-md-6 mb-3">
-                        <strong>Engine Capacity:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->engine_capacity_cc); ?>cc</span>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if($vehicle->vehicle_type === 'heavy_vehicle'): ?>
-                        <?php if($vehicle->seating_capacity): ?>
-                        <div class="col-md-6 mb-3">
-                            <strong>Seating Capacity:</strong><br>
-                            <span class="text-muted"><?php echo e($vehicle->seating_capacity); ?> Seater</span>
-                        </div>
-                        <?php endif; ?>
-                        <?php if($vehicle->payload_capacity_tons): ?>
-                        <div class="col-md-6 mb-3">
-                            <strong>Payload Capacity:</strong><br>
-                            <span class="text-muted"><?php echo e($vehicle->payload_capacity_tons); ?> Tons</span>
-                        </div>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- Rental Pricing Information Card -->
-        <?php if($vehicle->rental_price_24h): ?>
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-dollar-sign me-2"></i>Rental Pricing Information
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <strong>24-Hour Base Price:</strong><br>
-                        <span class="text-primary h5">₹<?php echo e(number_format($vehicle->rental_price_24h)); ?></span>
-                    </div>
-                    <?php if($vehicle->km_limit_per_booking): ?>
-                    <div class="col-md-3 mb-3">
-                        <strong>KM Limit per Booking:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->km_limit_per_booking); ?> km</span>
-                    </div>
-                    <?php endif; ?>
-                    <?php if($vehicle->extra_rental_price_per_hour): ?>
-                    <div class="col-md-3 mb-3">
-                        <strong>Extra Price per Hour:</strong><br>
-                        <span class="text-muted">₹<?php echo e(number_format($vehicle->extra_rental_price_per_hour)); ?></span>
-                    </div>
-                    <?php endif; ?>
-                    <?php if($vehicle->extra_price_per_km): ?>
-                    <div class="col-md-3 mb-3">
-                        <strong>Extra Price per KM:</strong><br>
-                        <span class="text-muted">₹<?php echo e(number_format($vehicle->extra_price_per_km)); ?></span>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-
-        <!-- Ownership and Vendor Details Card -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-handshake me-2"></i>Ownership and Vendor Details
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <strong>Ownership Type:</strong><br>
-                        <span class="badge bg-info"><?php echo e($vehicle->ownership_type_display); ?></span>
-                    </div>
-                    <?php if($vehicle->isVendorProvided() && $vehicle->vendor_name): ?>
-                    <div class="col-md-6 mb-3">
-                        <strong>Vendor Name:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->vendor_name); ?></span>
-                    </div>
-                    <?php endif; ?>
-                </div>
-
-                <?php if($vehicle->isVendorProvided() && $vehicle->commission_type): ?>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <strong>Commission Type:</strong><br>
-                        <span class="text-muted"><?php echo e(ucfirst($vehicle->commission_type)); ?></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <strong>Commission Value:</strong><br>
-                        <span class="text-muted">
-                            ₹<?php echo e(number_format($vehicle->commission_value)); ?>
-
-                            <?php if($vehicle->commission_type === 'percentage'): ?>
-                                %
-                            <?php endif; ?>
-                        </span>
-                    </div>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Insurance and Legal Documents Card -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-shield-alt me-2"></i>Insurance and Legal Documents
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <strong>Insurance Provider:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->insurance_provider); ?></span>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <strong>Policy Number:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->policy_number); ?></span>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <strong>Expiry Date:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->insurance_expiry_date->format('M d, Y')); ?></span>
-                        <?php if($vehicle->insurance_expiry_date->isPast()): ?>
-                            <span class="badge bg-danger ms-2">Expired</span>
-                        <?php elseif($vehicle->insurance_expiry_date->diffInDays() <= 30): ?>
-                            <span class="badge bg-warning ms-2">Expiring Soon</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <strong>RC Number:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->rc_number); ?></span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <?php if($vehicle->insurance_document_path): ?>
-                    <div class="col-md-6 mb-3">
-                        <strong>Insurance Document:</strong><br>
-                        <a href="<?php echo e(route('business.vehicles.download-document', [$vehicle, 'insurance'])); ?>" 
-                           class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-download me-1"></i>Download Insurance
-                        </a>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if($vehicle->rc_document_path): ?>
-                    <div class="col-md-6 mb-3">
-                        <strong>RC Document:</strong><br>
-                        <a href="<?php echo e(route('business.vehicles.download-document', [$vehicle, 'rc'])); ?>" 
-                           class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-download me-1"></i>Download RC
-                        </a>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- Maintenance Information Card -->
-        <?php if($vehicle->last_service_date || $vehicle->next_service_due): ?>
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-wrench me-2"></i>Maintenance Information
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <?php if($vehicle->last_service_date): ?>
-                    <div class="col-md-3 mb-3">
-                        <strong>Last Service Date:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->last_service_date->format('M d, Y')); ?></span>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if($vehicle->last_service_meter_reading): ?>
-                    <div class="col-md-3 mb-3">
-                        <strong>Last Service Meter:</strong><br>
-                        <span class="text-muted"><?php echo e(number_format($vehicle->last_service_meter_reading)); ?> km</span>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if($vehicle->next_service_due): ?>
-                    <div class="col-md-3 mb-3">
-                        <strong>Next Service Due:</strong><br>
-                        <span class="text-muted"><?php echo e($vehicle->next_service_due->format('M d, Y')); ?></span>
-                        <?php if($vehicle->next_service_due->isPast()): ?>
-                            <span class="badge bg-danger ms-2">Overdue</span>
-                        <?php elseif($vehicle->next_service_due->diffInDays() <= 30): ?>
-                            <span class="badge bg-warning ms-2">Due Soon</span>
-                        <?php endif; ?>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if($vehicle->next_service_meter_reading): ?>
-                    <div class="col-md-3 mb-3">
-                        <strong>Next Service Meter:</strong><br>
-                        <span class="text-muted"><?php echo e(number_format($vehicle->next_service_meter_reading)); ?> km</span>
-                    </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-
-        <!-- Additional Information Card -->
-        <?php if($vehicle->remarks_notes): ?>
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-sticky-note me-2"></i>Additional Information
-                </h5>
-            </div>
-            <div class="card-body">
-                <p class="text-muted"><?php echo e($vehicle->remarks_notes); ?></p>
-            </div>
-        </div>
-        <?php endif; ?>
     </div>
 
-    <div class="col-lg-4">
-        <!-- Vehicle Availability Card -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-toggle-on me-2"></i>Vehicle Availability
-                </h5>
+    <!-- Vehicle Name and Actions Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Vehicle Name Section -->
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="d-flex align-items-center mb-1">
+                            <div class="status-dot bg-success me-2"></div>
+                            <span class="text-muted small"><?php echo e($vehicle->vehicle_make); ?></span>
+                        </div>
+                        <h2 class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_model); ?></h2>
+                    </div>
+                </div>
+                
+                <!-- Vehicle Booking Status and Actions -->
+                <div class="d-flex align-items-center">
+                    <!-- Vehicle Booking Status -->
+                    <div class="me-4">
+                        <label class="form-label mb-1 small text-muted">Vehicle Booking Status</label>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <?php echo e(ucfirst($vehicle->vehicle_status)); ?>
+
+                                <i class="fas fa-chevron-down ms-1"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('active')">Active</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('inactive')">Inactive</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateStatus('under_maintenance')">Under Maintenance</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-3">
+                        <a href="<?php echo e(route('business.vehicles.edit', $vehicle)); ?>" class="btn btn-link text-muted text-decoration-none">
+                            Edit
+                        </a>
+                        <button class="btn btn-link text-danger text-decoration-none" onclick="confirmDelete(<?php echo e($vehicle->id); ?>)">
+                            Delete
+                        </button>
+                        <a href="<?php echo e(route('business.bookings.create', ['vehicle_id' => $vehicle->id])); ?>" class="btn btn-primary px-4">
+                            Book
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                 <div class="text-center mb-3">
-                     <div class="form-check form-switch d-inline-block">
-                         <input class="form-check-input" 
-                                type="checkbox" 
-                                id="availabilityToggle" 
-                                <?php echo e($vehicle->is_available ? 'checked' : ''); ?>
+        </div>
+    </div>
 
-                                <?php echo e($currentBookings->count() > 0 ? 'disabled' : ''); ?>
-
-                                onchange="toggleAvailability()">
-                         <label class="form-check-label" for="availabilityToggle">
-                             <?php echo e($vehicle->is_available ? 'Available' : 'Unavailable'); ?>
-
-                         </label>
-                     </div>
-                     <?php if($currentBookings->count() > 0): ?>
-                     <div class="mt-2">
-                         <small class="text-muted">
-                             <i class="fas fa-info-circle me-1"></i>
-                             Toggle disabled due to active bookings
-                         </small>
-                     </div>
-                     <?php endif; ?>
-                 </div>
-
-                <?php if(!$vehicle->is_available || $currentBookings->count() > 0): ?>
-                <div class="alert alert-warning booking-details-alert" style="opacity: 1 !important; transition: none !important;">
-                    <?php if($currentBookings->count() > 0): ?>
-                        <strong class="text-dark" style="opacity: 1 !important;">Booked Periods:</strong><br>
-                        <?php $__currentLoopData = $currentBookings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $booking): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <div class="mb-2" style="opacity: 1 !important;">
-                                <strong class="text-dark" style="opacity: 1 !important;">Booking #<?php echo e($booking->booking_number); ?>:</strong><br>
-                                <div class="text-dark" style="opacity: 1 !important;">
-                                    From: <?php echo e(\Carbon\Carbon::parse($booking->start_date_time)->format('M d, Y H:i')); ?><br>
-                                    Until: <?php echo e(\Carbon\Carbon::parse($booking->end_date_time)->format('M d, Y H:i')); ?>
-
+    <div class="row">
+        <!-- Left Column - Vehicle Images and Documents -->
+        <div class="col-lg-6">
+            <!-- Vehicle Images Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-images me-2"></i>Vehicle Images
+                        <?php if($vehicle->images && $vehicle->images->count() > 0): ?>
+                            <span class="badge bg-primary ms-2"><?php echo e($vehicle->images->count()); ?> image(s)</span>
+                        <?php endif; ?>
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <?php if($vehicle->images && $vehicle->images->count() > 0): ?>
+                        <div class="row g-0">
+                            <div class="col-8">
+                                <div class="main-image-container" style="height: 400px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                    <?php
+                                        $primaryImage = $vehicle->primaryImage ?? $vehicle->firstImage;
+                                    ?>
+                                    <?php if($primaryImage): ?>
+                                        <img src="<?php echo e(asset('storage/' . $primaryImage->image_path)); ?>" 
+                                             alt="<?php echo e($vehicle->vehicle_make); ?> <?php echo e($vehicle->vehicle_model); ?>" 
+                                             class="img-fluid" 
+                                             style="max-height: 100%; max-width: 100%; object-fit: cover;"
+                                             id="mainImage">
+                                    <?php else: ?>
+                                        <div class="text-center text-muted">
+                                            <i class="fas fa-<?php echo e($vehicle->vehicle_type === 'car' ? 'car' : ($vehicle->vehicle_type === 'bike_scooter' ? 'motorcycle' : 'truck')); ?> fa-5x mb-3"></i>
+                                            <p>No Image Available</p>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    <?php elseif($vehicle->unavailable_from || $vehicle->unavailable_until): ?>
-                        <strong>Manual Unavailability:</strong><br>
-                        <?php if($vehicle->unavailable_from): ?>
-                            From: <?php echo e($vehicle->unavailable_from->format('M d, Y')); ?><br>
-                        <?php endif; ?>
-                        <?php if($vehicle->unavailable_until): ?>
-                            Until: <?php echo e($vehicle->unavailable_until->format('M d, Y')); ?>
-
-                        <?php endif; ?>
+                            <div class="col-4">
+                                <div class="thumbnail-container p-3" style="height: 400px; overflow-y: auto;">
+                                    <?php $__currentLoopData = $vehicle->images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <div class="thumbnail-item mb-2 <?php echo e($index === 0 ? 'active' : ''); ?>" 
+                                             onclick="changeMainImage(this, '<?php echo e(asset('storage/' . $image->image_path)); ?>')"
+                                             data-image-src="<?php echo e(asset('storage/' . $image->image_path)); ?>">
+                                            <img src="<?php echo e(asset('storage/' . $image->image_path)); ?>" 
+                                                 alt="Thumbnail <?php echo e($index + 1); ?>" 
+                                                 class="img-fluid rounded" 
+                                                 style="width: 100%; height: 60px; object-fit: cover; border: 2px solid <?php echo e($index === 0 ? '#6f42c1' : 'transparent'); ?>;">
+                                            <?php if($image->is_primary): ?>
+                                                <div class="position-absolute top-0 start-0">
+                                                    <span class="badge bg-success" style="font-size: 0.7em;">Primary</span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center text-muted p-5">
+                            <i class="fas fa-<?php echo e($vehicle->vehicle_type === 'car' ? 'car' : ($vehicle->vehicle_type === 'bike_scooter' ? 'motorcycle' : 'truck')); ?> fa-5x mb-3"></i>
+                            <p>No Images Available</p>
+                        </div>
                     <?php endif; ?>
                 </div>
-                <?php endif; ?>
-
-                <form id="availabilityForm" method="POST" action="<?php echo e(route('business.vehicles.toggle-availability', $vehicle)); ?>" style="display: none;">
-                    <?php echo csrf_field(); ?>
-                    <input type="hidden" name="is_available" id="is_available_input">
-                    <div class="mb-3">
-                        <label for="unavailable_from" class="form-label">Unavailable From</label>
-                        <input type="date" class="form-control" id="unavailable_from" name="unavailable_from">
-                    </div>
-                    <div class="mb-3">
-                        <label for="unavailable_until" class="form-label">Unavailable Until</label>
-                        <input type="date" class="form-control" id="unavailable_until" name="unavailable_until">
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm w-100">Update Availability</button>
-                </form>
             </div>
-        </div>
 
-        <!-- Recent Bookings Card -->
-        <?php if($recentBookings->count() > 0): ?>
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-history me-2"></i>Recent Bookings
-                </h5>
-            </div>
-            <div class="card-body">
-                <?php $__currentLoopData = $recentBookings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $booking): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <div class="border-bottom pb-2 mb-2">
-                    <div class="d-flex justify-content-between">
-                        <strong>#<?php echo e($booking->booking_number); ?></strong>
-                        <span class="badge bg-<?php echo e($booking->status === 'completed' ? 'success' : 'warning'); ?>">
-                            <?php echo e(ucfirst($booking->status)); ?>
-
-                        </span>
-                    </div>
-                    <small class="text-muted">
-                        <?php echo e(\Carbon\Carbon::parse($booking->start_date_time)->format('M d, Y H:i')); ?> - 
-                        <?php echo e(\Carbon\Carbon::parse($booking->end_date_time)->format('M d, Y H:i')); ?>
-
-                    </small>
-                    <br>
-                    <small>Customer: <?php echo e($booking->customer->full_name ?? $booking->customer->company_name); ?></small>
-                </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </div>
-        </div>
-        <?php endif; ?>
-
-        <!-- Quick Actions Card -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-bolt me-2"></i>Quick Actions
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="<?php echo e(route('business.vehicles.edit', $vehicle)); ?>" class="btn btn-warning">
-                        <i class="fas fa-edit me-2"></i>Edit Vehicle
-                    </a>
-                    <button type="button" class="btn btn-danger" onclick="confirmDelete(<?php echo e($vehicle->id); ?>)">
-                        <i class="fas fa-trash me-2"></i>Delete Vehicle
+            <!-- Documents Section -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Documents</h5>
+                    <button class="btn btn-link p-0">
+                        <i class="fas fa-chevron-down text-primary"></i>
                     </button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Insurance Document -->
+                        <div class="col-6 col-md-4 mb-3 text-center">
+                            <div class="document-item">
+                                <?php if($vehicle->insurance_document_path && file_exists(public_path('storage/' . $vehicle->insurance_document_path))): ?>
+                                    <a href="<?php echo e(asset('storage/' . $vehicle->insurance_document_path)); ?>" target="_blank" class="text-decoration-none">
+                                        <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                                        <p class="mb-0 small text-primary">Insurance</p>
+                                        <small class="text-muted">Click to view</small>
+                                    </a>
+                                <?php else: ?>
+                                    <i class="fas fa-file-pdf fa-3x text-muted mb-2"></i>
+                                    <p class="mb-0 small text-muted">Insurance</p>
+                                    <small class="text-muted">Not uploaded</small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- RC Document -->
+                        <div class="col-6 col-md-4 mb-3 text-center">
+                            <div class="document-item">
+                                <?php if($vehicle->rc_document_path && file_exists(public_path('storage/' . $vehicle->rc_document_path))): ?>
+                                    <a href="<?php echo e(asset('storage/' . $vehicle->rc_document_path)); ?>" target="_blank" class="text-decoration-none">
+                                        <i class="fas fa-file-image fa-3x text-success mb-2"></i>
+                                        <p class="mb-0 small text-primary">RC Document</p>
+                                        <small class="text-muted">Click to view</small>
+                                    </a>
+                                <?php else: ?>
+                                    <i class="fas fa-file-image fa-3x text-muted mb-2"></i>
+                                    <p class="mb-0 small text-muted">RC Document</p>
+                                    <small class="text-muted">Not uploaded</small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Documents Placeholder -->
+                        <div class="col-6 col-md-4 mb-3 text-center">
+                            <div class="document-item">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-2"></i>
+                                <p class="mb-0 small text-muted">Other Documents</p>
+                                <small class="text-muted">Coming soon</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Vehicle Information -->
+        <div class="col-lg-6">
+            <!-- Vehicle Type & General Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-primary">Vehicle Type & General Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Vehicle Type</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_type_display); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Vehicle Make</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_make); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Vehicle Model</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_model); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Vehicle Year</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_year); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">VIN / Chasis Number</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vin_number ?? 'N/A'); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Registration Number</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_number); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Vehicle Status</label>
+                                <p class="mb-0 fw-bold">
+                                    <span class="badge bg-<?php echo e($vehicle->status_badge_class); ?>"><?php echo e($vehicle->status_display); ?></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Fuel Type</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->fuel_type_display); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Transmission Type</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->transmission_type_display); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Seating Capacity</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->seating_capacity ?? 'N/A'); ?> Seats</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Mileage</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->mileage ?? 'N/A'); ?> KM/HR</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Rental Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0 text-primary">Vehicle Rental Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">
+                                    <i class="fas fa-info-circle me-1"></i>Rental Price for 24 hrs
+                                </label>
+                                <p class="mb-0 fw-bold text-primary">₹<?php echo e(number_format($vehicle->rental_price_24h ?? 0, 2)); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">
+                                    <i class="fas fa-info-circle me-1"></i>Kilometer Limit per Booking
+                                </label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->km_limit_per_booking ?? 'N/A'); ?>KM</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">
+                                    <i class="fas fa-info-circle me-1"></i>Extra Rental Price per Hour
+                                </label>
+                                <p class="mb-0 fw-bold">₹<?php echo e(number_format($vehicle->extra_rental_price_per_hour ?? 0, 2)); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">
+                                    <i class="fas fa-info-circle me-1"></i>Extra Price per Kilometre
+                                </label>
+                                <p class="mb-0 fw-bold">₹<?php echo e(number_format($vehicle->extra_price_per_km ?? 0, 2)); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ownership & Service Maintenance Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0 text-primary">Ownership & Service Maintenance Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Ownership Type</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->ownership_type_display); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Vendor Name</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vendor_name ?? 'N/A'); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Last Service Date</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->last_service_date ? $vehicle->last_service_date->format('d/m/Y') : 'N/A'); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Meter Reading at Service Time</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->last_service_meter_reading ? number_format($vehicle->last_service_meter_reading) . ' Kilometers' : 'N/A'); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Next Service Date</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->next_service_due ? $vehicle->next_service_due->format('d/m/Y') : 'N/A'); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Meter Reading for Next Service</label>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->next_service_meter_reading ? number_format($vehicle->next_service_meter_reading) . ' Kilometers' : 'N/A'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <?php if($vehicle->remarks_notes): ?>
+                    <div class="mt-3">
+                        <label class="form-label small text-muted mb-1">Remarks / Notes</label>
+                        <div class="border rounded p-3 bg-light">
+                            <p class="mb-0"><?php echo e($vehicle->remarks_notes); ?></p>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -480,39 +370,86 @@
 </div>
 
 <style>
-/* Ensure booking details never fade */
-.booking-details-alert {
-    opacity: 1 !important;
-    transition: none !important;
-    animation: none !important;
+.thumbnail-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.booking-details-alert * {
-    opacity: 1 !important;
-    transition: none !important;
-    animation: none !important;
+.thumbnail-item:hover {
+    transform: scale(1.05);
 }
 
- /* Prevent any fade effects on booking details */
- .booking-details-alert .text-dark,
- .booking-details-alert strong,
- .booking-details-alert small,
- .booking-details-alert .badge {
-     opacity: 1 !important;
-     transition: none !important;
-     animation: none !important;
- }
+.thumbnail-item.active img {
+    border-color: #6f42c1 !important;
+}
 
- /* Disabled toggle styling */
- .form-check-input:disabled {
-     opacity: 0.5;
-     cursor: not-allowed;
- }
+.info-item {
+    padding: 0.5rem 0;
+}
 
- .form-check-input:disabled + .form-check-label {
-     opacity: 0.7;
-     cursor: not-allowed;
- }
+.document-item {
+    padding: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.document-item:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 12px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.text-primary {
+    color: #6f42c1 !important;
+}
+
+.btn-primary {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+.btn-primary:hover {
+    background-color: #5a359a;
+    border-color: #5a359a;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.main-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.main-image-container img {
+    transition: all 0.3s ease;
+}
+
+.main-image-container:hover img {
+    transform: scale(1.05);
+}
 </style>
 
 <!-- Delete Confirmation Modal -->
@@ -540,6 +477,54 @@
 </div>
 
 <script>
+function changeMainImage(thumbnail, imageSrc) {
+    // Remove active class from all thumbnails
+    document.querySelectorAll('.thumbnail-item').forEach(item => {
+        item.classList.remove('active');
+        item.querySelector('img').style.borderColor = 'transparent';
+    });
+    
+    // Add active class to clicked thumbnail
+    thumbnail.classList.add('active');
+    thumbnail.querySelector('img').style.borderColor = '#6f42c1';
+    
+    // Change main image
+    const mainImage = document.getElementById('mainImage');
+    if (mainImage && imageSrc) {
+        mainImage.src = imageSrc;
+    }
+}
+
+function updateStatus(status) {
+    console.log('Updating status to:', status);
+    
+    fetch(`/business/vehicles/<?php echo e($vehicle->id); ?>/toggle-availability`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the dropdown button text
+            const dropdownButton = document.querySelector('.dropdown-toggle');
+            if (dropdownButton) {
+                dropdownButton.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            }
+            showAlert('Status updated successfully!', 'success');
+        } else {
+            showAlert(data.message || 'Failed to update status', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('An error occurred while updating status', 'danger');
+    });
+}
+
 function confirmDelete(vehicleId) {
     const form = document.getElementById('deleteForm');
     form.action = `/business/vehicles/${vehicleId}`;
@@ -547,172 +532,33 @@ function confirmDelete(vehicleId) {
     modal.show();
 }
 
- function toggleAvailability() {
-     const toggle = document.getElementById('availabilityToggle');
-     
-     // Don't proceed if toggle is disabled (due to active bookings)
-     if (toggle.disabled) {
-         return;
-     }
-     
-     const form = document.getElementById('availabilityForm');
-     const isAvailableInput = document.getElementById('is_available_input');
-     
-     isAvailableInput.value = toggle.checked ? '1' : '0';
-     
-     if (toggle.checked) {
-         form.style.display = 'none';
-         // Automatically submit form when marking as available
-         submitAvailabilityForm();
-     } else {
-         form.style.display = 'block';
-     }
- }
-
-function submitAvailabilityForm() {
-    const form = document.getElementById('availabilityForm');
-    const formData = new FormData(form);
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+function showAlert(message, type) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
     
-    // Show loading state
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
-    submitBtn.disabled = true;
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
     
-    fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return response.text().then(text => {
-                throw new Error('Server error: ' + response.status + ' - ' + text);
-            });
-        }
-    })
-    .then(data => {
-        if (data.success) {
-            showSuccessAlert(data.message);
-            // Update the toggle label
-            const toggle = document.getElementById('availabilityToggle');
-            const label = document.querySelector('label[for="availabilityToggle"]');
-            label.textContent = data.is_available ? 'Available' : 'Unavailable';
-            
-            // Update the unavailable period display
-            updateUnavailablePeriodDisplay(data);
-        } else {
-            showErrorAlert(data.message || 'Failed to update availability');
-            // Revert toggle state
-            const toggle = document.getElementById('availabilityToggle');
-            toggle.checked = !toggle.checked;
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showErrorAlert('An error occurred while updating availability: ' + error.message);
-        // Revert toggle state
-        const toggle = document.getElementById('availabilityToggle');
-        toggle.checked = !toggle.checked;
-    })
-    .finally(() => {
-        // Reset button state
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-}
-
-function updateUnavailablePeriodDisplay(data) {
-    const unavailablePeriod = document.querySelector('.alert-warning');
-    if (data.is_available) {
-        // Hide unavailable period display
-        if (unavailablePeriod) {
-            unavailablePeriod.style.display = 'none';
-        }
-    } else {
-        // Show or update unavailable period display
-        if (unavailablePeriod) {
-            let content = '<strong>Unavailable Period:</strong><br>';
-            if (data.unavailable_from) {
-                const fromDate = new Date(data.unavailable_from).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-                content += `From: ${fromDate}<br>`;
-            }
-            if (data.unavailable_until) {
-                const untilDate = new Date(data.unavailable_until).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-                content += `Until: ${untilDate}`;
-            }
-            unavailablePeriod.innerHTML = content;
-            unavailablePeriod.style.display = 'block';
-        }
+    // Add new alert at the top of the content
+    const content = document.querySelector('.container-fluid');
+    if (content) {
+        content.insertAdjacentHTML('afterbegin', alertHtml);
     }
 }
 
-function showSuccessAlert(message) {
-    const alertHtml = `
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    document.querySelector('.card-body').insertAdjacentHTML('afterbegin', alertHtml);
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        const alert = document.querySelector('.alert-success.alert-dismissible');
-        if (alert) {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }
-    }, 5000);
-}
-
-function showErrorAlert(message) {
-    const alertHtml = `
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    document.querySelector('.card-body').insertAdjacentHTML('afterbegin', alertHtml);
-    
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        const alert = document.querySelector('.alert-danger.alert-dismissible');
-        if (alert) {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }
-    }, 5000);
-}
-
-// Initialize form visibility and form submission
+// Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-    toggleAvailability();
-    
-    // Handle manual form submission
-    const availabilityForm = document.getElementById('availabilityForm');
-    if (availabilityForm) {
-        availabilityForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            submitAvailabilityForm();
-        });
+    // Set initial active thumbnail
+    const firstThumbnail = document.querySelector('.thumbnail-item');
+    if (firstThumbnail) {
+        firstThumbnail.classList.add('active');
     }
 });
 </script>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('business.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/business/vehicles/show.blade.php ENDPATH**/ ?>

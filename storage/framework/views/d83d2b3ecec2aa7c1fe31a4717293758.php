@@ -331,20 +331,20 @@ unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
 
-                    <!-- Vehicle Image -->
+                    <!-- Vehicle Images -->
                     <div class="row mb-4">
                         <div class="col-12">
                             <h6 class="text-primary mb-3">
-                                <i class="fas fa-image me-2"></i>Vehicle Image
+                                <i class="fas fa-images me-2"></i>Vehicle Images
                             </h6>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="vehicle_image" class="form-label">Vehicle Image</label>
+                            <label for="vehicle_images" class="form-label">Add New Images</label>
                             <input type="file" 
-                                   class="form-control <?php $__errorArgs = ['vehicle_image'];
+                                   class="form-control <?php $__errorArgs = ['vehicle_images'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -352,11 +352,12 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                   id="vehicle_image" 
-                                   name="vehicle_image" 
+                                   id="vehicle_images" 
+                                   name="vehicle_images[]" 
                                    accept="image/*"
-                                   onchange="previewImage(this)">
-                            <?php $__errorArgs = ['vehicle_image'];
+                                   multiple
+                                   onchange="previewMultipleImages(this)">
+                            <?php $__errorArgs = ['vehicle_images'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -366,20 +367,54 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-                            <div class="form-text">Upload a clear image of the vehicle (JPG, PNG, max 5MB)</div>
+                            <div class="form-text">Upload multiple images of the vehicle (JPG, PNG, max 5MB each)</div>
+                            <div id="imagePreviewContainer" class="mt-2" style="display: none;">
+                                <div class="row" id="imagePreviews"></div>
+                            </div>
+                            
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Current Image</label>
-                            <div id="imagePreview" class="border rounded p-2" style="height: 150px; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
-                                <?php if($vehicle->vehicle_image_path && file_exists(public_path('storage/' . $vehicle->vehicle_image_path))): ?>
-                                    <img src="<?php echo e(asset('storage/' . $vehicle->vehicle_image_path)); ?>" 
-                                         alt="Current Vehicle Image" 
-                                         class="img-fluid" 
-                                         style="max-height: 140px; max-width: 100%; object-fit: contain;">
+                            <label class="form-label">Current Images</label>
+                            <div id="currentImages" class="border rounded p-2" style="min-height: 150px; background-color: #f8f9fa;">
+                                <?php if($vehicle->images && $vehicle->images->count() > 0): ?>
+                                    <div class="row" id="currentImagesList">
+                                        <?php $__currentLoopData = $vehicle->images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <div class="col-md-6 mb-2" data-image-id="<?php echo e($image->id); ?>">
+                                                <div class="position-relative">
+                                                    <img src="<?php echo e(asset('storage/' . $image->image_path)); ?>" 
+                                                         alt="Vehicle Image" 
+                                                         class="img-thumbnail" 
+                                                         style="width: 100%; height: 100px; object-fit: cover;">
+                                                    <?php if($image->is_primary): ?>
+                                                        <span class="position-absolute top-0 start-0 badge bg-success">Primary</span>
+                                                    <?php endif; ?>
+                                                    <div class="position-absolute top-0 end-0">
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-danger" 
+                                                                onclick="deleteImage(<?php echo e($vehicle->id); ?>, <?php echo e($image->id); ?>)"
+                                                                title="Delete Image">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="position-absolute bottom-0 start-0 w-100">
+                                                        <button type="button" 
+                                                                class="btn btn-sm btn-primary w-100" 
+                                                                onclick="setPrimaryImage(<?php echo e($vehicle->id); ?>, <?php echo e($image->id); ?>)"
+                                                                <?php echo e($image->is_primary ? 'disabled' : ''); ?>
+
+                                                                title="Set as Primary">
+                                                            <?php echo e($image->is_primary ? 'Primary' : 'Set Primary'); ?>
+
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </div>
                                 <?php else: ?>
-                                    <div class="text-muted">
-                                        <i class="fas fa-image fa-2x mb-2"></i><br>
-                                        No image uploaded
+                                    <div class="text-muted text-center">
+                                        <i class="fas fa-images fa-2x mb-2"></i><br>
+                                        No images uploaded
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -1249,16 +1284,175 @@ unset($__errorArgs, $__bag); ?>
 
 <script>
 // Image preview function
-function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-fluid" style="max-height: 140px; max-width: 100%; object-fit: contain;">`;
-        };
-        reader.readAsDataURL(input.files[0]);
+// Multiple image preview function
+function previewMultipleImages(input) {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreviews = document.getElementById('imagePreviews');
+    
+    // Clear previous previews
+    imagePreviews.innerHTML = '';
+    
+    if (input.files && input.files.length > 0) {
+        previewContainer.style.display = 'block';
+        
+        Array.from(input.files).forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const colDiv = document.createElement('div');
+                    colDiv.className = 'col-md-3 mb-2';
+                    colDiv.innerHTML = `
+                        <div class="position-relative">
+                            <img src="${e.target.result}" 
+                                 alt="Preview ${index + 1}" 
+                                 class="img-thumbnail" 
+                                 style="width: 100%; height: 120px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0">
+                                <span class="badge bg-primary">New ${index + 1}</span>
+                            </div>
+                        </div>
+                    `;
+                    imagePreviews.appendChild(colDiv);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    } else {
+        previewContainer.style.display = 'none';
     }
 }
+
+// Delete image function
+function deleteImage(vehicleId, imageId) {
+    console.log('deleteImage called with vehicleId:', vehicleId, 'imageId:', imageId);
+    
+    if (confirm('Are you sure you want to delete this image?')) {
+        console.log('User confirmed deletion');
+        
+        fetch(`<?php echo e(url('/business/vehicles')); ?>/${vehicleId}/images/${imageId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            console.log('Delete response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Delete response data:', data);
+            if (data.success) {
+                // Remove the image element from DOM
+                const imageElement = document.querySelector(`[data-image-id="${imageId}"]`);
+                if (imageElement) {
+                    imageElement.remove();
+                }
+                
+                // Show success message
+                showAlert('Image deleted successfully!', 'success');
+                
+                // Check if no images left
+                const currentImagesList = document.getElementById('currentImagesList');
+                if (currentImagesList && currentImagesList.children.length === 0) {
+                    currentImagesList.innerHTML = `
+                        <div class="text-muted text-center">
+                            <i class="fas fa-images fa-2x mb-2"></i><br>
+                            No images uploaded
+                        </div>
+                    `;
+                }
+            } else {
+                showAlert(data.message || 'Failed to delete image', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            showAlert('An error occurred while deleting the image', 'danger');
+        });
+    }
+}
+
+// Set primary image function
+function setPrimaryImage(vehicleId, imageId) {
+    console.log('setPrimaryImage called with vehicleId:', vehicleId, 'imageId:', imageId);
+    
+    fetch(`<?php echo e(url('/business/vehicles')); ?>/${vehicleId}/images/${imageId}/set-primary`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        console.log('Set primary response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Set primary response data:', data);
+        if (data.success) {
+            // Remove primary badge from all images
+            document.querySelectorAll('.badge.bg-success').forEach(badge => {
+                badge.textContent = 'Set Primary';
+                badge.className = 'position-absolute top-0 start-0 badge bg-primary';
+            });
+            
+            // Update all buttons
+            document.querySelectorAll('button[onclick*="setPrimaryImage"]').forEach(btn => {
+                btn.textContent = 'Set Primary';
+                btn.disabled = false;
+                btn.className = 'btn btn-sm btn-primary w-100';
+            });
+            
+            // Set the selected image as primary
+            const imageElement = document.querySelector(`[data-image-id="${imageId}"]`);
+            if (imageElement) {
+                const badge = imageElement.querySelector('.badge');
+                const button = imageElement.querySelector('button[onclick*="setPrimaryImage"]');
+                
+                if (badge) {
+                    badge.textContent = 'Primary';
+                    badge.className = 'position-absolute top-0 start-0 badge bg-success';
+                }
+                
+                if (button) {
+                    button.textContent = 'Primary';
+                    button.disabled = true;
+                    button.className = 'btn btn-sm btn-success w-100';
+                }
+            }
+            
+            showAlert('Primary image updated successfully!', 'success');
+        } else {
+            showAlert(data.message || 'Failed to update primary image', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Set primary error:', error);
+        showAlert('An error occurred while updating the primary image', 'danger');
+    });
+}
+
+// Show alert function
+function showAlert(message, type) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => alert.remove());
+    
+    // Add new alert at the top of the form
+    const form = document.getElementById('vehicleForm');
+    if (form) {
+        form.insertAdjacentHTML('afterbegin', alertHtml);
+    }
+}
+
 
 // Vendor search functionality
 let vendorSearchTimeout;

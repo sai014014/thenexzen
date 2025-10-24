@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
+use App\Models\VehicleImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -127,7 +128,12 @@ class VehicleController extends Controller
                 unset($data['seating_capacity_heavy']);
             }
 
-            Vehicle::create($data);
+            $vehicle = Vehicle::create($data);
+
+            // Handle multiple vehicle images
+            if ($request->hasFile('vehicle_images')) {
+                $this->handleMultipleImageUploads($request->file('vehicle_images'), $vehicle);
+            }
 
             if ($request->ajax()) {
                 return response()->json([
@@ -172,6 +178,9 @@ class VehicleController extends Controller
             abort(403, 'Unauthorized access to vehicle.');
         }
 
+        // Load vehicle with images
+        $vehicle->load('images');
+
         // Get current and upcoming bookings for this vehicle
         $currentBookings = $vehicle->bookings()
             ->whereIn('status', ['ongoing', 'upcoming'])
@@ -206,6 +215,9 @@ class VehicleController extends Controller
         if ($vehicle->business_id !== $business->id) {
             abort(403, 'Unauthorized access to vehicle.');
         }
+
+        // Load vehicle with images
+        $vehicle->load('images');
 
         return view('business.vehicles.edit', compact('vehicle', 'business'));
     }
@@ -282,6 +294,11 @@ class VehicleController extends Controller
             }
 
             $vehicle->update($data);
+
+            // Handle multiple vehicle images
+            if ($request->hasFile('vehicle_images')) {
+                $this->handleMultipleImageUploads($request->file('vehicle_images'), $vehicle);
+            }
 
             if ($request->ajax()) {
                 return response()->json([
@@ -509,5 +526,105 @@ class VehicleController extends Controller
         $filename = $type . '_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
         $path = $file->storeAs('vehicle_documents', $filename, 'public');
         return $path;
+    }
+
+    /**
+     * Handle multiple image uploads for vehicles
+     */
+    private function handleMultipleImageUploads($files, Vehicle $vehicle)
+    {
+        $sortOrder = $vehicle->images()->max('sort_order') ?? 0;
+        $hasPrimary = $vehicle->images()->where('is_primary', true)->exists();
+
+        foreach ($files as $index => $file) {
+            if ($file->isValid()) {
+                $filename = 'vehicle_images_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('vehicle_documents', $filename, 'public');
+
+                VehicleImage::create([
+                    'vehicle_id' => $vehicle->id,
+                    'image_path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType(),
+                    'file_size' => $file->getSize(),
+                    'sort_order' => $sortOrder + $index + 1,
+                    'is_primary' => !$hasPrimary && $index === 0, // First image is primary if none exists
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Delete a vehicle image
+     */
+    public function deleteImage($vehicleId, $imageId)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        $business = $businessAdmin->business;
+
+        // Find the vehicle
+        $vehicle = Vehicle::findOrFail($vehicleId);
+        
+        // Ensure the vehicle belongs to this business
+        if ($vehicle->business_id !== $business->id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
+        }
+
+        // Find the image
+        $image = VehicleImage::findOrFail($imageId);
+        
+        // Ensure the image belongs to this vehicle
+        if ($image->vehicle_id !== $vehicle->id) {
+            return response()->json(['success' => false, 'message' => 'Image not found'], 404);
+        }
+
+        try {
+            // Delete file from storage
+            Storage::disk('public')->delete($image->image_path);
+            
+            // Delete from database
+            $image->delete();
+
+            return response()->json(['success' => true, 'message' => 'Image deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete image'], 500);
+        }
+    }
+
+    /**
+     * Set primary image for vehicle
+     */
+    public function setPrimaryImage($vehicleId, $imageId)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        $business = $businessAdmin->business;
+
+        // Find the vehicle
+        $vehicle = Vehicle::findOrFail($vehicleId);
+        
+        // Ensure the vehicle belongs to this business
+        if ($vehicle->business_id !== $business->id) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
+        }
+
+        // Find the image
+        $image = VehicleImage::findOrFail($imageId);
+        
+        // Ensure the image belongs to this vehicle
+        if ($image->vehicle_id !== $vehicle->id) {
+            return response()->json(['success' => false, 'message' => 'Image not found'], 404);
+        }
+
+        try {
+            // Remove primary status from all images
+            $vehicle->images()->update(['is_primary' => false]);
+            
+            // Set this image as primary
+            $image->update(['is_primary' => true]);
+
+            return response()->json(['success' => true, 'message' => 'Primary image updated successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to update primary image'], 500);
+        }
     }
 }

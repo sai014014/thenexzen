@@ -7,9 +7,6 @@ html {
   margin: 0;
   background: #f4f7fe;
   font-family: 'Poppins', sans-serif;
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto; /* Center the body content */
 }
 h1 {
   color: #fff;
@@ -31,10 +28,10 @@ p {
   width: 250px;
   box-shadow: -6px 5px 14px 3px #0000002e;
   font-family: 'Poppins', sans-serif;
-  height: calc(100vh - 100px); /* Adjust height to account for margins */
+  height: calc(100vh - 26px); /* Adjust height to account for top/bottom margins */
   position: fixed;
-  top: 50px; /* 50px margin from top */
-  left: calc(50% - 600px + 50px); /* Position relative to centered body with 50px margin */
+  top: 13px;
+  left: 13px;
   color: white;
   padding: 0px 15px 15px 15px;
   display: flex;
@@ -283,17 +280,15 @@ p {
 /* Header */
 .header {
   height: 150px;
-  width: 90%;
-  max-width: 1200px;
+  width: 100%;
   object-fit: cover;
   background-color: #6B6ADE;
   padding: 20px 15px;
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%); /* Center the header */
+  left: 0px;
+  right: 0;
   z-index: 100;
-  margin: 0 auto; /* Additional centering */
 }
 
 .head_left {
@@ -596,65 +591,40 @@ p {
 
 /* Main Content */
 .main-content {
-  margin-top: 200px; /* 150px header + 50px margin */
-  margin-left: 350px; /* 250px sidebar + 50px margin + 50px left margin */
+  margin-top: 150px; /* Add space for fixed header */
+  margin-left: 276px; /* 250px sidebar + 13px left margin + 13px right margin */
   padding: 20px 30px; /* Add proper padding for content */
   overflow-x: auto; /* Allow horizontal scrolling when needed */
   background: #f8f9fa;
-  min-height: calc(100vh - 200px); /* Adjust min-height to account for header + margin */
-  width: calc(100% - 350px); /* Use percentage instead of viewport width */
-  max-width: calc(100% - 350px); /* Prevent content from exceeding container */
+  min-height: calc(100vh - 150px); /* Adjust min-height to account for header */
+  width: calc(100vw - 276px); /* Ensure content takes remaining width */
+  max-width: calc(100vw - 276px); /* Prevent content from exceeding viewport */
   box-sizing: border-box; /* Include padding in width calculation */
-  font-size: 90%; /* Reduce font size for better fit */
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-  body {
-    width: 95%; /* Increase width on smaller screens */
-    max-width: 100%; /* Remove max-width constraint on smaller screens */
-  }
-  
-  .header {
-    width: 95%; /* Match body width */
-    max-width: 100%;
-  }
-  
-  .sidebar {
-    left: calc(50% - 47.5% + 50px); /* Adjust for 95% body width with 50px margin */
-  }
-  
   .main-content {
-    margin-left: 350px; /* Keep same as desktop for consistency */
+    margin-left: 276px; /* Keep same as desktop for consistency */
     padding: 15px 20px; /* Reduce padding on smaller screens */
-    width: calc(100% - 350px); /* Use percentage for responsive width */
-    max-width: calc(100% - 350px); /* Prevent overflow */
+    width: calc(100vw - 276px); /* Ensure responsive width */
+    max-width: calc(100vw - 276px); /* Prevent overflow */
   }
 }
 
 @media (max-width: 768px) {
-  body {
-    width: 100%; /* Full width on mobile */
-    max-width: 100%;
-  }
-  
-  .header {
-    width: 100%; /* Full width on mobile */
-    max-width: 100%;
-  }
-  
   .sidebar {
     width: 200px;
-    left: 50px; /* 50px margin from left */
-    top: 50px; /* 50px margin from top */
-    height: calc(100vh - 100px); /* Adjust height for margins */
+    left: 5px;
+    top: 5px;
+    height: calc(100vh - 10px);
   }
   
   .main-content {
-    margin-left: 300px; /* 200px sidebar + 50px margin + 50px left margin */
+    margin-left: 210px; /* 200px sidebar + 5px left margin + 5px right margin */
     padding: 10px 15px; /* Further reduce padding on mobile */
-    width: calc(100% - 300px); /* Use percentage for responsive width on mobile */
-    max-width: calc(100% - 300px); /* Prevent overflow on mobile */
+    width: calc(100vw - 210px); /* Ensure responsive width on mobile */
+    max-width: calc(100vw - 210px); /* Prevent overflow on mobile */
   }
   
   .header {

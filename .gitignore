@@ -1,2 +1,3 @@
-# Only ignore .env file
+# Only ignore .env file and log files
 .env
+storage/logs/laravel.log

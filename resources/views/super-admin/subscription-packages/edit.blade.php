@@ -5,6 +5,15 @@
 
 @section('content')
 <div class="container-fluid">
+    @if($subscriptionPackage->active_business_subscriptions_count > 0)
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Warning:</strong> This package is currently being used by <strong>{{ $subscriptionPackage->active_business_subscriptions_count }}</strong> active business(es). 
+        Changes to this package will affect all subscribed businesses immediately.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    
     <div class="row">
         <div class="col-lg-8">
             <form method="POST" action="{{ route('super-admin.subscription-packages.update', $subscriptionPackage) }}">
@@ -105,212 +114,83 @@
                     </div>
                 </div>
 
-                <!-- Features & Functionalities Section -->
+                <!-- Module Management Section -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0">B. Features & Functionalities</h5>
+                        <h5 class="mb-0">B. Module Management</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="booking_management" 
-                                           name="booking_management" value="1" 
-                                           {{ $subscriptionPackage->booking_management ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="booking_management">
-                                        ✅ Booking Management
-                                    </label>
-                                    <small class="form-text text-muted d-block">Default: Yes</small>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="customer_management" 
-                                           name="customer_management" value="1" 
-                                           {{ $subscriptionPackage->customer_management ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="customer_management">
-                                        ✅ Customer Management
-                                    </label>
-                                    <small class="form-text text-muted d-block">Default: Yes</small>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="vehicle_management" 
-                                           name="vehicle_management" value="1" 
-                                           {{ $subscriptionPackage->vehicle_management ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="vehicle_management">
-                                        ✅ Vehicle Management
-                                    </label>
-                                    <small class="form-text text-muted d-block">Default: Yes</small>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="basic_reporting" 
-                                           name="basic_reporting" value="1" 
-                                           {{ $subscriptionPackage->basic_reporting ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="basic_reporting">
-                                        ✅ Basic Reporting Features
-                                    </label>
-                                    <small class="form-text text-muted d-block">Default: Yes</small>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="advanced_reporting" 
-                                           name="advanced_reporting" value="1" 
-                                           {{ $subscriptionPackage->advanced_reporting ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="advanced_reporting">
-                                        ✅ Advanced Reporting & Analytics
-                                    </label>
-                                    <small class="form-text text-muted d-block">Available in Pro & Max only</small>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="vendor_management" 
-                                           name="vendor_management" value="1" 
-                                           {{ $subscriptionPackage->vendor_management ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="vendor_management">
-                                        ✅ Vendor Management
-                                    </label>
-                                    <small class="form-text text-muted d-block">Available in Pro & Max only</small>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="maintenance_reminders" 
-                                           name="maintenance_reminders" value="1" 
-                                           {{ $subscriptionPackage->maintenance_reminders ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="maintenance_reminders">
-                                        ✅ Vehicle Maintenance Reminders
-                                    </label>
-                                    <small class="form-text text-muted d-block">Default: Yes</small>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="customization_options" 
-                                           name="customization_options" value="1" 
-                                           {{ $subscriptionPackage->customization_options ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="customization_options">
-                                        ✅ Customization Options
-                                    </label>
-                                    <small class="form-text text-muted d-block">Available in Max only</small>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="multi_user_access" 
-                                           name="multi_user_access" value="1" 
-                                           {{ $subscriptionPackage->multi_user_access ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="multi_user_access">
-                                        ✅ Multi-User Access & Role-Based Permissions
-                                    </label>
-                                    <small class="form-text text-muted d-block">Available in Max only</small>
-                                </div>
-
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="dedicated_account_manager" 
-                                           name="dedicated_account_manager" value="1" 
-                                           {{ $subscriptionPackage->dedicated_account_manager ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="dedicated_account_manager">
-                                        ✅ Dedicated Account Manager
-                                    </label>
-                                    <small class="form-text text-muted d-block">Available in Max only</small>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="support_type" class="form-label">✅ 24/7 Support Type</label>
-                                    <select class="form-select @error('support_type') is-invalid @enderror" id="support_type" name="support_type" required>
-                                        <option value="standard" {{ $subscriptionPackage->support_type == 'standard' ? 'selected' : '' }}>Standard</option>
-                                        <option value="chat_only" {{ $subscriptionPackage->support_type == 'chat_only' ? 'selected' : '' }}>Chat Only</option>
-                                        <option value="full_support" {{ $subscriptionPackage->support_type == 'full_support' ? 'selected' : '' }}>Full Support</option>
-                                        <option value="enterprise_level" {{ $subscriptionPackage->support_type == 'enterprise_level' ? 'selected' : '' }}>Enterprise-Level</option>
-                                    </select>
-                                    @error('support_type')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Subscription Settings Section -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">C. Subscription Settings</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Billing Cycle Options</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="billing_monthly" 
-                                               name="billing_cycles[]" value="monthly" 
-                                               {{ in_array('monthly', $subscriptionPackage->billing_cycles) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="billing_monthly">Monthly</label>
+                            <div class="col-12">
+                                <h6>Enable Modules for this Package</h6>
+                                <p class="text-muted">Select which modules businesses can access with this subscription package.</p>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="module_vehicles" 
+                                                   name="enabled_modules[]" value="vehicles" 
+                                                   {{ in_array('vehicles', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="module_vehicles">
+                                                🚗 Vehicle Management
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="module_bookings" 
+                                                   name="enabled_modules[]" value="bookings" 
+                                                   {{ in_array('bookings', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="module_bookings">
+                                                📅 Booking Management
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="module_customers" 
+                                                   name="enabled_modules[]" value="customers" 
+                                                   {{ in_array('customers', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="module_customers">
+                                                👥 Customer Management
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="module_reports" 
+                                                   name="enabled_modules[]" value="reports" 
+                                                   {{ in_array('reports', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="module_reports">
+                                                📊 Reports & Analytics
+                                            </label>
+                                        </div>
                                     </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="billing_quarterly" 
-                                               name="billing_cycles[]" value="quarterly" 
-                                               {{ in_array('quarterly', $subscriptionPackage->billing_cycles) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="billing_quarterly">Quarterly</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="billing_yearly" 
-                                               name="billing_cycles[]" value="yearly" 
-                                               {{ in_array('yearly', $subscriptionPackage->billing_cycles) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="billing_yearly">Yearly</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="billing_custom" 
-                                               name="billing_cycles[]" value="custom" 
-                                               {{ in_array('custom', $subscriptionPackage->billing_cycles) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="billing_custom">Custom</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Payment Methods</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="payment_direct_debit" 
-                                               name="payment_methods[]" value="direct_debit" 
-                                               {{ in_array('direct_debit', $subscriptionPackage->payment_methods) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="payment_direct_debit">Direct Debit</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="payment_credit_card" 
-                                               name="payment_methods[]" value="credit_card" 
-                                               {{ in_array('credit_card', $subscriptionPackage->payment_methods) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="payment_credit_card">Credit Card</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="payment_bank_transfer" 
-                                               name="payment_methods[]" value="bank_transfer" 
-                                               {{ in_array('bank_transfer', $subscriptionPackage->payment_methods) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="payment_bank_transfer">Bank Transfer</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="payment_cash" 
-                                               name="payment_methods[]" value="cash" 
-                                               {{ in_array('cash', $subscriptionPackage->payment_methods) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="payment_cash">Cash</label>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Renewal Type</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" id="renewal_auto" 
-                                               name="renewal_type" value="auto_renew" 
-                                               {{ $subscriptionPackage->renewal_type == 'auto_renew' ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="renewal_auto">Auto-Renew</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" id="renewal_manual" 
-                                               name="renewal_type" value="manual_renewal" 
-                                               {{ $subscriptionPackage->renewal_type == 'manual_renewal' ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="renewal_manual">Manual Renewal</label>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="module_notifications" 
+                                                   name="enabled_modules[]" value="notifications" 
+                                                   {{ in_array('notifications', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="module_notifications">
+                                                🔔 Notifications
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="module_vendors" 
+                                                   name="enabled_modules[]" value="vendors" 
+                                                   {{ in_array('vendors', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="module_vendors">
+                                                🏢 Vendor Management
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="module_subscription" 
+                                                   name="enabled_modules[]" value="subscription" 
+                                                   {{ in_array('subscription', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="module_subscription">
+                                                💳 Subscription Management
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -321,7 +201,7 @@
                 <!-- Package Availability Section -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0">D. Package Availability</h5>
+                        <h5 class="mb-0">C. Package Availability</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -336,23 +216,6 @@
                                     @error('status')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Visibility</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="show_on_website" 
-                                               name="show_on_website" value="1" 
-                                               {{ $subscriptionPackage->show_on_website ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="show_on_website">Show on Website</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="internal_use_only" 
-                                               name="internal_use_only" value="1" 
-                                               {{ $subscriptionPackage->internal_use_only ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="internal_use_only">Internal Use Only</label>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -418,8 +281,8 @@
                     <div class="mb-3">
                         <h6>Features:</h6>
                         <ul id="preview-features" class="list-unstyled">
-                            @foreach($subscriptionPackage->getFeaturesList() as $feature)
-                                <li><i class="fas fa-check text-success me-2"></i>{{ $feature }}</li>
+                            @foreach($subscriptionPackage->enabled_modules ?? [] as $module)
+                                <li><i class="fas fa-check text-success me-2"></i>{{ ucfirst(str_replace('_', ' ', $module)) }}</li>
                             @endforeach
                         </ul>
                     </div>

@@ -1,9 +1,9 @@
-@extends('super-admin.layouts.app')
 
-@section('title', 'Subscription Package Details')
-@section('page-title', 'Package Details')
 
-@section('content')
+<?php $__env->startSection('title', 'Subscription Package Details'); ?>
+<?php $__env->startSection('page-title', 'Package Details'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="row">
         <div class="col-lg-8">
@@ -13,10 +13,10 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Package Overview</h5>
                         <div class="btn-group">
-                            <a href="{{ route('super-admin.subscription-packages.edit', $subscriptionPackage) }}" class="btn btn-primary btn-sm">
+                            <a href="<?php echo e(route('super-admin.subscription-packages.edit', $subscriptionPackage)); ?>" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit"></i> Edit Package
                             </a>
-                            <a href="{{ route('super-admin.subscription-packages.index') }}" class="btn btn-outline-secondary btn-sm">
+                            <a href="<?php echo e(route('super-admin.subscription-packages.index')); ?>" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-arrow-left"></i> Back to List
                             </a>
                         </div>
@@ -30,46 +30,50 @@
                                     <i class="fas fa-box fa-3x"></i>
                                 </div>
                             </div>
-                            <h2 class="text-center mb-3">{{ $subscriptionPackage->package_name }}</h2>
+                            <h2 class="text-center mb-3"><?php echo e($subscriptionPackage->package_name); ?></h2>
                             <div class="text-center mb-3">
-                                <h1 class="text-primary">{{ $subscriptionPackage->formatted_price }}</h1>
+                                <h1 class="text-primary"><?php echo e($subscriptionPackage->formatted_price); ?></h1>
                                 <small class="text-muted">per month</small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="package-details">
                                 <div class="detail-item mb-3">
-                                    <strong>Trial Period:</strong> {{ $subscriptionPackage->trial_period_days }} days
+                                    <strong>Trial Period:</strong> <?php echo e($subscriptionPackage->trial_period_days); ?> days
                                 </div>
                                 <div class="detail-item mb-3">
-                                    <strong>Onboarding Fee:</strong> {{ $subscriptionPackage->formatted_onboarding_fee }}
+                                    <strong>Onboarding Fee:</strong> <?php echo e($subscriptionPackage->formatted_onboarding_fee); ?>
+
                                 </div>
                                 <div class="detail-item mb-3">
                                     <strong>Vehicle Capacity:</strong> 
-                                    <span class="badge bg-info">{{ $subscriptionPackage->vehicle_capacity_display }}</span>
+                                    <span class="badge bg-info"><?php echo e($subscriptionPackage->vehicle_capacity_display); ?></span>
                                 </div>
                                 <div class="detail-item mb-3">
                                     <strong>Status:</strong> 
-                                    <span class="badge bg-{{ $subscriptionPackage->status === 'active' ? 'success' : ($subscriptionPackage->status === 'inactive' ? 'danger' : 'secondary') }}">
-                                        {{ ucfirst($subscriptionPackage->status) }}
+                                    <span class="badge bg-<?php echo e($subscriptionPackage->status === 'active' ? 'success' : ($subscriptionPackage->status === 'inactive' ? 'danger' : 'secondary')); ?>">
+                                        <?php echo e(ucfirst($subscriptionPackage->status)); ?>
+
                                     </span>
                                 </div>
                                 <div class="detail-item mb-3">
-                                    <strong>Support Type:</strong> {{ ucfirst($subscriptionPackage->status) }}
+                                    <strong>Support Type:</strong> <?php echo e(ucfirst($subscriptionPackage->status)); ?>
+
                                 </div>
                                 <div class="detail-item mb-3">
-                                    <strong>Renewal Type:</strong> {{ ucfirst($subscriptionPackage->status) }}
+                                    <strong>Renewal Type:</strong> <?php echo e(ucfirst($subscriptionPackage->status)); ?>
+
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    @if($subscriptionPackage->description)
+                    <?php if($subscriptionPackage->description): ?>
                         <div class="mt-4">
                             <h6>Description:</h6>
-                            <p class="text-muted">{{ $subscriptionPackage->description }}</p>
+                            <p class="text-muted"><?php echo e($subscriptionPackage->description); ?></p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -83,17 +87,17 @@
                         <div class="col-md-6">
                             <h6>Enabled Modules:</h6>
                             <ul class="list-unstyled">
-                                @php
+                                <?php
                                     $enabledModules = $subscriptionPackage->getEnabledModules();
                                     $availableModules = $subscriptionPackage->getAvailableModules();
-                                @endphp
-                                @if(count($enabledModules) > 0)
-                                    @foreach($enabledModules as $module)
-                                        <li><i class="fas fa-check text-success me-2"></i>{{ $availableModules[$module] ?? ucfirst(str_replace('_', ' ', $module)) }}</li>
-                                    @endforeach
-                                @else
+                                ?>
+                                <?php if(count($enabledModules) > 0): ?>
+                                    <?php $__currentLoopData = $enabledModules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $module): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><i class="fas fa-check text-success me-2"></i><?php echo e($availableModules[$module] ?? ucfirst(str_replace('_', ' ', $module))); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php else: ?>
                                     <li class="text-muted">No modules enabled</li>
-                                @endif
+                                <?php endif; ?>
                             </ul>
                         </div>
                         <div class="col-md-6">
@@ -101,18 +105,18 @@
                             <div class="module-summary">
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Total Modules:</span>
-                                    <strong>{{ count($availableModules) }}</strong>
+                                    <strong><?php echo e(count($availableModules)); ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Enabled Modules:</span>
-                                    <strong>{{ count($enabledModules) }}</strong>
+                                    <strong><?php echo e(count($enabledModules)); ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Access Level:</span>
-                                    <strong>{{ round((count($enabledModules) / count($availableModules)) * 100) }}%</strong>
+                                    <strong><?php echo e(round((count($enabledModules) / count($availableModules)) * 100)); ?>%</strong>
                                 </div>
                                 <div class="progress mt-2" style="height: 8px;">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ (count($enabledModules) / count($availableModules)) * 100 }}%"></div>
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo e((count($enabledModules) / count($availableModules)) * 100); ?>%"></div>
                                 </div>
                             </div>
                         </div>
@@ -126,12 +130,12 @@
                     <h5 class="mb-0">Package Availability</h5>
                 </div>
                 <div class="card-body">
-                    @if($subscriptionPackage->features_summary)
+                    <?php if($subscriptionPackage->features_summary): ?>
                         <div class="mt-3">
                             <h6>Features Summary:</h6>
-                            <p class="text-muted">{{ $subscriptionPackage->features_summary }}</p>
+                            <p class="text-muted"><?php echo e($subscriptionPackage->features_summary); ?></p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -145,13 +149,13 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('super-admin.subscription-packages.edit', $subscriptionPackage) }}" class="btn btn-primary">
+                        <a href="<?php echo e(route('super-admin.subscription-packages.edit', $subscriptionPackage)); ?>" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit Package
                         </a>
                         <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
                             <i class="fas fa-trash"></i> Delete Package
                         </button>
-                        <a href="{{ route('super-admin.subscription-packages.index') }}" class="btn btn-outline-secondary">
+                        <a href="<?php echo e(route('super-admin.subscription-packages.index')); ?>" class="btn btn-outline-secondary">
                             <i class="fas fa-list"></i> View All Packages
                         </a>
                     </div>
@@ -167,25 +171,25 @@
                     <div class="stat-item mb-3">
                         <div class="d-flex justify-content-between">
                             <span>Created:</span>
-                            <strong>{{ $subscriptionPackage->created_at->format('M d, Y') }}</strong>
+                            <strong><?php echo e($subscriptionPackage->created_at->format('M d, Y')); ?></strong>
                         </div>
                     </div>
                     <div class="stat-item mb-3">
                         <div class="d-flex justify-content-between">
                             <span>Last Updated:</span>
-                            <strong>{{ $subscriptionPackage->updated_at->format('M d, Y') }}</strong>
+                            <strong><?php echo e($subscriptionPackage->updated_at->format('M d, Y')); ?></strong>
                         </div>
                     </div>
                     <div class="stat-item mb-3">
                         <div class="d-flex justify-content-between">
                             <span>Active Businesses:</span>
-                            <strong class="text-primary">{{ $subscriptionPackage->active_business_count }}</strong>
+                            <strong class="text-primary"><?php echo e($subscriptionPackage->active_business_count); ?></strong>
                         </div>
                     </div>
                     <div class="stat-item mb-3">
                         <div class="d-flex justify-content-between">
                             <span>Enabled Modules:</span>
-                            <strong>{{ count($subscriptionPackage->enabled_modules ?? []) }}</strong>
+                            <strong><?php echo e(count($subscriptionPackage->enabled_modules ?? [])); ?></strong>
                         </div>
                     </div>
                 </div>
@@ -198,18 +202,18 @@
                 </div>
                 <div class="card-body">
                     <div class="feature-summary">
-                        @php
+                        <?php
                             $features = $subscriptionPackage->enabled_modules ?? [];
                             $totalFeatures = 11; // Total possible features
                             $percentage = count($features) / $totalFeatures * 100;
-                        @endphp
+                        ?>
                         <div class="progress mb-3" style="height: 20px;">
-                            <div class="progress-bar" role="progressbar" style="width: {{ $percentage }}%">
-                                {{ round($percentage) }}%
+                            <div class="progress-bar" role="progressbar" style="width: <?php echo e($percentage); ?>%">
+                                <?php echo e(round($percentage)); ?>%
                             </div>
                         </div>
                         <p class="text-muted small">
-                            {{ count($features) }} of {{ $totalFeatures }} features enabled
+                            <?php echo e(count($features)); ?> of <?php echo e($totalFeatures); ?> features enabled
                         </p>
                     </div>
                 </div>
@@ -218,7 +222,7 @@
     </div>
 
     <!-- Active Businesses Section -->
-    @if($subscriptionPackage->active_business_count > 0)
+    <?php if($subscriptionPackage->active_business_count > 0): ?>
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
@@ -238,7 +242,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($subscriptionPackage->getActiveBusinesses() as $subscription)
+                                <?php $__currentLoopData = $subscriptionPackage->getActiveBusinesses(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subscription): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
@@ -248,20 +252,21 @@
                                                 </div>
                                             </div>
                                             <div>
-                                                <strong>{{ $subscription->business->business_name ?? 'N/A' }}</strong>
+                                                <strong><?php echo e($subscription->business->business_name ?? 'N/A'); ?></strong>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ $subscription->business->contact_person ?? 'N/A' }}</td>
-                                    <td>{{ $subscription->business->email ?? 'N/A' }}</td>
+                                    <td><?php echo e($subscription->business->contact_person ?? 'N/A'); ?></td>
+                                    <td><?php echo e($subscription->business->email ?? 'N/A'); ?></td>
                                     <td>
-                                        <span class="badge bg-{{ $subscription->status === 'active' ? 'success' : 'warning' }}">
-                                            {{ ucfirst($subscription->status) }}
+                                        <span class="badge bg-<?php echo e($subscription->status === 'active' ? 'success' : 'warning'); ?>">
+                                            <?php echo e(ucfirst($subscription->status)); ?>
+
                                         </span>
                                     </td>
-                                    <td>{{ $subscription->created_at->format('M d, Y') }}</td>
+                                    <td><?php echo e($subscription->created_at->format('M d, Y')); ?></td>
                                 </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
@@ -269,7 +274,7 @@
             </div>
         </div>
     </div>
-    @else
+    <?php else: ?>
     <div class="row mt-4">
         <div class="col-12">
             <div class="card">
@@ -281,7 +286,7 @@
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -293,14 +298,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete the subscription package <strong>{{ $subscriptionPackage->package_name }}</strong>?</p>
+                <p>Are you sure you want to delete the subscription package <strong><?php echo e($subscriptionPackage->package_name); ?></strong>?</p>
                 <p class="text-danger"><small>This action cannot be undone.</small></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="POST" action="{{ route('super-admin.subscription-packages.destroy', $subscriptionPackage) }}" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
+                <form method="POST" action="<?php echo e(route('super-admin.subscription-packages.destroy', $subscriptionPackage)); ?>" style="display: inline;">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="btn btn-danger">Delete Package</button>
                 </form>
             </div>
@@ -361,4 +366,6 @@ function confirmDelete() {
     margin-right: 0;
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('super-admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/super-admin/subscription-packages/show.blade.php ENDPATH**/ ?>

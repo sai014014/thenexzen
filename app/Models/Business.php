@@ -75,6 +75,16 @@ class Business extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function subscriptions()
+    {
+        return $this->hasMany(BusinessSubscription::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
     public function isActive()
     {
         return $this->status === 'active';

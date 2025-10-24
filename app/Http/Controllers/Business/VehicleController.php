@@ -59,8 +59,12 @@ class VehicleController extends Controller
         }
 
         $vehicles = $query->latest()->paginate(15);
+        
+        // Get subscription information for capacity display
+        $subscription = $business->subscriptions()->whereIn('status', ['active', 'trial'])->first();
+        $capacityStatus = $subscription ? $subscription->getVehicleCapacityStatus() : null;
 
-        return view('business.vehicles.index', compact('vehicles', 'business'));
+        return view('business.vehicles.index', compact('vehicles', 'business', 'subscription', 'capacityStatus'));
     }
 
     /**
@@ -75,8 +79,18 @@ class VehicleController extends Controller
         }
         
         $business = $businessAdmin->business;
+        
+        // Check vehicle capacity limits
+        $subscription = $business->subscriptions()->whereIn('status', ['active', 'trial'])->first();
+        if ($subscription) {
+            $capacityStatus = $subscription->getVehicleCapacityStatus();
+            if (!$capacityStatus['can_add']) {
+                return redirect()->route('business.vehicles.index')
+                    ->with('error', $capacityStatus['message']);
+            }
+        }
 
-        return view('business.vehicles.create', compact('business'));
+        return view('business.vehicles.create', compact('business', 'subscription'));
     }
 
     /**
@@ -97,6 +111,20 @@ class VehicleController extends Controller
         }
         
         $business = $businessAdmin->business;
+
+        // Check vehicle capacity limits before processing
+        $subscription = $business->subscriptions()->whereIn('status', ['active', 'trial'])->first();
+        if ($subscription && !$subscription->canAddVehicle()) {
+            $capacityStatus = $subscription->getVehicleCapacityStatus();
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $capacityStatus['message']
+                ], 403);
+            }
+            return redirect()->route('business.vehicles.index')
+                ->with('error', $capacityStatus['message']);
+        }
 
         try {
             $request->validate($this->getValidationRules($request));

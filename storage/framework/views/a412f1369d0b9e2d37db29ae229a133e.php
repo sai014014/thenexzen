@@ -1,14 +1,24 @@
-@extends('super-admin.layouts.app')
 
-@section('title', 'Create Subscription Package')
-@section('page-title', 'Create New Package')
 
-@section('content')
+<?php $__env->startSection('title', 'Edit Subscription Package'); ?>
+<?php $__env->startSection('page-title', 'Edit Package'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
+    <?php if($subscriptionPackage->active_business_subscriptions_count > 0): ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Warning:</strong> This package is currently being used by <strong><?php echo e($subscriptionPackage->active_business_subscriptions_count); ?></strong> active business(es). 
+        Changes to this package will affect all subscribed businesses immediately.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php endif; ?>
+    
     <div class="row">
         <div class="col-lg-8">
-            <form method="POST" action="{{ route('super-admin.subscription-packages.store') }}">
-                @csrf
+            <form method="POST" action="<?php echo e(route('super-admin.subscription-packages.update', $subscriptionPackage)); ?>">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
 
                 <!-- Package Details Section -->
                 <div class="card mb-4">
@@ -20,33 +30,68 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="package_name" class="form-label">1️⃣ Package Name</label>
-                                    <input type="text" class="form-control @error('package_name') is-invalid @enderror" 
+                                    <input type="text" class="form-control <?php $__errorArgs = ['package_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                            id="package_name" name="package_name" 
-                                           value="{{ old('package_name', '') }}" 
+                                           value="<?php echo e(old('package_name', $subscriptionPackage->package_name)); ?>" 
                                            placeholder="e.g., Starter, Pro, Max" required>
-                                    @error('package_name')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['package_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="subscription_fee" class="form-label">2️⃣ Package Price</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control @error('subscription_fee') is-invalid @enderror" 
+                                        <input type="number" class="form-control <?php $__errorArgs = ['subscription_fee'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                id="subscription_fee" name="subscription_fee" 
-                                               value="{{ old('subscription_fee', '') }}" 
+                                               value="<?php echo e(old('subscription_fee', $subscriptionPackage->subscription_fee)); ?>" 
                                                step="0.01" min="0" required>
-                                        <select class="form-select @error('currency') is-invalid @enderror" name="currency" style="max-width: 100px;">
-                                            <option value="INR" {{ old('currency', 'INR') == 'INR' ? 'selected' : '' }}>₹</option>
-                                            <option value="USD" {{ old('currency', '') == 'USD' ? 'selected' : '' }}>$</option>
-                                            <option value="EUR" {{ old('currency', '') == 'EUR' ? 'selected' : '' }}>€</option>
+                                        <select class="form-select <?php $__errorArgs = ['currency'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="currency" style="max-width: 100px;">
+                                            <option value="INR" <?php echo e(old('currency', $subscriptionPackage->currency) == 'INR' ? 'selected' : ''); ?>>₹</option>
+                                            <option value="USD" <?php echo e(old('currency', $subscriptionPackage->currency) == 'USD' ? 'selected' : ''); ?>>$</option>
+                                            <option value="EUR" <?php echo e(old('currency', $subscriptionPackage->currency) == 'EUR' ? 'selected' : ''); ?>>€</option>
                                         </select>
                                     </div>
                                     <small class="form-text text-muted">per month / year</small>
-                                    @error('subscription_fee')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['subscription_fee'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -55,49 +100,91 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="trial_period_days" class="form-label">3️⃣ Trial Period (Days)</label>
-                                    <input type="number" class="form-control @error('trial_period_days') is-invalid @enderror" 
+                                    <input type="number" class="form-control <?php $__errorArgs = ['trial_period_days'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                            id="trial_period_days" name="trial_period_days" 
-                                           value="{{ old('trial_period_days', 14) }}" 
+                                           value="<?php echo e(old('trial_period_days', $subscriptionPackage->trial_period_days)); ?>" 
                                            min="0" max="365" required>
                                     <small class="form-text text-muted">Default: 14 days</small>
-                                    @error('trial_period_days')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['trial_period_days'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="onboarding_fee" class="form-label">4️⃣ Onboarding Fee</label>
-                                    <input type="number" class="form-control @error('onboarding_fee') is-invalid @enderror" 
+                                    <input type="number" class="form-control <?php $__errorArgs = ['onboarding_fee'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                            id="onboarding_fee" name="onboarding_fee" 
-                                           value="{{ old('onboarding_fee', 6000) }}" 
+                                           value="<?php echo e(old('onboarding_fee', $subscriptionPackage->onboarding_fee)); ?>" 
                                            step="0.01" min="0" required>
                                     <small class="form-text text-muted">Default: 6000</small>
-                                    @error('onboarding_fee')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['onboarding_fee'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="vehicle_capacity" class="form-label">5️⃣ Vehicle Capacity</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control @error('vehicle_capacity') is-invalid @enderror" 
+                                        <input type="number" class="form-control <?php $__errorArgs = ['vehicle_capacity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                id="vehicle_capacity" name="vehicle_capacity" 
-                                               value="{{ old('vehicle_capacity', '') }}" 
-                                               min="1" {{ old('is_unlimited_vehicles', false) ? 'disabled' : '' }}>
+                                               value="<?php echo e(old('vehicle_capacity', $subscriptionPackage->vehicle_capacity)); ?>" 
+                                               min="1" <?php echo e($subscriptionPackage->is_unlimited_vehicles ? 'disabled' : ''); ?>>
                                         <div class="form-check form-switch ms-3">
                                             <input class="form-check-input" type="checkbox" id="is_unlimited_vehicles" 
                                                    name="is_unlimited_vehicles" value="1" 
-                                                   {{ old('is_unlimited_vehicles', false) ? 'checked' : '' }}>
+                                                   <?php echo e($subscriptionPackage->is_unlimited_vehicles ? 'checked' : ''); ?>>
                                             <label class="form-check-label" for="is_unlimited_vehicles">
                                                 Unlimited
                                             </label>
                                         </div>
                                     </div>
-                                    @error('vehicle_capacity')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['vehicle_capacity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -120,7 +207,7 @@
                                         <div class="form-check mb-3">
                                             <input class="form-check-input" type="checkbox" id="module_vehicles" 
                                                    name="enabled_modules[]" value="vehicles" 
-                                                   {{ in_array('vehicles', old('enabled_modules', [])) ? 'checked' : '' }}>
+                                                   <?php echo e(in_array('vehicles', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : ''); ?>>
                                             <label class="form-check-label" for="module_vehicles">
                                                 🚗 Vehicle Management
                                             </label>
@@ -129,7 +216,7 @@
                                         <div class="form-check mb-3">
                                             <input class="form-check-input" type="checkbox" id="module_bookings" 
                                                    name="enabled_modules[]" value="bookings" 
-                                                   {{ in_array('bookings', old('enabled_modules', [])) ? 'checked' : '' }}>
+                                                   <?php echo e(in_array('bookings', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : ''); ?>>
                                             <label class="form-check-label" for="module_bookings">
                                                 📅 Booking Management
                                             </label>
@@ -138,7 +225,7 @@
                                         <div class="form-check mb-3">
                                             <input class="form-check-input" type="checkbox" id="module_customers" 
                                                    name="enabled_modules[]" value="customers" 
-                                                   {{ in_array('customers', old('enabled_modules', [])) ? 'checked' : '' }}>
+                                                   <?php echo e(in_array('customers', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : ''); ?>>
                                             <label class="form-check-label" for="module_customers">
                                                 👥 Customer Management
                                             </label>
@@ -147,7 +234,7 @@
                                         <div class="form-check mb-3">
                                             <input class="form-check-input" type="checkbox" id="module_reports" 
                                                    name="enabled_modules[]" value="reports" 
-                                                   {{ in_array('reports', old('enabled_modules', [])) ? 'checked' : '' }}>
+                                                   <?php echo e(in_array('reports', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : ''); ?>>
                                             <label class="form-check-label" for="module_reports">
                                                 📊 Reports & Analytics
                                             </label>
@@ -158,7 +245,7 @@
                                         <div class="form-check mb-3">
                                             <input class="form-check-input" type="checkbox" id="module_notifications" 
                                                    name="enabled_modules[]" value="notifications" 
-                                                   {{ in_array('notifications', old('enabled_modules', [])) ? 'checked' : '' }}>
+                                                   <?php echo e(in_array('notifications', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : ''); ?>>
                                             <label class="form-check-label" for="module_notifications">
                                                 🔔 Notifications
                                             </label>
@@ -167,7 +254,7 @@
                                         <div class="form-check mb-3">
                                             <input class="form-check-input" type="checkbox" id="module_vendors" 
                                                    name="enabled_modules[]" value="vendors" 
-                                                   {{ in_array('vendors', old('enabled_modules', [])) ? 'checked' : '' }}>
+                                                   <?php echo e(in_array('vendors', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : ''); ?>>
                                             <label class="form-check-label" for="module_vendors">
                                                 🏢 Vendor Management
                                             </label>
@@ -176,7 +263,7 @@
                                         <div class="form-check mb-3">
                                             <input class="form-check-input" type="checkbox" id="module_subscription" 
                                                    name="enabled_modules[]" value="subscription" 
-                                                   {{ in_array('subscription', old('enabled_modules', [])) ? 'checked' : '' }}>
+                                                   <?php echo e(in_array('subscription', old('enabled_modules', $subscriptionPackage->enabled_modules ?? [])) ? 'checked' : ''); ?>>
                                             <label class="form-check-label" for="module_subscription">
                                                 💳 Subscription Management
                                             </label>
@@ -198,14 +285,28 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="status" class="form-label">Status</label>
-                                    <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
-                                        <option value="draft" {{ old('status', 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                        <option value="active" {{ old('status', '') == 'active' ? 'selected' : '' }}>Active</option>
-                                        <option value="inactive" {{ old('status', '') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                    <select class="form-select <?php $__errorArgs = ['status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" id="status" name="status" required>
+                                        <option value="draft" <?php echo e($subscriptionPackage->status == 'draft' ? 'selected' : ''); ?>>Draft</option>
+                                        <option value="active" <?php echo e($subscriptionPackage->status == 'active' ? 'selected' : ''); ?>>Active</option>
+                                        <option value="inactive" <?php echo e($subscriptionPackage->status == 'inactive' ? 'selected' : ''); ?>>Inactive</option>
                                     </select>
-                                    @error('status')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -214,23 +315,51 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control @error('description') is-invalid @enderror" 
+                                    <textarea class="form-control <?php $__errorArgs = ['description'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                               id="description" name="description" rows="3" 
-                                              placeholder="Brief description of the package...">{{ old('description', '') }}</textarea>
-                                    @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                              placeholder="Brief description of the package..."><?php echo e(old('description', $subscriptionPackage->description)); ?></textarea>
+                                    <?php $__errorArgs = ['description'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="features_summary" class="form-label">Features Summary</label>
-                                    <textarea class="form-control @error('features_summary') is-invalid @enderror" 
+                                    <textarea class="form-control <?php $__errorArgs = ['features_summary'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                               id="features_summary" name="features_summary" rows="3" 
-                                              placeholder="Summary of key features...">{{ old('features_summary', '') }}</textarea>
-                                    @error('features_summary')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                              placeholder="Summary of key features..."><?php echo e(old('features_summary', $subscriptionPackage->features_summary)); ?></textarea>
+                                    <?php $__errorArgs = ['features_summary'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -241,9 +370,9 @@
                 <div class="card">
                     <div class="card-body text-center">
                         <button type="submit" class="btn btn-primary btn-lg me-3">
-                            <i class="fas fa-save"></i> Save Package
+                            <i class="fas fa-save"></i> Update Package
                         </button>
-                        <a href="{{ route('super-admin.subscription-packages.index') }}" class="btn btn-outline-secondary btn-lg">
+                        <a href="<?php echo e(route('super-admin.subscription-packages.index')); ?>" class="btn btn-outline-secondary btn-lg">
                             <i class="fas fa-times"></i> Cancel
                         </a>
                     </div>
@@ -263,24 +392,26 @@
                             <i class="fas fa-box fa-2x"></i>
                         </div>
                     </div>
-                    <h4 id="preview-name" class="text-center mb-3">Package Name</h4>
+                    <h4 id="preview-name" class="text-center mb-3"><?php echo e($subscriptionPackage->package_name); ?></h4>
                     <div class="text-center mb-3">
-                        <h3 id="preview-price" class="text-primary">₹ 0.00</h3>
+                        <h3 id="preview-price" class="text-primary"><?php echo e($subscriptionPackage->formatted_price); ?></h3>
                         <small class="text-muted">per month</small>
                     </div>
                     <div class="mb-3">
                         <h6>Features:</h6>
                         <ul id="preview-features" class="list-unstyled">
-                            <li><i class="fas fa-check text-success me-2"></i>Basic Features</li>
+                            <?php $__currentLoopData = $subscriptionPackage->enabled_modules ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $module): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><i class="fas fa-check text-success me-2"></i><?php echo e(ucfirst(str_replace('_', ' ', $module))); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                     <div class="mb-3">
                         <h6>Vehicle Capacity:</h6>
-                        <span id="preview-capacity" class="badge bg-info">Unlimited</span>
+                        <span id="preview-capacity" class="badge bg-info"><?php echo e($subscriptionPackage->vehicle_capacity_display); ?></span>
                     </div>
                     <div class="mb-3">
                         <h6>Status:</h6>
-                        <span id="preview-status" class="badge bg-secondary">Draft</span>
+                        <span id="preview-status" class="badge bg-<?php echo e($subscriptionPackage->status === 'active' ? 'success' : ($subscriptionPackage->status === 'inactive' ? 'danger' : 'secondary')); ?>"><?php echo e(ucfirst($subscriptionPackage->status)); ?></span>
                     </div>
                 </div>
             </div>
@@ -387,4 +518,6 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 16px;
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('super-admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/super-admin/subscription-packages/edit.blade.php ENDPATH**/ ?>

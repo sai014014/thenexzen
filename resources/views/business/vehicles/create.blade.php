@@ -11,6 +11,28 @@
                 <h5 class="mb-0">
                     <i class="fas fa-plus me-2"></i>Vehicle Registration Form
                 </h5>
+                @if(isset($subscription))
+                    @php
+                        $capacityStatus = $subscription->getVehicleCapacityStatus();
+                    @endphp
+                    <div class="mt-2">
+                        @if($capacityStatus['unlimited'])
+                            <span class="badge bg-success">
+                                <i class="fas fa-infinity me-1"></i>Unlimited Vehicle Capacity
+                            </span>
+                        @else
+                            <span class="badge bg-{{ $capacityStatus['can_add'] ? 'primary' : 'warning' }}">
+                                <i class="fas fa-layer-group me-1"></i>
+                                {{ $capacityStatus['current'] }}/{{ $capacityStatus['capacity'] }} Vehicles
+                                @if($capacityStatus['can_add'])
+                                    ({{ $capacityStatus['remaining'] }} remaining)
+                                @else
+                                    (Limit Reached)
+                                @endif
+                            </span>
+                        @endif
+                    </div>
+                @endif
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ route('business.vehicles.store') }}" enctype="multipart/form-data" id="vehicleForm">

@@ -108,6 +108,12 @@
                     </a>
                         </li>
                         <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('super-admin.subscription-packages.*') ? 'active' : '' }}" href="{{ route('super-admin.subscription-packages.index') }}">
+                        <i class="fas fa-box"></i>
+                        Software Packages
+                    </a>
+                        </li>
+                        <li class="nav-item">
                     <a class="nav-link {{ request()->routeIs('super-admin.bugs.*') ? 'active' : '' }}" href="{{ route('super-admin.bugs.index') }}">
                         <i class="fas fa-bug"></i>
                         Bug Tracking

@@ -108,6 +108,12 @@
                     </a>
                         </li>
                         <li class="nav-item">
+                    <a class="nav-link <?php echo e(request()->routeIs('super-admin.subscription-packages.*') ? 'active' : ''); ?>" href="<?php echo e(route('super-admin.subscription-packages.index')); ?>">
+                        <i class="fas fa-box"></i>
+                        Software Packages
+                    </a>
+                        </li>
+                        <li class="nav-item">
                     <a class="nav-link <?php echo e(request()->routeIs('super-admin.bugs.*') ? 'active' : ''); ?>" href="<?php echo e(route('super-admin.bugs.index')); ?>">
                         <i class="fas fa-bug"></i>
                         Bug Tracking

@@ -152,6 +152,10 @@ Route::prefix('super-admin')->name('super-admin.')->group(function () {
         Route::resource('businesses', SuperAdminBusinessController::class);
         Route::patch('/businesses/{business}/status', [SuperAdminBusinessController::class, 'updateStatus'])->name('businesses.update-status');
         
+        // Subscription Package Management Routes
+        Route::resource('subscription-packages', \App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class);
+        Route::post('/subscription-packages/{subscriptionPackage}/toggle-status', [\App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class, 'toggleStatus'])->name('subscription-packages.toggle-status');
+        
         // Bug Tracking Routes
         Route::patch('/bugs/{bug}/update-status', [SuperAdminBugController::class, 'updateStatus'])->name('bugs.update-status');
         Route::delete('/bug-attachments/{attachment}', [SuperAdminBugController::class, 'deleteAttachment'])->name('bug-attachments.destroy');
@@ -195,7 +199,7 @@ Route::prefix('business')->name('business.')->group(function () {
     Route::get('/api/vehicle-makes-with-models', [\App\Http\Controllers\Api\VehicleApiController::class, 'getMakesWithModels'])->name('api.vehicle-makes-with-models');
     
 
-    Route::middleware(['business_admin', 'check.business.status'])->group(function () {
+    Route::middleware(['business_admin', 'check.business.status', 'check.subscription.changes'])->group(function () {
         Route::post('/logout', [BusinessAuthController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [BusinessDashboardController::class, 'index'])->name('dashboard');
         
@@ -204,6 +208,12 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::resource('vehicles', \App\Http\Controllers\Business\VehicleController::class);
         Route::post('/vehicles/{vehicle}/toggle-availability', [\App\Http\Controllers\Business\VehicleController::class, 'toggleAvailability'])->name('vehicles.toggle-availability');
         Route::get('/vehicles/{vehicle}/download/{type}', [\App\Http\Controllers\Business\VehicleController::class, 'downloadDocument'])->name('vehicles.download-document');
+        
+        // Vehicle Creation Routes with Capacity Check
+        Route::middleware('check.vehicle.capacity')->group(function () {
+            Route::get('/vehicles/create', [\App\Http\Controllers\Business\VehicleController::class, 'create'])->name('vehicles.create');
+            Route::post('/vehicles', [\App\Http\Controllers\Business\VehicleController::class, 'store'])->name('vehicles.store');
+        });
         
         // Vehicle Image Management Routes
         Route::delete('/vehicles/{vehicleId}/images/{imageId}', [\App\Http\Controllers\Business\VehicleController::class, 'deleteImage'])->name('vehicles.images.delete');
@@ -215,6 +225,13 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::post('/notifications/{notification}/snooze', [\App\Http\Controllers\Business\NotificationsController::class, 'snooze'])->name('notifications.snooze');
         Route::post('/notifications/{notification}/complete', [\App\Http\Controllers\Business\NotificationsController::class, 'markCompleted'])->name('notifications.complete');
         Route::get('/notifications/count', [\App\Http\Controllers\Business\NotificationsController::class, 'getNotificationCount'])->name('notifications.count');
+        
+        // Subscription Management Routes
+        Route::resource('subscription', \App\Http\Controllers\Business\BusinessSubscriptionController::class);
+        Route::post('/subscription/{subscription}/cancel', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'cancel'])->name('subscription.cancel');
+        Route::post('/subscription/upgrade', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'upgrade'])->name('subscription.upgrade');
+        Route::post('/subscription/{subscription}/renew', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'renew'])->name('subscription.renew');
+        Route::get('/subscription/packages/available', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'getAvailablePackages'])->name('subscription.packages.available');
         
         // Customer Management Routes
         Route::resource('customers', \App\Http\Controllers\Business\CustomerController::class);

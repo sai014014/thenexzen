@@ -36,6 +36,17 @@
             <div class="stat-label">Booked Vehicles</div>
         </div>
     </div>
+    @if($capacityStatus)
+    <div class="vehicle-stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-number">{{ $capacityStatus['unlimited'] ? '∞' : $capacityStatus['remaining'] }}</div>
+            <div class="stat-label">{{ $capacityStatus['unlimited'] ? 'Unlimited' : 'Remaining Slots' }}</div>
+        </div>
+    </div>
+    @endif
 </div>
 <style>
     /* Vehicle Statistics Cards */
@@ -321,9 +332,25 @@
             </div>
         </div>
         <div class="add-vehicle-container">
-            <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Add Vehicle
-            </a>
+            @if($capacityStatus && $capacityStatus['can_add'])
+                <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Vehicle
+                </a>
+            @elseif($capacityStatus && !$capacityStatus['can_add'])
+                <button class="btn btn-secondary" disabled title="{{ $capacityStatus['message'] }}">
+                    <i class="fas fa-ban me-2"></i>Add Vehicle (Limit Reached)
+                </button>
+                <div class="mt-2">
+                    <small class="text-danger">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        {{ $capacityStatus['message'] }}
+                    </small>
+                </div>
+            @else
+                <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Vehicle
+                </a>
+            @endif
         </div>
     </div>
     

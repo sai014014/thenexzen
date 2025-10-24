@@ -28,6 +28,18 @@
             <h3>{{ $business->business_name ?? 'RENTCAR' }}</h3>
         </div>
         
+        @php
+            $business = auth('business_admin')->user()->business;
+            $subscription = $business->subscriptions()->whereIn('status', ['active', 'trial'])->first();
+            $canAccessVehicles = $subscription ? $subscription->canAccessModule('vehicles') : true;
+            $canAccessBookings = $subscription ? $subscription->canAccessModule('bookings') : true;
+            $canAccessCustomers = $subscription ? $subscription->canAccessModule('customers') : true;
+            $canAccessVendors = $subscription ? $subscription->canAccessModule('vendors') : true;
+            $canAccessReports = $subscription ? $subscription->canAccessModule('reports') : true;
+            $canAccessNotifications = $subscription ? $subscription->canAccessModule('notifications') : true;
+            $canAccessSubscription = $subscription ? $subscription->canAccessModule('subscription') : true;
+        @endphp
+        
         <a href="{{ route('business.dashboard') }}" class="nav-link {{ request()->routeIs('business.dashboard') ? 'menuActive' : '' }} dashboard-link">
             <svg width="31" height="30" viewBox="0 0 31 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="0.5" width="30" height="30" rx="8" fill="white" />
@@ -37,6 +49,7 @@
                         Dashboard
                     </a>
 
+        @if($canAccessBookings)
         <a href="{{ route('business.bookings.index') }}" class="nav-link {{ request()->routeIs('business.bookings.*') ? 'menuActive' : '' }} data-link">
             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="30" height="30" rx="8" fill="white" />
@@ -47,7 +60,9 @@
             </svg>
             Bookings
         </a>
+        @endif
 
+        @if($canAccessVehicles)
         <a href="{{ route('business.vehicles.index') }}" class="nav-link {{ request()->routeIs('business.vehicles.*') ? 'menuActive' : '' }} vehicle-link">
             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="30" height="30" rx="8" fill="white" />
@@ -60,9 +75,11 @@
                     </clipPath>
                 </defs>
             </svg>
-                        Vehicles
-                    </a>
+            Vehicles
+        </a>
+        @endif
 
+        @if($canAccessVendors)
         <a href="{{ route('business.vendors.index') }}" class="nav-link {{ request()->routeIs('business.vendors.*') ? 'menuActive' : '' }} vendor-link">
             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="30" height="30" rx="8" fill="white" />
@@ -77,16 +94,20 @@
             </svg>
             Vendors
         </a>
+        @endif
 
+        @if($canAccessCustomers)
         <a href="{{ route('business.customers.index') }}" class="nav-link {{ request()->routeIs('business.customers.*') ? 'menuActive' : '' }} customer-link">
             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="30" height="30" rx="8" fill="white" />
                 <path d="M16.7453 9.39199C16.1752 8.77646 15.3789 8.4375 14.5 8.4375C13.6164 8.4375 12.8175 8.77441 12.25 9.38613C11.6764 10.0046 11.3969 10.8451 11.4625 11.7527C11.5926 13.5434 12.9552 15 14.5 15C16.0448 15 17.4051 13.5437 17.5372 11.7533C17.6037 10.8539 17.3225 10.0151 16.7453 9.39199Z" fill="#6B6ADE" />
                 <path d="M19.6564 21.5625H9.34392C9.20894 21.5643 9.07526 21.5359 8.95262 21.4795C8.82997 21.4231 8.72145 21.34 8.63493 21.2364C8.4445 21.0088 8.36775 20.6979 8.42458 20.3836C8.67185 19.0119 9.44353 17.8597 10.6564 17.0508C11.734 16.3327 13.0989 15.9375 14.5002 15.9375C15.9014 15.9375 17.2664 16.333 18.3439 17.0508C19.5568 17.8594 20.3285 19.0116 20.5757 20.3833C20.6326 20.6977 20.5558 21.0085 20.3654 21.2361C20.2789 21.3398 20.1704 21.4229 20.0478 21.4794C19.9251 21.5358 19.7914 21.5642 19.6564 21.5625Z" fill="#6B6ADE" />
             </svg>
-                        Customers
-                    </a>
+            Customers
+        </a>
+        @endif
 
+        @if($canAccessReports)
         <a href="{{ route('business.reports.index') }}" class="nav-link {{ request()->routeIs('business.reports*') ? 'menuActive' : '' }} data-link">
             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="30" height="30" rx="8" fill="white" />
@@ -100,9 +121,11 @@
                     </clipPath>
                 </defs>
             </svg>
-                        Reports
-                    </a>
+            Reports
+        </a>
+        @endif
 
+        @if($canAccessNotifications)
         <a href="{{ route('business.notifications.index') }}" class="nav-link {{ request()->routeIs('business.notifications.*') ? 'menuActive' : '' }} notifications-link">
             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="30" height="30" rx="8" fill="white" />
@@ -110,6 +133,17 @@
             </svg>
             Notifications
         </a>
+        @endif
+
+        @if($canAccessSubscription)
+        <a href="{{ route('business.subscription.index') }}" class="nav-link {{ request()->routeIs('business.subscription.*') ? 'menuActive' : '' }} subscription-link">
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="30" height="30" rx="8" fill="white" />
+                <path d="M7.5 7.5H22.5V22.5H7.5V7.5ZM9.5 9.5V20.5H20.5V9.5H9.5ZM11.5 11.5H18.5V13.5H11.5V11.5ZM11.5 15.5H18.5V17.5H11.5V15.5Z" fill="#6B6ADE" />
+            </svg>
+            My Subscription
+        </a>
+        @endif
         </nav>
 
     <!-- Header -->
@@ -153,6 +187,7 @@
                                 </defs>
                             </svg>
                         </div>
+                        @if($canAccessNotifications)
                         <div class="notify">
                             <span class="notification-trigger">
                                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -185,6 +220,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                         <div class="profile_menu">
                             <div class="profile_img" id="profileBtn">
                                 <img src="{{ asset('images/profile.svg') }}" alt="Profile" id="profileDropdown">
@@ -268,6 +304,7 @@
         }
 
         // Notifications toggle
+        @if($canAccessNotifications)
         const trigger = document.querySelector('.notification-trigger');
         const container = document.querySelector('#notificationsContainer');
         if(trigger && container){
@@ -281,6 +318,25 @@
                 }
             });
         }
+
+        // Tab switching for notifications
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                this.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+        @endif
 
         // Profile dropdown
         const profileBtn = document.getElementById('profileBtn');
@@ -308,24 +364,6 @@
                 }
             });
         }
-
-        // Tab switching for notifications
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                
-                // Remove active class from all tabs and contents
-                tabs.forEach(t => t.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
-                
-                // Add active class to clicked tab and corresponding content
-                this.classList.add('active');
-                document.getElementById(tabName).classList.add('active');
-            });
-        });
     </script>
     
     <!-- Dashboard JS -->

@@ -1,9 +1,9 @@
-@extends('super-admin.layouts.app')
 
-@section('title', 'Subscription Packages')
-@section('page-title', 'Software Packages Management')
 
-@section('content')
+<?php $__env->startSection('title', 'Subscription Packages'); ?>
+<?php $__env->startSection('page-title', 'Software Packages Management'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <!-- Header Section -->
     <div class="row mb-4">
@@ -12,7 +12,7 @@
             <p class="text-muted">Manage software subscription packages and pricing</p>
         </div>
         <div class="col-md-6 text-end">
-            <a href="{{ route('super-admin.subscription-packages.create') }}" class="btn btn-primary">
+            <a href="<?php echo e(route('super-admin.subscription-packages.create')); ?>" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create New Package
             </a>
         </div>
@@ -21,40 +21,40 @@
     <!-- Filters Section -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="GET" action="{{ route('super-admin.subscription-packages.index') }}" class="row g-3">
+            <form method="GET" action="<?php echo e(route('super-admin.subscription-packages.index')); ?>" class="row g-3">
                 <div class="col-md-4">
                     <label for="search" class="form-label">Search Packages</label>
                     <input type="text" class="form-control" id="search" name="search" 
-                           value="{{ request('search') }}" placeholder="Search by package name...">
+                           value="<?php echo e(request('search')); ?>" placeholder="Search by package name...">
                 </div>
                 <div class="col-md-3">
                     <label for="status" class="form-label">Status</label>
                     <select class="form-select" id="status" name="status">
                         <option value="">All Status</option>
-                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                        <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="active" <?php echo e(request('status') == 'active' ? 'selected' : ''); ?>>Active</option>
+                        <option value="inactive" <?php echo e(request('status') == 'inactive' ? 'selected' : ''); ?>>Inactive</option>
+                        <option value="draft" <?php echo e(request('status') == 'draft' ? 'selected' : ''); ?>>Draft</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label for="sort_by" class="form-label">Sort By</label>
                     <select class="form-select" id="sort_by" name="sort_by">
-                        <option value="package_name" {{ request('sort_by') == 'package_name' ? 'selected' : '' }}>Package Name</option>
-                        <option value="subscription_fee" {{ request('sort_by') == 'subscription_fee' ? 'selected' : '' }}>Subscription Fee</option>
-                        <option value="status" {{ request('sort_by') == 'status' ? 'selected' : '' }}>Status</option>
-                        <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Created Date</option>
+                        <option value="package_name" <?php echo e(request('sort_by') == 'package_name' ? 'selected' : ''); ?>>Package Name</option>
+                        <option value="subscription_fee" <?php echo e(request('sort_by') == 'subscription_fee' ? 'selected' : ''); ?>>Subscription Fee</option>
+                        <option value="status" <?php echo e(request('sort_by') == 'status' ? 'selected' : ''); ?>>Status</option>
+                        <option value="created_at" <?php echo e(request('sort_by') == 'created_at' ? 'selected' : ''); ?>>Created Date</option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <label for="sort_order" class="form-label">Order</label>
                     <select class="form-select" id="sort_order" name="sort_order">
-                        <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Ascending</option>
-                        <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>Descending</option>
+                        <option value="asc" <?php echo e(request('sort_order') == 'asc' ? 'selected' : ''); ?>>Ascending</option>
+                        <option value="desc" <?php echo e(request('sort_order') == 'desc' ? 'selected' : ''); ?>>Descending</option>
                     </select>
                 </div>
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
-                    <a href="{{ route('super-admin.subscription-packages.index') }}" class="btn btn-outline-secondary">Clear Filters</a>
+                    <a href="<?php echo e(route('super-admin.subscription-packages.index')); ?>" class="btn btn-outline-secondary">Clear Filters</a>
                 </div>
             </form>
         </div>
@@ -79,7 +79,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($packages as $package)
+                        <?php $__empty_1 = true; $__currentLoopData = $packages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $package): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -89,88 +89,91 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <h6 class="mb-0">{{ $package->package_name }}</h6>
-                                            <small class="text-muted">{{ $package->vehicle_capacity_display }} vehicles</small>
+                                            <h6 class="mb-0"><?php echo e($package->package_name); ?></h6>
+                                            <small class="text-muted"><?php echo e($package->vehicle_capacity_display); ?> vehicles</small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <div>
-                                        <strong>{{ $package->formatted_price }}</strong>
-                                        <small class="text-muted d-block">{{ $package->status }}</small>
+                                        <strong><?php echo e($package->formatted_price); ?></strong>
+                                        <small class="text-muted d-block"><?php echo e($package->status); ?></small>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="features-preview" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                         title="{{ implode(', ', $package->enabled_modules ?? []) }}">
-                                        <span class="badge bg-info me-1">{{ count($package->enabled_modules ?? []) }} Modules</span>
+                                         title="<?php echo e(implode(', ', $package->enabled_modules ?? [])); ?>">
+                                        <span class="badge bg-info me-1"><?php echo e(count($package->enabled_modules ?? [])); ?> Modules</span>
                                         <i class="fas fa-info-circle text-muted" style="font-size: 12px;"></i>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="text-center">
-                                        <span class="badge bg-primary fs-6">{{ $package->active_business_subscriptions_count }}</span>
+                                        <span class="badge bg-primary fs-6"><?php echo e($package->active_business_subscriptions_count); ?></span>
                                         <small class="text-muted d-block">Active</small>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input status-toggle" type="checkbox" 
-                                               id="status-{{ $package->id }}" 
-                                               data-package-id="{{ $package->id }}"
-                                               data-business-count="{{ $package->active_business_subscriptions_count }}"
-                                               {{ $package->status === 'active' ? 'checked' : '' }}
-                                               @if($package->status === 'active' && $package->active_business_subscriptions_count > 0)
+                                               id="status-<?php echo e($package->id); ?>" 
+                                               data-package-id="<?php echo e($package->id); ?>"
+                                               data-business-count="<?php echo e($package->active_business_subscriptions_count); ?>"
+                                               <?php echo e($package->status === 'active' ? 'checked' : ''); ?>
+
+                                               <?php if($package->status === 'active' && $package->active_business_subscriptions_count > 0): ?>
                                                    disabled
-                                                   title="Cannot deactivate: {{ $package->active_business_subscriptions_count }} active business(es) using this package"
-                                               @endif>
-                                        <label class="form-check-label" for="status-{{ $package->id }}">
-                                            <span class="badge bg-{{ $package->status === 'active' ? 'success' : 'secondary' }}">
-                                                {{ ucfirst($package->status) }}
+                                                   title="Cannot deactivate: <?php echo e($package->active_business_subscriptions_count); ?> active business(es) using this package"
+                                               <?php endif; ?>>
+                                        <label class="form-check-label" for="status-<?php echo e($package->id); ?>">
+                                            <span class="badge bg-<?php echo e($package->status === 'active' ? 'success' : 'secondary'); ?>">
+                                                <?php echo e(ucfirst($package->status)); ?>
+
                                             </span>
-                                            @if($package->status === 'active' && $package->active_business_subscriptions_count > 0)
+                                            <?php if($package->status === 'active' && $package->active_business_subscriptions_count > 0): ?>
                                                 <small class="text-muted d-block">🔒 Locked</small>
-                                            @endif
+                                            <?php endif; ?>
                                         </label>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="btn-group" role="group">
-                                        <a href="{{ route('super-admin.subscription-packages.show', $package) }}" 
+                                        <a href="<?php echo e(route('super-admin.subscription-packages.show', $package)); ?>" 
                                            class="btn btn-sm btn-outline-info" title="View Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('super-admin.subscription-packages.edit', $package) }}" 
+                                        <a href="<?php echo e(route('super-admin.subscription-packages.edit', $package)); ?>" 
                                            class="btn btn-sm btn-outline-primary" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <button type="button" class="btn btn-sm btn-outline-danger delete-package" 
-                                                data-package-id="{{ $package->id }}" 
-                                                data-package-name="{{ $package->package_name }}" title="Delete">
+                                                data-package-id="<?php echo e($package->id); ?>" 
+                                                data-package-name="<?php echo e($package->package_name); ?>" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="5" class="text-center py-4">
                                     <div class="text-muted">
                                         <i class="fas fa-box fa-3x mb-3"></i>
                                         <p>No subscription packages found.</p>
-                                        <a href="{{ route('super-admin.subscription-packages.create') }}" class="btn btn-primary">
+                                        <a href="<?php echo e(route('super-admin.subscription-packages.create')); ?>" class="btn btn-primary">
                                             Create First Package
                                         </a>
                                     </div>
                                 </td>
                             </tr>
-                        @endforelse
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
         <div class="card-footer">
-            {{ $packages->links() }}
+            <?php echo e($packages->links()); ?>
+
         </div>
     </div>
 </div>
@@ -190,8 +193,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="delete-form" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="btn btn-danger">Delete Package</button>
                 </form>
             </div>
@@ -221,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const packageId = this.dataset.packageId;
             const isActive = this.checked;
             
-            fetch(`{{ url('/super-admin/subscription-packages') }}/${packageId}/toggle-status`, {
+            fetch(`<?php echo e(url('/super-admin/subscription-packages')); ?>/${packageId}/toggle-status`, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -259,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const packageName = this.dataset.packageName;
             
             document.getElementById('package-name').textContent = packageName;
-            document.getElementById('delete-form').action = `{{ url('/super-admin/subscription-packages') }}/${packageId}`;
+            document.getElementById('delete-form').action = `<?php echo e(url('/super-admin/subscription-packages')); ?>/${packageId}`;
             
             const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
             deleteModal.show();
@@ -291,4 +294,6 @@ document.addEventListener('DOMContentLoaded', function() {
     margin-right: 0;
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('super-admin.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/super-admin/subscription-packages/index.blade.php ENDPATH**/ ?>

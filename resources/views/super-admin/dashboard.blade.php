@@ -75,6 +75,80 @@
     </div>
 </div>
 
+<!-- Pending Subscriptions -->
+@if($pending_subscriptions->count() > 0)
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="fas fa-clock me-2"></i>Pending Subscription Approvals
+                </h6>
+                <span class="badge bg-warning">{{ $pending_subscriptions->count() }} Pending</span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Business</th>
+                                <th>Package</th>
+                                <th>Requested</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($pending_subscriptions as $subscription)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-building"></i>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <strong>{{ $subscription->business->business_name }}</strong><br>
+                                            <small class="text-muted">{{ $subscription->business->email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ $subscription->subscriptionPackage->package_name }}</span><br>
+                                    <small class="text-muted">{{ $subscription->subscriptionPackage->subscription_fee }} {{ $subscription->subscriptionPackage->currency }}</small>
+                                </td>
+                                <td>
+                                    {{ $subscription->created_at->format('M d, Y') }}<br>
+                                    <small class="text-muted">{{ $subscription->created_at->diffForHumans() }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ $subscription->subscriptionPackage->subscription_fee }} {{ $subscription->subscriptionPackage->currency }}</strong>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-success btn-sm" onclick="approveSubscription({{ $subscription->id }})">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                        <button class="btn btn-danger btn-sm" onclick="rejectSubscription({{ $subscription->id }})">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                        <a href="{{ route('super-admin.businesses.show', $subscription->business) }}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Recent Activities -->
 <div class="row">
     <div class="col-lg-8">
@@ -179,6 +253,75 @@
 function exportData() {
     // Simple export functionality
     alert('Export functionality will be implemented here');
+}
+
+// Subscription approval functions
+function approveSubscription(subscriptionId) {
+    if (confirm('Are you sure you want to approve this subscription?')) {
+        fetch(`{{ route('super-admin.subscription-packages.approve-subscription') }}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                subscription_id: subscriptionId
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Subscription approved successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while approving the subscription');
+        });
+    }
+}
+
+function rejectSubscription(subscriptionId) {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (reason && reason.trim()) {
+        fetch(`{{ route('super-admin.subscription-packages.reject-subscription') }}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                subscription_id: subscriptionId,
+                reason: reason
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Subscription rejected successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while rejecting the subscription');
+        });
+    }
 }
 </script>
 @endpush

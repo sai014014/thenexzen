@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('business_id')->constrained()->onDelete('cascade');
             $table->foreignId('subscription_package_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['active', 'cancelled', 'expired', 'trial', 'pending'])->default('trial');
-            $table->timestamp('starts_at');
-            $table->timestamp('expires_at');
+            $table->timestamp('starts_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamp('trial_ends_at')->nullable();
             $table->decimal('amount_paid', 10, 2)->default(0);

@@ -21,10 +21,11 @@ class BusinessSubscriptionController extends Controller
             ->with('subscriptionPackage')
             ->first();
 
-        // Get available packages for upgrade
-        $availablePackages = SubscriptionPackage::where('status', 'active')
-            ->where('id', '!=', $currentSubscription?->subscription_package_id)
-            ->get();
+        // Determine if this is a new user (no subscription history)
+        $hasSubscriptionHistory = BusinessSubscription::where('business_id', $business->id)->exists();
+        
+        // Get available packages
+        $availablePackages = SubscriptionPackage::where('status', 'active')->get();
 
         // Get subscription history
         $subscriptionHistory = BusinessSubscription::where('business_id', $business->id)
@@ -35,7 +36,8 @@ class BusinessSubscriptionController extends Controller
         return view('business.subscription.index', compact(
             'currentSubscription',
             'availablePackages',
-            'subscriptionHistory'
+            'subscriptionHistory',
+            'hasSubscriptionHistory'
         ));
     }
 
@@ -50,6 +52,47 @@ class BusinessSubscriptionController extends Controller
         }
 
         return view('business.subscription.show', compact('subscription'));
+    }
+
+    public function startTrial(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        $business = $businessAdmin->business;
+
+        $request->validate([
+            'package_id' => 'required|exists:subscription_packages,id'
+        ]);
+
+        $package = SubscriptionPackage::findOrFail($request->package_id);
+
+        // Check if package is available
+        if ($package->status !== 'active') {
+            return response()->json(['success' => false, 'message' => 'Selected package is not available'], 400);
+        }
+
+        // Check if business already has a subscription
+        $existingSubscription = BusinessSubscription::where('business_id', $business->id)->exists();
+        
+        if ($existingSubscription) {
+            return response()->json(['success' => false, 'message' => 'You have already used your trial period'], 400);
+        }
+
+        // Create trial subscription
+        $trialEndsAt = now()->addDays($package->trial_period_days ?? 14);
+        $trialSubscription = BusinessSubscription::create([
+            'business_id' => $business->id,
+            'subscription_package_id' => $package->id,
+            'status' => 'trial',
+            'trial_ends_at' => $trialEndsAt,
+            'starts_at' => now(),
+            'expires_at' => $trialEndsAt, // For trial subscriptions, expires_at should match trial_ends_at
+        ]);
+
+        return response()->json([
+            'success' => true, 
+            'message' => 'Trial started successfully! You have ' . ($package->trial_period_days ?? 14) . ' days to explore our features.',
+            'subscription' => $trialSubscription
+        ]);
     }
 
     public function cancel(Request $request, BusinessSubscription $subscription)
@@ -107,7 +150,6 @@ class BusinessSubscriptionController extends Controller
             'status' => 'pending',
             'starts_at' => now(),
             'expires_at' => now()->addMonth(),
-            'trial_ends_at' => now()->addDays($package->trial_period_days),
             'amount_paid' => 0,
             'auto_renew' => true,
             'module_access' => $package->getEnabledModules(),

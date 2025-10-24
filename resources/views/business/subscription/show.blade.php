@@ -127,15 +127,15 @@
                                 $enabledModules = $subscription->subscriptionPackage->enabled_modules ?? [];
                             @endphp
                             
-                            @foreach($availableModules as $moduleKey => $moduleName)
+                            @foreach($availableModules as $moduleName)
                                 <div class="col-md-4 mb-3">
                                     <div class="d-flex align-items-center">
-                                        @if(in_array($moduleKey, $enabledModules))
+                                        @if(in_array($moduleName, $enabledModules))
                                             <i class="fas fa-check-circle text-success me-2"></i>
-                                            <span class="text-success">{{ $moduleName }}</span>
+                                            <span class="text-success">{{ ucfirst($moduleName) }}</span>
                                         @else
                                             <i class="fas fa-times-circle text-muted me-2"></i>
-                                            <span class="text-muted">{{ $moduleName }}</span>
+                                            <span class="text-muted">{{ ucfirst($moduleName) }}</span>
                                         @endif
                                     </div>
                                 </div>

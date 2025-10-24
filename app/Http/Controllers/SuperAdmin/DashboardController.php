@@ -10,6 +10,7 @@ use App\Models\SuperAdmin;
 use App\Models\User;
 use App\Models\Booking;
 use App\Models\Bug;
+use App\Models\BusinessSubscription;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -111,12 +112,20 @@ class DashboardController extends Controller
         // Recent bookings (if available)
         $recent_bookings = collect(); // This would be populated from actual booking data
 
+        // Pending subscriptions
+        $pending_subscriptions = BusinessSubscription::where('status', 'pending')
+            ->with(['business', 'subscriptionPackage'])
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
         return view('super-admin.dashboard', compact(
             'stats', 
             'revenue_by_package', 
             'revenue_by_region', 
             'recent_businesses', 
-            'recent_bookings'
+            'recent_bookings',
+            'pending_subscriptions'
         ));
     }
 

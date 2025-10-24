@@ -21,45 +21,6 @@ use App\Http\Controllers\TestOTPController;
 |
 */
 
-// Test OTP email route (remove in production)
-Route::get('/test-otp-email', function () {
-    try {
-        $otp = '123456';
-        $businessName = 'Test Business';
-        $adminName = 'Test Admin';
-        $email = 'test@example.com';
-        
-        \Mail::to($email)->send(new \App\Mail\BusinessRegistrationOTP($otp, $businessName, $adminName));
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Test OTP email sent successfully!',
-            'mail_config' => [
-                'driver' => config('mail.default'),
-                'host' => config('mail.mailers.smtp.host'),
-                'port' => config('mail.mailers.smtp.port'),
-                'encryption' => config('mail.mailers.smtp.encryption'),
-                'from' => config('mail.from.address'),
-            ]
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to send test email: ' . $e->getMessage(),
-            'error' => $e->getTraceAsString()
-        ], 500);
-    }
-})->name('test.otp.email');
-
-// Advanced OTP Testing Routes
-Route::prefix('test-otp')->group(function () {
-    Route::get('/', [TestOTPController::class, 'index'])->name('test.otp.index');
-    Route::post('/send-basic', [TestOTPController::class, 'sendBasic'])->name('test.otp.send.basic');
-    Route::post('/send-otp', [TestOTPController::class, 'sendOTP'])->name('test.otp.send.otp');
-    Route::post('/send-custom-smtp', [TestOTPController::class, 'sendCustomSMTP'])->name('test.otp.send.custom.smtp');
-    Route::get('/check-config', [TestOTPController::class, 'checkConfig'])->name('test.otp.check.config');
-    Route::post('/test-smtp-connection', [TestOTPController::class, 'testSMTPConnection'])->name('test.otp.test.smtp.connection');
-});
 
 // Alternative routes without prefix (backup) - These should work
 Route::get('/test-otp-check-config', [TestOTPController::class, 'checkConfig']);
@@ -155,6 +116,12 @@ Route::prefix('super-admin')->name('super-admin.')->group(function () {
         // Subscription Package Management Routes
         Route::resource('subscription-packages', \App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class);
         Route::post('/subscription-packages/{subscriptionPackage}/toggle-status', [\App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class, 'toggleStatus'])->name('subscription-packages.toggle-status');
+        Route::post('/subscription-packages/{subscriptionPackage}/add-business', [\App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class, 'addBusiness'])->name('subscription-packages.add-business');
+        Route::post('/subscription-packages/extend-trial', [\App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class, 'extendTrial'])->name('subscription-packages.extend-trial');
+        Route::post('/subscription-packages/remove-business', [\App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class, 'removeBusiness'])->name('subscription-packages.remove-business');
+        Route::post('/subscription-packages/approve-subscription', [\App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class, 'approveSubscription'])->name('subscription-packages.approve-subscription');
+        Route::post('/subscription-packages/reject-subscription', [\App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class, 'rejectSubscription'])->name('subscription-packages.reject-subscription');
+        Route::get('/businesses/search', [\App\Http\Controllers\SuperAdmin\SubscriptionPackageController::class, 'searchBusinesses'])->name('businesses.search');
         
         // Bug Tracking Routes
         Route::patch('/bugs/{bug}/update-status', [SuperAdminBugController::class, 'updateStatus'])->name('bugs.update-status');
@@ -199,10 +166,20 @@ Route::prefix('business')->name('business.')->group(function () {
     Route::get('/api/vehicle-makes-with-models', [\App\Http\Controllers\Api\VehicleApiController::class, 'getMakesWithModels'])->name('api.vehicle-makes-with-models');
     
 
+    // Subscription Management Routes (accessible without subscription check)
     Route::middleware(['business_admin', 'check.business.status', 'check.subscription.changes'])->group(function () {
         Route::post('/logout', [BusinessAuthController::class, 'logout'])->name('logout');
+        Route::resource('subscription', \App\Http\Controllers\Business\BusinessSubscriptionController::class);
+        Route::post('/subscription/{subscription}/cancel', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'cancel'])->name('subscription.cancel');
+        Route::post('/subscription/upgrade', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'upgrade'])->name('subscription.upgrade');
+        Route::post('/subscription/start-trial', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'startTrial'])->name('subscription.start-trial');
+        Route::post('/subscription/{subscription}/renew', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'renew'])->name('subscription.renew');
+        Route::get('/subscription/packages/available', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'getAvailablePackages'])->name('subscription.packages.available');
+    });
+
+    // Main business routes (require active subscription)
+    Route::middleware(['business_admin', 'check.business.status', 'check.subscription.changes', 'check.business.subscription'])->group(function () {
         Route::get('/dashboard', [BusinessDashboardController::class, 'index'])->name('dashboard');
-        
         
         // Vehicle Management Routes
         Route::resource('vehicles', \App\Http\Controllers\Business\VehicleController::class);
@@ -219,19 +196,11 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::delete('/vehicles/{vehicleId}/images/{imageId}', [\App\Http\Controllers\Business\VehicleController::class, 'deleteImage'])->name('vehicles.images.delete');
         Route::post('/vehicles/{vehicleId}/images/{imageId}/set-primary', [\App\Http\Controllers\Business\VehicleController::class, 'setPrimaryImage'])->name('vehicles.images.set-primary');
         
-        
         // Notifications Management Routes
         Route::resource('notifications', \App\Http\Controllers\Business\NotificationsController::class);
         Route::post('/notifications/{notification}/snooze', [\App\Http\Controllers\Business\NotificationsController::class, 'snooze'])->name('notifications.snooze');
         Route::post('/notifications/{notification}/complete', [\App\Http\Controllers\Business\NotificationsController::class, 'markCompleted'])->name('notifications.complete');
         Route::get('/notifications/count', [\App\Http\Controllers\Business\NotificationsController::class, 'getNotificationCount'])->name('notifications.count');
-        
-        // Subscription Management Routes
-        Route::resource('subscription', \App\Http\Controllers\Business\BusinessSubscriptionController::class);
-        Route::post('/subscription/{subscription}/cancel', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'cancel'])->name('subscription.cancel');
-        Route::post('/subscription/upgrade', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'upgrade'])->name('subscription.upgrade');
-        Route::post('/subscription/{subscription}/renew', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'renew'])->name('subscription.renew');
-        Route::get('/subscription/packages/available', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'getAvailablePackages'])->name('subscription.packages.available');
         
         // Customer Management Routes
         Route::resource('customers', \App\Http\Controllers\Business\CustomerController::class);

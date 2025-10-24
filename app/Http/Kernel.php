@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'business_admin' => \App\Http\Middleware\BusinessAdminAuth::class,
         'check.business.status' => \App\Http\Middleware\CheckBusinessStatus::class,
         'check.subscription.changes' => \App\Http\Middleware\CheckSubscriptionChanges::class,
+        'check.business.subscription' => \App\Http\Middleware\CheckBusinessSubscription::class,
         'check.vehicle.capacity' => \App\Http\Middleware\CheckVehicleCapacity::class,
     ];
 }

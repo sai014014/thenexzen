@@ -320,4 +320,296 @@ class SubscriptionPackageController extends Controller
             ]);
         }
     }
+    
+    /**
+     * Add business to subscription package
+     */
+    public function addBusiness(Request $request, SubscriptionPackage $subscriptionPackage)
+    {
+        $request->validate([
+            'business_id' => 'required|exists:businesses,id',
+            'trial_days' => 'required|integer|min:1|max:365'
+        ]);
+
+        $business = \App\Models\Business::findOrFail($request->business_id);
+
+        // Check if business already has an active subscription
+        $existingSubscription = \App\Models\BusinessSubscription::where('business_id', $business->id)
+            ->whereIn('status', ['active', 'trial'])
+            ->first();
+
+        if ($existingSubscription) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Business already has an active subscription. Please cancel their current subscription first.'
+            ], 400);
+        }
+
+        // Create new subscription
+        $subscription = \App\Models\BusinessSubscription::create([
+            'business_id' => $business->id,
+            'subscription_package_id' => $subscriptionPackage->id,
+            'status' => 'trial',
+            'trial_ends_at' => now()->addDays($request->trial_days),
+            'starts_at' => now(),
+            'expires_at' => now()->addDays($request->trial_days),
+            'amount_paid' => 0,
+            'auto_renew' => true,
+            'module_access' => $subscriptionPackage->enabled_modules ?? [],
+        ]);
+
+        Log::info('Business added to subscription package', [
+            'business_id' => $business->id,
+            'package_id' => $subscriptionPackage->id,
+            'subscription_id' => $subscription->id,
+            'trial_days' => $request->trial_days
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Business added to package successfully!',
+            'subscription' => $subscription
+        ]);
+    }
+
+    /**
+     * Extend trial period for a business subscription
+     */
+    public function extendTrial(Request $request)
+    {
+        try {
+            $request->validate([
+                'subscription_id' => 'required|exists:business_subscriptions,id',
+                'extension_days' => 'required|numeric|min:1|max:365',
+                'reason' => 'nullable|string|max:500'
+            ]);
+
+            $subscription = \App\Models\BusinessSubscription::findOrFail($request->subscription_id);
+
+            if ($subscription->status !== 'trial') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Can only extend trial subscriptions'
+                ], 400);
+            }
+
+            if (!$subscription->trial_ends_at) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Trial end date is not set for this subscription'
+                ], 400);
+            }
+
+            // Extend trial period
+            $newTrialEndsAt = $subscription->trial_ends_at->copy()->addDays((int)$request->extension_days);
+            $subscription->update([
+                'trial_ends_at' => $newTrialEndsAt,
+                'expires_at' => $newTrialEndsAt,
+            ]);
+
+            Log::info('Trial extended for business subscription', [
+                'subscription_id' => $subscription->id,
+                'business_id' => $subscription->business_id,
+                'extension_days' => $request->extension_days,
+                'old_trial_ends_at' => $subscription->trial_ends_at->format('Y-m-d H:i:s'),
+                'new_trial_ends_at' => $newTrialEndsAt->format('Y-m-d H:i:s'),
+                'reason' => $request->reason
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Trial extended successfully!',
+                'new_trial_ends_at' => $newTrialEndsAt->format('M d, Y')
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Trial extension validation failed', [
+                'errors' => $e->errors(),
+                'request_data' => $request->all()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed: ' . implode(', ', collect($e->errors())->flatten()->toArray())
+            ], 422);
+            
+        } catch (\Exception $e) {
+            Log::error('Trial extension failed', [
+                'subscription_id' => $request->subscription_id,
+                'extension_days' => $request->extension_days,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while extending the trial: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Approve a pending subscription
+     */
+    public function approveSubscription(Request $request)
+    {
+        try {
+            $request->validate([
+                'subscription_id' => 'required|exists:business_subscriptions,id'
+            ]);
+
+            $subscription = BusinessSubscription::findOrFail($request->subscription_id);
+
+            if ($subscription->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending subscriptions can be approved'
+                ], 400);
+            }
+
+            // Update subscription status to active
+            $subscription->update([
+                'status' => 'active',
+                'starts_at' => now(),
+                'expires_at' => now()->addMonth(),
+            ]);
+
+            Log::info('Subscription approved by super admin', [
+                'subscription_id' => $subscription->id,
+                'business_id' => $subscription->business_id,
+                'package_id' => $subscription->subscription_package_id,
+                'approved_by' => auth('super_admin')->id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subscription approved successfully!'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Subscription approval failed', [
+                'subscription_id' => $request->subscription_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while approving the subscription: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject a pending subscription
+     */
+    public function rejectSubscription(Request $request)
+    {
+        try {
+            $request->validate([
+                'subscription_id' => 'required|exists:business_subscriptions,id',
+                'reason' => 'required|string|max:500'
+            ]);
+
+            $subscription = BusinessSubscription::findOrFail($request->subscription_id);
+
+            if ($subscription->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only pending subscriptions can be rejected'
+                ], 400);
+            }
+
+            // Update subscription status to cancelled (rejected)
+            $subscription->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancellation_reason' => $request->reason
+            ]);
+
+            Log::info('Subscription rejected by super admin', [
+                'subscription_id' => $subscription->id,
+                'business_id' => $subscription->business_id,
+                'package_id' => $subscription->subscription_package_id,
+                'reason' => $request->reason,
+                'rejected_by' => auth('super_admin')->id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subscription rejected successfully!'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Subscription rejection failed', [
+                'subscription_id' => $request->subscription_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while rejecting the subscription: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove business from subscription package
+     */
+    public function removeBusiness(Request $request)
+    {
+        $request->validate([
+            'subscription_id' => 'required|exists:business_subscriptions,id',
+            'reason' => 'required|string|max:500'
+        ]);
+
+        $subscription = \App\Models\BusinessSubscription::findOrFail($request->subscription_id);
+
+        // Cancel the subscription
+        $subscription->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => $request->reason
+        ]);
+
+        Log::info('Business removed from subscription package', [
+            'subscription_id' => $subscription->id,
+            'business_id' => $subscription->business_id,
+            'package_id' => $subscription->subscription_package_id,
+            'reason' => $request->reason
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Business removed from package successfully!'
+        ]);
+    }
+
+    /**
+     * Search businesses for adding to packages
+     */
+    public function searchBusinesses(Request $request)
+    {
+        $query = $request->get('q', '');
+        
+        if (strlen($query) < 2) {
+            return response()->json([
+                'success' => true,
+                'businesses' => []
+            ]);
+        }
+
+        $businesses = \App\Models\Business::where('business_name', 'like', "%{$query}%")
+            ->orWhere('email', 'like', "%{$query}%")
+            ->where('status', 'active')
+            ->select('id', 'business_name', 'email')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'businesses' => $businesses
+        ]);
+    }
 }

@@ -89,10 +89,13 @@
                             <div class="col-md-6">
                                 <div class="subscription-detail">
                                     <strong>Status:</strong> 
-                                    <span class="badge bg-<?php echo e($currentSubscription->is_active ? 'success' : ($currentSubscription->is_trial ? 'warning' : 'secondary')); ?>">
-                                        <?php echo e($currentSubscription->status_display); ?>
+                                    <span class="badge bg-<?php echo e($currentSubscription->is_paused ? 'warning' : ($currentSubscription->is_active ? 'success' : ($currentSubscription->is_trial ? 'warning' : 'secondary'))); ?>">
+                                        <?php echo e($currentSubscription->is_paused ? 'Paused' : $currentSubscription->status_display); ?>
 
                                     </span>
+                                    <?php if($currentSubscription->is_paused): ?>
+                                        <small class="text-muted d-block">Paused on <?php echo e($currentSubscription->paused_at->format('M d, Y')); ?></small>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="subscription-detail">
                                     <strong>Expires:</strong> <?php echo e($currentSubscription->expires_at->format('M d, Y')); ?>
@@ -108,6 +111,15 @@
                     <div class="col-md-4 text-end">
                         <div class="subscription-actions">
                             <?php if($currentSubscription->is_active): ?>
+                                <?php if($currentSubscription->is_paused): ?>
+                                    <button class="btn btn-success me-2" onclick="resumeSubscription()">
+                                        <i class="fas fa-play"></i> Resume
+                                    </button>
+                                <?php else: ?>
+                                    <button class="btn btn-warning me-2" onclick="pauseSubscription()">
+                                        <i class="fas fa-pause"></i> Pause
+                                    </button>
+                                <?php endif; ?>
                                 <button class="btn btn-outline-danger me-2" onclick="cancelSubscription(<?php echo e($currentSubscription->id); ?>)">
                                     <i class="fas fa-times"></i> Cancel
                                 </button>
@@ -406,6 +418,63 @@ function showPackages() {
     } else {
         // If packages section doesn't exist, show it
         document.querySelector('.card:has(.card-header h5:contains("Available Packages"))')?.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function pauseSubscription() {
+    const reason = prompt('Please provide a reason for pausing your subscription (optional):');
+    
+    if (reason === null) {
+        return; // User cancelled
+    }
+
+    fetch('<?php echo e(route("business.subscription.pause")); ?>', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            reason: reason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ ' + data.message);
+            location.reload();
+        } else {
+            alert('❌ ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ An error occurred while pausing the subscription');
+    });
+}
+
+function resumeSubscription() {
+    if (confirm('Are you sure you want to resume your subscription?')) {
+        fetch('<?php echo e(route("business.subscription.resume")); ?>', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ ' + data.message);
+                location.reload();
+            } else {
+                alert('❌ ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ An error occurred while resuming the subscription');
+        });
     }
 }
 </script>

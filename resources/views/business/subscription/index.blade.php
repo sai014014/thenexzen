@@ -52,94 +52,32 @@
         </div>
     @endif
 
-    <!-- Current Subscription Card -->
+    <!-- Subscription Status Banner -->
     @if($currentSubscription)
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Current Subscription</h5>
-                    <span class="badge bg-light text-primary fs-6">{{ $currentSubscription->status_display }}</span>
+        <div class="alert alert-{{ $currentSubscription->is_paused ? 'warning' : ($currentSubscription->is_active ? 'success' : ($currentSubscription->is_trial ? 'info' : 'secondary')) }} alert-dismissible fade show" role="alert">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ $currentSubscription->subscriptionPackage->name ?? 'Unknown Package' }}</strong>
+                    @if($currentSubscription->is_paused)
+                        - Subscription Paused
+                    @elseif($currentSubscription->is_trial)
+                        - Trial Active ({{ $currentSubscription->days_remaining }} days remaining)
+                    @elseif($currentSubscription->is_active)
+                        - Active ({{ $currentSubscription->days_remaining }} days remaining)
+                    @endif
                 </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h4 class="text-primary">{{ $currentSubscription->subscriptionPackage->package_name }}</h4>
-                        <p class="text-muted mb-3">{{ $currentSubscription->subscriptionPackage->description }}</p>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="subscription-detail">
-                                    <strong>Price:</strong> {{ $currentSubscription->subscriptionPackage->formatted_price }}/month
-                                </div>
-                                <div class="subscription-detail">
-                                    <strong>Vehicle Capacity:</strong> {{ $currentSubscription->subscriptionPackage->vehicle_capacity_display }}
-                                </div>
-                                <div class="subscription-detail">
-                                    <strong>Support:</strong> {{ ucfirst($currentSubscription->subscriptionPackage->support_type) }}
-                                </div>
-                                @if($currentSubscription->is_trial)
-                                <div class="subscription-detail">
-                                    <strong>Trial Period:</strong> {{ $currentSubscription->subscriptionPackage->trial_period_days }} days
-                                </div>
-                                @endif
-                            </div>
-                            <div class="col-md-6">
-                                <div class="subscription-detail">
-                                    <strong>Status:</strong> 
-                                    <span class="badge bg-{{ $currentSubscription->is_paused ? 'warning' : ($currentSubscription->is_active ? 'success' : ($currentSubscription->is_trial ? 'warning' : 'secondary')) }}">
-                                        {{ $currentSubscription->is_paused ? 'Paused' : $currentSubscription->status_display }}
-                                    </span>
-                                    @if($currentSubscription->is_paused)
-                                        <small class="text-muted d-block">Paused on {{ $currentSubscription->paused_at->format('M d, Y') }}</small>
-                                    @endif
-                                </div>
-                                <div class="subscription-detail">
-                                    <strong>Expires:</strong> {{ $currentSubscription->expires_at->format('M d, Y') }}
-                                </div>
-                                <div class="subscription-detail">
-                                    <strong>Days Remaining:</strong> {{ $currentSubscription->days_remaining }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <div class="subscription-actions">
-                            @if($currentSubscription->is_active)
-                                @if($currentSubscription->is_paused)
-                                    <button class="btn btn-success me-2" onclick="resumeSubscription()">
-                                        <i class="fas fa-play"></i> Resume
-                                    </button>
-                                @else
-                                    <button class="btn btn-warning me-2" onclick="pauseSubscription()">
-                                        <i class="fas fa-pause"></i> Pause
-                                    </button>
-                                @endif
-                                <button class="btn btn-outline-danger me-2" onclick="cancelSubscription({{ $currentSubscription->id }})">
-                                    <i class="fas fa-times"></i> Cancel
-                                </button>
-                                <button class="btn btn-success" onclick="renewSubscription({{ $currentSubscription->id }})">
-                                    <i class="fas fa-sync"></i> Renew
-                                </button>
-                            @elseif($currentSubscription->is_trial)
-                                <button class="btn btn-primary" onclick="upgradeSubscription()">
-                                    <i class="fas fa-arrow-up"></i> Upgrade Now
-                                </button>
-                            @endif
-                        </div>
-                    </div>
+                <div>
+                    @if($currentSubscription->is_active && !$currentSubscription->is_paused)
+                        <button class="btn btn-sm btn-outline-warning me-2" onclick="pauseSubscription()">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                    @elseif($currentSubscription->is_paused)
+                        <button class="btn btn-sm btn-success me-2" onclick="resumeSubscription()">
+                            <i class="fas fa-play"></i> Resume
+                        </button>
+                    @endif
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </div>
-        </div>
-    @else
-        <div class="card mb-4">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
-                <h4>No Active Subscription</h4>
-                <p class="text-muted">You don't have an active subscription. Please choose a plan to continue using our services.</p>
-                <button class="btn btn-primary btn-lg" onclick="showAvailablePackages()">
-                    <i class="fas fa-plus"></i> Choose a Plan
-                </button>
             </div>
         </div>
     @endif

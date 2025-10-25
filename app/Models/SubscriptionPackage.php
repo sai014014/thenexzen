@@ -43,6 +43,17 @@ class SubscriptionPackage extends Model
         'enabled_modules' => 'array',
     ];
 
+    // Accessors
+    public function getNameAttribute()
+    {
+        return $this->package_name;
+    }
+
+    public function getPriceAttribute()
+    {
+        return $this->subscription_fee;
+    }
+
     // Scopes
     public function scopeActive($query)
     {

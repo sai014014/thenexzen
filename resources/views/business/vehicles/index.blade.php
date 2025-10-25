@@ -3,160 +3,15 @@
 @section('title', 'Vehicle Management')
 @section('page-title', 'Vehicle Management')
 
+@push('styles')
+
+
+@endpush
+
 @section('content')
 <!-- Main Content -->
 <link rel="stylesheet" href="{{ asset('dist/css/VehicleManagement/vehicleManagement_view.css') }}">
 
-<style>
-    .price-tooltip {
-        position: absolute;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 10px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        z-index: 100;
-        width: 200px;
-        display: none;
-        font-size: 13px;
-    }
-
-    .price-tooltip h4 {
-        margin: 0 0 8px;
-        padding-bottom: 5px;
-        border-bottom: 1px solid #eee;
-        font-size: 14px;
-    }
-
-    .price-tooltip p {
-        margin: 5px 0;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .fas.fa-info-circle {
-        cursor: pointer;
-        position: relative;
-    }
-
-    /* Add different colors for each row to differentiate */
-    tr:nth-child(4n+1) .price-tooltip {
-        border-left: 4px solid #4285f4;
-    }
-
-    tr:nth-child(4n+2) .price-tooltip {
-        border-left: 4px solid #ea4335;
-    }
-
-    tr:nth-child(4n+3) .price-tooltip {
-        border-left: 4px solid #fbbc05;
-    }
-
-    tr:nth-child(4n+4) .price-tooltip {
-        border-left: 4px solid #34a853;
-    }
-
-    /* Search and Add Vehicle Section Styling */
-    .search-container .input-group {
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        overflow: hidden;
-    }
-
-    .search-container .input-group-text {
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-        color: #6c757d;
-    }
-
-    .search-container .form-control {
-        border: 1px solid #dee2e6;
-        border-left: none;
-    }
-
-    .search-container .form-control:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-    }
-
-    .add-vehicle-container .btn {
-        border-radius: 8px;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-    }
-
-    /* Filter Container Styling */
-    .filter-container {
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        margin-bottom: 1rem;
-    }
-
-    .filter-container .form-label {
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 0.5rem;
-    }
-
-    .filter-container .form-select {
-        border-radius: 6px;
-        border: 1px solid #ced4da;
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-    }
-
-    .filter-container .form-select:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-    }
-
-    .filter-container .btn {
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-
-    .filter-container .btn-outline-secondary {
-        border-color: #6c757d;
-        color: #6c757d;
-    }
-
-    .filter-container .btn-outline-secondary:hover {
-        background-color: #6c757d;
-        border-color: #6c757d;
-        color: white;
-    }
-
-    .add-vehicle-container .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-
-    /* Responsive design for search and add section */
-    @media (max-width: 768px) {
-        .d-flex.justify-content-between {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .search-container .input-group {
-            width: 100% !important;
-        }
-        
-        .add-vehicle-container {
-            width: 100%;
-        }
-        
-        .add-vehicle-container .btn {
-            width: 100%;
-        }
-    }
-</style>
 <!-- Search and Add Vehicle Section -->
     <!-- Filter Options -->
     <div class="filter-container mb-3">
@@ -190,39 +45,9 @@
                     <option value="hybrid">Hybrid</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="button" id="clearFilters" class="btn btn-outline-secondary">
-                    <i class="fas fa-times me-1"></i>Clear Filters
-                </button>
-            </div>
         </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="search-container">
-            <div class="input-group" style="width: 300px;">
-                <span class="input-group-text">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" id="vehicleSearch" class="form-control" placeholder="Search vehicles...">
-            </div>
-        </div>
-        <div class="add-vehicle-container">
-            @if($capacityStatus && $capacityStatus['can_add'])
-                <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Add Vehicle
-                </a>
-            @elseif($capacityStatus && !$capacityStatus['can_add'])
-                <button class="btn btn-primary" onclick="showVehicleLimitModal()">
-                    <i class="fas fa-plus me-2"></i>Add Vehicle
-                </button>
-            @else
-                <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Add Vehicle
-                </a>
-            @endif
-        </div>
-    </div>
     
     <div class="record-count">{{ $vehicles->total() }} Records Found, Page {{ $vehicles->currentPage() }} of {{ $vehicles->lastPage() }}</div>
     <div class="filter-section">
@@ -399,51 +224,24 @@
     const RECORDS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
     const VEHICLE_STATUS_ARRAY = ['Active', 'Inactive', 'Under Maintenance'];
 
-    // Live search functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('vehicleSearch');
-        const tableBody = document.getElementById('vehicleTableBody');
-        const rows = tableBody.querySelectorAll('tr');
-        
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase().trim();
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            
-            // Update record count
-            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
-            const recordCount = document.querySelector('.record-count');
-            if (recordCount) {
-                recordCount.textContent = `${visibleRows.length} Records Found (filtered from ${rows.length} total)`;
-            }
-        });
-        
-        // Clear search functionality
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                this.value = '';
-                this.dispatchEvent(new Event('input'));
-            }
-        });
+        // Live search functionality (now handled by common search)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality is now handled by the common search in the header
 
         // Filter functionality
         const vehicleTypeFilter = document.getElementById('vehicleTypeFilter');
         const statusFilter = document.getElementById('statusFilter');
         const fuelTypeFilter = document.getElementById('fuelTypeFilter');
-        const clearFiltersBtn = document.getElementById('clearFilters');
+        
+        // Get table rows and search input
+        const rows = document.querySelectorAll('#vehicleTableBody tr');
+        const searchInput = document.querySelector('input[type="search"]') || document.querySelector('.search-input');
 
         function applyFilters() {
             const vehicleType = vehicleTypeFilter.value.toLowerCase();
             const status = statusFilter.value.toLowerCase();
             const fuelType = fuelTypeFilter.value.toLowerCase();
-            const searchTerm = searchInput.value.toLowerCase().trim();
+            const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
             let visibleCount = 0;
 
@@ -507,19 +305,15 @@
             }
         }
 
-        // Event listeners for filters
-        clearFiltersBtn.addEventListener('click', function() {
-            vehicleTypeFilter.value = '';
-            statusFilter.value = '';
-            fuelTypeFilter.value = '';
-            searchInput.value = '';
-            applyFilters();
-        });
-
         // Live filters - apply automatically on change
         vehicleTypeFilter.addEventListener('change', applyFilters);
         statusFilter.addEventListener('change', applyFilters);
         fuelTypeFilter.addEventListener('change', applyFilters);
+        
+        // Add search input listener if search input exists
+        if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+        }
     });
 
     // Function to show vehicle limit modal

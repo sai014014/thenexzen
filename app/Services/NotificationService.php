@@ -60,25 +60,25 @@ class NotificationService
             $kmSinceLastService = $currentKm - $lastServiceKm;
             if ($kmSinceLastService >= $vehicle->service_interval_km) {
                 $shouldCreateReminder = true;
-                $dueDate = Carbon::now()->addDays(7); // Give 7 days notice
+                $dueDate = Carbon::now('Asia/Kolkata')->addDays(7); // Give 7 days notice
                 $priority = 'high';
             } elseif ($kmSinceLastService >= ($vehicle->service_interval_km * 0.9)) {
                 $shouldCreateReminder = true;
-                $dueDate = Carbon::now()->addDays(14); // Give 14 days notice
+                $dueDate = Carbon::now('Asia/Kolkata')->addDays(14); // Give 14 days notice
                 $priority = 'medium';
             }
         }
 
         // Check by time
         if ($vehicle->service_interval_months && $lastServiceDate) {
-            $monthsSinceLastService = $lastServiceDate->diffInMonths(Carbon::now());
+            $monthsSinceLastService = $lastServiceDate->diffInMonths(Carbon::now('Asia/Kolkata'));
             if ($monthsSinceLastService >= $vehicle->service_interval_months) {
                 $shouldCreateReminder = true;
-                $dueDate = Carbon::now()->addDays(7);
+                $dueDate = Carbon::now('Asia/Kolkata')->addDays(7);
                 $priority = 'high';
             } elseif ($monthsSinceLastService >= ($vehicle->service_interval_months * 0.8)) {
                 $shouldCreateReminder = true;
-                $dueDate = Carbon::now()->addDays(14);
+                $dueDate = Carbon::now('Asia/Kolkata')->addDays(14);
                 $priority = 'medium';
             }
         }
@@ -108,7 +108,7 @@ class NotificationService
         }
 
         $expiryDate = Carbon::parse($vehicle->insurance_expiry_date);
-        $daysUntilExpiry = Carbon::now()->diffInDays($expiryDate, false);
+        $daysUntilExpiry = Carbon::now('Asia/Kolkata')->diffInDays($expiryDate, false);
 
         $shouldCreateReminder = false;
         $priority = 'medium';
@@ -160,7 +160,7 @@ class NotificationService
      */
     public function cleanupOldNotifications($daysOld = 30)
     {
-        $cutoffDate = Carbon::now()->subDays($daysOld);
+        $cutoffDate = Carbon::now('Asia/Kolkata')->subDays($daysOld);
         
         $deletedCount = Notification::where('is_completed', true)
             ->where('completed_at', '<', $cutoffDate)
@@ -181,17 +181,17 @@ class NotificationService
             ->where('is_completed', false)
             ->where(function($query) {
                 $query->whereNull('snooze_until')
-                      ->orWhere('snooze_until', '<=', Carbon::now());
+                      ->orWhere('snooze_until', '<=', Carbon::now('Asia/Kolkata'));
             })
             ->count();
 
         $overdue = Notification::where('business_id', $businessId)
             ->where('is_active', true)
             ->where('is_completed', false)
-            ->where('due_date', '<', Carbon::now())
+            ->where('due_date', '<', Carbon::now('Asia/Kolkata'))
             ->where(function($query) {
                 $query->whereNull('snooze_until')
-                      ->orWhere('snooze_until', '<=', Carbon::now());
+                      ->orWhere('snooze_until', '<=', Carbon::now('Asia/Kolkata'));
             })
             ->count();
 

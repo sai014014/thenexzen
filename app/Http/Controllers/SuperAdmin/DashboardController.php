@@ -131,7 +131,7 @@ class DashboardController extends Controller
 
     private function getDateFilter($dateRange)
     {
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Kolkata');
         
         switch ($dateRange) {
             case 'daily':

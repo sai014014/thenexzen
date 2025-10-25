@@ -19,11 +19,11 @@ async function triggerGlobalFilter() {
       dateFilterSelectedDates: JSON.stringify(customDateRange),
     });
 
-    // Fetch summary cards and graph data
+    // Fetch only filtered data (earnings chart and stats)
     await Promise.all([
       fetchSummaryCards(queryParams),
       fetchNetSummaryGraphData(queryParams),
-      fetchVehiclesSummaryData(queryParams), // Uncomment when needed
+      // Note: Vehicle status and ongoing bookings remain live (not filtered)
     ]);
 
     // Hide the date filter UI after applying filter
@@ -161,7 +161,16 @@ function calculatePercentageChange(current, previous) {
     }
 
     const change = ((current - previous) * 100) / previous;
-    return isNaN(change) ? 0 : change.toFixed(2);
+    
+    // Round to whole numbers to avoid tiny decimals like 0.001
+    const roundedChange = Math.round(change);
+    
+    // If the change is very small (less than 1%), return 0
+    if (Math.abs(roundedChange) < 1) {
+      return 0;
+    }
+    
+    return isNaN(roundedChange) ? 0 : roundedChange;
   } catch (error) {
     console.error("Error calculating percentage change:", error);
     return 0;
@@ -369,9 +378,10 @@ document
     getElement("earningsValue")?.classList.remove("visible");
   });
 
-// doughnut chart of vehicles
-function fetchVehiclesSummaryData(params) {
-  fetch(`dashboard/get-vehicles-data?${params.toString()}`, {
+// doughnut chart of vehicles (LIVE DATA - not filtered by date range)
+function fetchVehiclesSummaryData() {
+  // Always fetch live vehicle data without date filters
+  fetch(`dashboard/get-vehicles-data`, {
     method: "GET",
     headers: {
       Accept: "application/json",
@@ -530,5 +540,12 @@ renderDoughnutChart({
   booked: 0,
   // maintenance: 0,
 });
-// On document load, trigger the global filter to fetch data
-document.addEventListener("DOMContentLoaded", triggerGlobalFilter);
+
+// On document load, fetch live data and filtered data
+document.addEventListener("DOMContentLoaded", function() {
+  // Fetch live data (vehicle status and ongoing bookings are already loaded from PHP)
+  fetchVehiclesSummaryData();
+  
+  // Fetch filtered data (earnings chart and stats)
+  triggerGlobalFilter();
+});

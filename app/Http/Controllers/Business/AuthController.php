@@ -118,6 +118,14 @@ class AuthController extends Controller
                 'last_login_ip' => $request->ip(),
             ]);
 
+            // Log login activity
+            \App\Traits\LogsActivity::logActivity(
+                'login',
+                'Logged into the system',
+                get_class($businessAdmin),
+                $businessAdmin->id
+            );
+
             return redirect()->intended(route('business.dashboard'));
         }
 
@@ -396,6 +404,18 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        
+        // Log logout activity before logging out
+        if ($businessAdmin) {
+            \App\Traits\LogsActivity::logActivity(
+                'logout',
+                'Logged out of the system',
+                get_class($businessAdmin),
+                $businessAdmin->id
+            );
+        }
+        
         Auth::guard('business_admin')->logout();
         
         $request->session()->invalidate();

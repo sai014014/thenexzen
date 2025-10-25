@@ -56,7 +56,7 @@ class BookingController extends Controller
 
         $bookings = $query->paginate(15)->withQueryString();
 
-        return view('business.bookings.index', compact('bookings', 'status'));
+        return view('business.bookings.index', compact('bookings', 'status', 'business', 'businessAdmin'));
     }
 
     /**
@@ -70,7 +70,9 @@ class BookingController extends Controller
             return redirect()->route('business.login')->with('error', 'Please log in to continue.');
         }
 
-        return view('business.bookings.flow.create');
+        $business = $businessAdmin->business;
+
+        return view('business.bookings.flow.create', compact('business', 'businessAdmin'));
     }
 
     /**
@@ -88,7 +90,7 @@ class BookingController extends Controller
         $customers = $business->customers()->where('status', 'active')->get();
         $vehicles = $business->vehicles()->where('is_available', true)->get();
 
-        return view('business.bookings.quick-create', compact('customers', 'vehicles'));
+        return view('business.bookings.quick-create', compact('customers', 'vehicles', 'business', 'businessAdmin'));
     }
 
     /**
@@ -102,7 +104,9 @@ class BookingController extends Controller
             return redirect()->route('business.login')->with('error', 'Please log in to continue.');
         }
         
-        return view('business.bookings.flow.step1-dates');
+        $business = $businessAdmin->business;
+        
+        return view('business.bookings.flow.step1-dates', compact('business', 'businessAdmin'));
     }
 
     /**
@@ -166,7 +170,7 @@ class BookingController extends Controller
             })
             ->get();
 
-        return view('business.bookings.flow.step2-vehicles', compact('vehicles', 'startDateTime', 'endDateTime'));
+        return view('business.bookings.flow.step2-vehicles', compact('vehicles', 'startDateTime', 'endDateTime', 'business', 'businessAdmin'));
     }
 
     /**
@@ -210,7 +214,7 @@ class BookingController extends Controller
         $customers = $business->customers()->get();
         $vehicle = Vehicle::find(session('booking_flow.vehicle_id'));
 
-        return view('business.bookings.flow.step3-customer', compact('customers', 'vehicle'));
+        return view('business.bookings.flow.step3-customer', compact('customers', 'vehicle', 'business', 'businessAdmin'));
     }
 
     /**
@@ -261,7 +265,7 @@ class BookingController extends Controller
         $baseRentalPrice = $vehicle->rental_price_24h ?? 1000;
         $totalAmount = $baseRentalPrice * $days;
 
-        return view('business.bookings.flow.step4-billing', compact('vehicle', 'customer', 'startDateTime', 'endDateTime', 'baseRentalPrice', 'totalAmount', 'days'));
+        return view('business.bookings.flow.step4-billing', compact('vehicle', 'customer', 'startDateTime', 'endDateTime', 'baseRentalPrice', 'totalAmount', 'days', 'business', 'businessAdmin'));
     }
 
     /**
@@ -331,7 +335,7 @@ class BookingController extends Controller
         return view('business.bookings.flow.step5-confirm', compact(
             'vehicle', 'customer', 'startDateTime', 'endDateTime', 
             'baseRentalPrice', 'extraCharges', 'discountAmount', 'advanceAmount',
-            'totalAmount', 'amountAfterDiscount', 'amountDue', 'days'
+            'totalAmount', 'amountAfterDiscount', 'amountDue', 'days', 'business', 'businessAdmin'
         ));
     }
 
@@ -521,7 +525,7 @@ class BookingController extends Controller
 
         $booking->load(['customer', 'vehicle']);
 
-        return view('business.bookings.show', compact('booking'));
+        return view('business.bookings.show', compact('booking', 'business', 'businessAdmin'));
     }
 
     /**
@@ -551,7 +555,7 @@ class BookingController extends Controller
         $customers = $business->customers()->where('status', 'active')->get();
         $vehicles = $business->vehicles()->where('is_available', true)->get();
 
-        return view('business.bookings.edit', compact('booking', 'customers', 'vehicles'));
+        return view('business.bookings.edit', compact('booking', 'customers', 'vehicles', 'business', 'businessAdmin'));
     }
 
     /**

@@ -17,6 +17,7 @@ class Vehicle extends Model
         'vehicle_model',
         'vehicle_year',
         'vehicle_number',
+        'vin_number',
         'vehicle_status',
         'fuel_type',
         'mileage',

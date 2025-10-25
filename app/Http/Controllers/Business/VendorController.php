@@ -26,24 +26,23 @@ class VendorController extends Controller
         }
         
         $business = $businessAdmin->business;
-        $query = $request->get('q', '');
+        $search = $request->get('search', '');
         
-        if (strlen($query) < 2) {
-            return response()->json([
-                'success' => true,
-                'vendors' => []
-            ]);
+        $query = $business->vendors();
+        
+        // If search term is provided, filter results
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('vendor_name', 'like', "%{$search}%")
+                  ->orWhere('mobile_number', 'like', "%{$search}%")
+                  ->orWhere('gstin', 'like', "%{$search}%")
+                  ->orWhere('pan_number', 'like', "%{$search}%");
+            });
         }
         
-        $vendors = $business->vendors()
-            ->where(function ($q) use ($query) {
-                $q->where('vendor_name', 'like', "%{$query}%")
-                  ->orWhere('mobile_number', 'like', "%{$query}%")
-                  ->orWhere('gstin', 'like', "%{$query}%")
-                  ->orWhere('pan_number', 'like', "%{$query}%");
-            })
-            ->select('id', 'vendor_name', 'mobile_number', 'vendor_type', 'gstin', 'pan_number', 'commission_type', 'commission_rate')
-            ->limit(10)
+        $vendors = $query->select('id', 'vendor_name', 'mobile_number', 'vendor_type', 'gstin', 'pan_number', 'commission_type', 'commission_rate')
+            ->orderBy('vendor_name', 'asc')
+            ->limit(20)
             ->get();
         
         return response()->json([
@@ -95,7 +94,7 @@ class VendorController extends Controller
 
         $vendors = $query->paginate(15)->withQueryString();
 
-        return view('business.vendors.index', compact('vendors'));
+        return view('business.vendors.index', compact('vendors', 'business', 'businessAdmin'));
     }
 
     /**
@@ -109,7 +108,9 @@ class VendorController extends Controller
             return redirect()->route('business.login')->with('error', 'Please log in to continue.');
         }
 
-        return view('business.vendors.create');
+        $business = $businessAdmin->business;
+
+        return view('business.vendors.create', compact('business', 'businessAdmin'));
     }
 
     /**
@@ -211,7 +212,7 @@ class VendorController extends Controller
             abort(403, 'Unauthorized access to vendor.');
         }
 
-        return view('business.vendors.show', compact('vendor'));
+        return view('business.vendors.show', compact('vendor', 'business', 'businessAdmin'));
     }
 
     /**
@@ -232,7 +233,7 @@ class VendorController extends Controller
             abort(403, 'Unauthorized access to vendor.');
         }
 
-        return view('business.vendors.edit', compact('vendor'));
+        return view('business.vendors.edit', compact('vendor', 'business', 'businessAdmin'));
     }
 
     /**

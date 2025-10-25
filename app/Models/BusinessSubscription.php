@@ -97,6 +97,22 @@ class BusinessSubscription extends Model
         if ($this->is_trial) {
             return max(0, $this->trial_ends_at->diffInDays(now()));
         }
+        
+        if (!$this->expires_at) {
+            return 0;
+        }
+        
+        $now = Carbon::now();
+        $expiresAt = Carbon::parse($this->expires_at);
+        
+        if ($this->is_paused && $this->paused_at) {
+            // If paused, calculate days remaining from when it was paused
+            $pausedAt = Carbon::parse($this->paused_at);
+            $daysSincePaused = $now->diffInDays($pausedAt);
+            $originalDaysRemaining = $pausedAt->diffInDays($expiresAt);
+            return max(0, $originalDaysRemaining - $daysSincePaused);
+        }
+        
         return max(0, $this->expires_at->diffInDays(now()));
     }
 
@@ -371,5 +387,63 @@ class BusinessSubscription extends Model
             'total_paused_days' => $totalPausedDays,
             'pause_reason' => $this->pause_reason,
         ];
+    }
+
+    /**
+     * Get vehicle limit for this subscription
+     */
+    public function getVehicleLimit()
+    {
+        if (!$this->is_active && !$this->is_trial) {
+            return 0;
+        }
+
+        $package = $this->subscriptionPackage;
+        if (!$package) {
+            return 0;
+        }
+
+        return $package->is_unlimited_vehicles ? 'Unlimited' : ($package->vehicle_capacity ?? 0);
+    }
+
+    /**
+     * Get booking limit for this subscription
+     */
+    public function getBookingLimit()
+    {
+        if (!$this->is_active && !$this->is_trial) {
+            return 0;
+        }
+
+        $package = $this->subscriptionPackage;
+        if (!$package) {
+            return 0;
+        }
+
+        // For now, return unlimited for bookings as we don't have a specific booking limit field
+        return 'Unlimited';
+    }
+
+    /**
+     * Get user limit for this subscription
+     */
+    public function getUserLimit()
+    {
+        if (!$this->is_active && !$this->is_trial) {
+            return 0;
+        }
+
+        $package = $this->subscriptionPackage;
+        if (!$package) {
+            return 0;
+        }
+
+        // Check if multi-user access is enabled
+        if ($package->multi_user_access) {
+            return 'Unlimited';
+        }
+
+        // Default to 1 user if multi-user access is not enabled
+        return 1;
     }
 }

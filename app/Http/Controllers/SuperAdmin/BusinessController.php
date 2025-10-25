@@ -81,8 +81,15 @@ class BusinessController extends Controller
 
     public function show(Business $business)
     {
-        $business->load('businessAdmins');
-        return view('super-admin.businesses.show', compact('business'));
+        $business->load(['businessAdmins', 'subscriptions.subscriptionPackage']);
+        
+        // Get active subscription
+        $activeSubscription = $business->subscriptions()
+            ->with('subscriptionPackage')
+            ->whereIn('status', ['active', 'trial'])
+            ->first();
+            
+        return view('super-admin.businesses.show', compact('business', 'activeSubscription'));
     }
 
     public function edit(Business $business)

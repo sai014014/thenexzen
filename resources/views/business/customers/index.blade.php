@@ -15,64 +15,18 @@
                         </h5>
                     </div>
                     <div class="col-md-6 text-end">
-                        <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-plus me-2"></i>Add New Customer
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('business.customers.create', ['type' => 'individual']) }}">
-                                    <i class="fas fa-user me-2"></i>Individual Customer
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ route('business.customers.create', ['type' => 'corporate']) }}">
-                                    <i class="fas fa-building me-2"></i>Corporate Customer
-                                </a></li>
-                            </ul>
-                        </div>
+                        <!-- Add button moved to header -->
                     </div>
                 </div>
             </div>
             <div class="card-body">
-                <!-- Search and Filter Section -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" id="searchInput" placeholder="Search by name, mobile, or GSTIN..." value="{{ request('search') }}">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select" id="customerTypeFilter">
-                            <option value="">All Types</option>
-                            <option value="individual" {{ request('customer_type') == 'individual' ? 'selected' : '' }}>Individual</option>
-                            <option value="corporate" {{ request('customer_type') == 'corporate' ? 'selected' : '' }}>Corporate</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select" id="statusFilter">
-                            <option value="">All Status</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select" id="licenseStatusFilter">
-                            <option value="">All Licenses</option>
-                            <option value="valid" {{ request('license_status') == 'valid' ? 'selected' : '' }}>Valid</option>
-                            <option value="near_expiry" {{ request('license_status') == 'near_expiry' ? 'selected' : '' }}>Near Expiry</option>
-                            <option value="expired" {{ request('license_status') == 'expired' ? 'selected' : '' }}>Expired</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
-                            <i class="fas fa-times me-2"></i>Clear
-                        </button>
-                    </div>
-                </div>
+                <!-- Search moved to header -->
+
+                <div class="record-count">{{ $customers->total() }} Records Found, Page {{ $customers->currentPage() }} of {{ $customers->lastPage() }}</div>
 
                 <!-- Customer List Table -->
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table id="customerTable" class="table table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th>Customer ID</th>
@@ -85,7 +39,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="customerTableBody">
                             @forelse($customers as $customer)
                             <tr>
                                 <td>

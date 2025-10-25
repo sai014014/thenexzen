@@ -42,7 +42,7 @@
                                 <div class="d-flex align-items-center">
                                     <div class="me-3">
                                         @if($business->logo)
-                                            <img src="{{ $business->logo }}" alt="{{ $business->business_name }}" class="rounded-circle" width="50" height="50">
+                                            <img src="{{ asset('storage/' . $business->logo) }}" alt="{{ $business->business_name }}" class="rounded-circle" width="50" height="50">
                                         @else
                                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
                                                 <i class="fas fa-building"></i>

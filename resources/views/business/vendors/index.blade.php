@@ -16,52 +16,17 @@
                         <small class="text-muted">Manage your vendors and service partners</small>
                     </div>
                     <div class="col-md-6 text-end">
-                        <a href="{{ route('business.vendors.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Add New Vendor
-                        </a>
+                        <!-- Add button moved to header -->
                     </div>
                 </div>
 
-                <!-- Search and Filter Section -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" id="searchInput" placeholder="Search by name, mobile, or GSTIN..." value="{{ request('search') }}">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select" id="vendorTypeFilter">
-                            <option value="">All Types</option>
-                            <option value="vehicle_provider" {{ request('vendor_type') == 'vehicle_provider' ? 'selected' : '' }}>Vehicle Provider</option>
-                            <option value="service_partner" {{ request('vendor_type') == 'service_partner' ? 'selected' : '' }}>Service Partner</option>
-                            <option value="other" {{ request('vendor_type') == 'other' ? 'selected' : '' }}>Other</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select" id="sortByFilter">
-                            <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Registration Date</option>
-                            <option value="vendor_name" {{ request('sort_by') == 'vendor_name' ? 'selected' : '' }}>Name</option>
-                            <option value="gstin" {{ request('sort_by') == 'gstin' ? 'selected' : '' }}>GSTIN</option>
-                            <option value="pan_number" {{ request('sort_by') == 'pan_number' ? 'selected' : '' }}>PAN Number</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select class="form-select" id="sortDirectionFilter">
-                            <option value="desc" {{ request('sort_direction') == 'desc' ? 'selected' : '' }}>Descending</option>
-                            <option value="asc" {{ request('sort_direction') == 'asc' ? 'selected' : '' }}>Ascending</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-outline-secondary w-100" onclick="clearFilters()">
-                            <i class="fas fa-times me-1"></i>Clear
-                        </button>
-                    </div>
-                </div>
+                <!-- Search moved to header -->
+
+                <div class="record-count">{{ $vendors->total() }} Records Found, Page {{ $vendors->currentPage() }} of {{ $vendors->lastPage() }}</div>
 
                 <!-- Vendor List Table -->
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table id="vendorTable" class="table table-hover">
                         <thead class="table-light">
                             <tr>
                                 <th>Vendor Name</th>
@@ -72,7 +37,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="vendorTableBody">
                             @forelse($vendors as $vendor)
                             <tr>
                                 <td>

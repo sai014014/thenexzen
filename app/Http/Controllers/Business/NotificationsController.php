@@ -39,10 +39,10 @@ class NotificationsController extends Controller
                     $query->whereDate('due_date', Carbon::tomorrow());
                     break;
                 case 'this_week':
-                    $query->whereBetween('due_date', [Carbon::now(), Carbon::now()->addWeek()]);
+                    $query->whereBetween('due_date', [Carbon::now('Asia/Kolkata'), Carbon::now('Asia/Kolkata')->addWeek()]);
                     break;
                 case 'overdue':
-                    $query->where('due_date', '<', Carbon::now());
+                    $query->where('due_date', '<', Carbon::now('Asia/Kolkata'));
                     break;
             }
         }
@@ -50,7 +50,7 @@ class NotificationsController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             if ($request->status === 'snoozed') {
-                $query->where('snooze_until', '>', Carbon::now());
+                $query->where('snooze_until', '>', Carbon::now('Asia/Kolkata'));
             } else {
                 $query->whereNull('snooze_until');
             }
@@ -60,7 +60,7 @@ class NotificationsController extends Controller
             ->orderBy('due_date', 'asc')
             ->paginate(20);
 
-        return view('business.notifications.index', compact('notifications'));
+        return view('business.notifications.index', compact('notifications', 'business', 'businessAdmin'));
     }
 
     public function show(Notification $notification)
@@ -73,7 +73,7 @@ class NotificationsController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        return view('business.notifications.show', compact('notification'));
+        return view('business.notifications.show', compact('notification', 'business', 'businessAdmin'));
     }
 
     public function snooze(Request $request, Notification $notification)
@@ -99,13 +99,13 @@ class NotificationsController extends Controller
 
             switch ($request->snooze_period) {
                 case '1_hour':
-                    $snoozeUntil = Carbon::now()->addHour();
+                    $snoozeUntil = Carbon::now('Asia/Kolkata')->addHour();
                     break;
                 case '1_day':
-                    $snoozeUntil = Carbon::now()->addDay();
+                    $snoozeUntil = Carbon::now('Asia/Kolkata')->addDay();
                     break;
                 case '1_week':
-                    $snoozeUntil = Carbon::now()->addWeek();
+                    $snoozeUntil = Carbon::now('Asia/Kolkata')->addWeek();
                     break;
                 case 'custom':
                     if ($request->custom_date) {
@@ -121,7 +121,7 @@ class NotificationsController extends Controller
 
             $updateData = [
                 'snooze_until' => $snoozeUntil,
-                'snoozed_at' => Carbon::now(),
+                'snoozed_at' => Carbon::now('Asia/Kolkata'),
                 'snoozed_by' => $businessAdmin->id
             ];
 
@@ -172,7 +172,7 @@ class NotificationsController extends Controller
 
         $notification->update([
             'is_completed' => true,
-            'completed_at' => Carbon::now(),
+            'completed_at' => Carbon::now('Asia/Kolkata'),
             'completed_by' => $businessAdmin->id,
             'completion_notes' => $request->completion_notes
         ]);
@@ -210,7 +210,7 @@ class NotificationsController extends Controller
             ->where('is_active', true)
             ->where(function($query) {
                 $query->whereNull('snooze_until')
-                      ->orWhere('snooze_until', '<=', Carbon::now());
+                      ->orWhere('snooze_until', '<=', Carbon::now('Asia/Kolkata'));
             })
             ->where('is_completed', false)
             ->count();

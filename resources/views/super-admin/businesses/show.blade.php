@@ -25,7 +25,7 @@
                 <div class="row">
                     <div class="col-md-4 text-center mb-4">
                         @if($business->logo)
-                            <img src="{{ $business->logo }}" alt="{{ $business->business_name }}" class="img-fluid rounded" style="max-height: 200px;">
+                            <img src="{{ asset('storage/' . $business->logo) }}" alt="{{ $business->business_name }}" class="img-fluid rounded" style="max-height: 200px;">
                         @else
                             <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center" style="height: 200px;">
                                 <i class="fas fa-building fa-4x"></i>
@@ -87,6 +87,12 @@
                             <strong>Phone:</strong><br>
                             <a href="tel:{{ $business->phone }}" class="text-decoration-none">{{ $business->phone }}</a>
                         </div>
+                        @if($business->contact_number)
+                        <div class="mb-3">
+                            <strong>Alternate Number:</strong><br>
+                            <a href="tel:{{ $business->contact_number }}" class="text-decoration-none">{{ $business->contact_number }}</a>
+                        </div>
+                        @endif
                         @if($business->website)
                         <div class="mb-3">
                             <strong>Website:</strong><br>
@@ -116,24 +122,76 @@
                 </h5>
             </div>
             <div class="card-body">
+                @if($activeSubscription)
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <strong>Plan:</strong><br>
-                            <span class="badge bg-primary">{{ ucfirst($business->subscription_plan) }}</span>
+                            <strong>Current Plan:</strong><br>
+                            <span class="badge bg-primary fs-6">{{ $activeSubscription->subscriptionPackage->name ?? 'Unknown Package' }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Status:</strong><br>
+                            <span class="badge bg-{{ $activeSubscription->status === 'active' ? 'success' : 'warning' }} fs-6">
+                                {{ ucfirst($activeSubscription->status) }}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Monthly Price:</strong><br>
+                            <span class="text-success fw-bold">₹{{ number_format($activeSubscription->subscriptionPackage->price ?? 0) }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
+                            <strong>Started:</strong><br>
+                            <span class="text-muted">{{ $activeSubscription->starts_at ? $activeSubscription->starts_at->format('M d, Y H:i') : 'N/A' }}</span>
+                        </div>
+                        <div class="mb-3">
                             <strong>Expires:</strong><br>
-                            @if($business->subscription_expires_at)
-                                <span class="text-muted">{{ $business->subscription_expires_at->format('M d, Y') }}</span>
-                            @else
-                                <span class="text-muted">No expiration date</span>
-                            @endif
+                            <span class="text-muted">{{ $activeSubscription->expires_at ? $activeSubscription->expires_at->format('M d, Y H:i') : 'N/A' }}</span>
+                        </div>
+                        @if($activeSubscription->is_paused)
+                        <div class="mb-3">
+                            <strong>Paused Since:</strong><br>
+                            <span class="text-warning">{{ $activeSubscription->paused_at ? $activeSubscription->paused_at->format('M d, Y H:i') : 'N/A' }}</span>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                
+                <!-- Subscription Features -->
+                @if($activeSubscription->subscriptionPackage)
+                <div class="mt-4">
+                    <h6 class="mb-3">Package Features:</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Modules:</h6>
+                            <ul class="list-unstyled">
+                                @foreach(['vehicles', 'bookings', 'customers', 'vendors', 'reports', 'notifications'] as $module)
+                                <li>
+                                    <i class="fas fa-{{ $activeSubscription->canAccessModule($module) ? 'check text-success' : 'times text-danger' }} me-2"></i>
+                                    {{ ucfirst($module) }}
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Limits:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-car me-2 text-info"></i> Vehicles: {{ $activeSubscription->getVehicleLimit() ?? 'Unlimited' }}</li>
+                                <li><i class="fas fa-calendar me-2 text-info"></i> Bookings: {{ $activeSubscription->getBookingLimit() ?? 'Unlimited' }}</li>
+                                <li><i class="fas fa-users me-2 text-info"></i> Users: {{ $activeSubscription->getUserLimit() ?? 'Unlimited' }}</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
+                @endif
+                @else
+                <div class="text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5 class="text-muted">No Active Subscription</h5>
+                    <p class="text-muted">This business doesn't have an active subscription.</p>
+                </div>
+                @endif
             </div>
         </div>
     </div>
@@ -149,27 +207,42 @@
             <div class="card-body">
                 @if($business->businessAdmins->count() > 0)
                     @foreach($business->businessAdmins as $admin)
-                    <div class="d-flex align-items-center mb-3">
+                    <div class="d-flex align-items-center mb-3 p-3 border rounded">
                         <div class="me-3">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
                                 <i class="fas fa-user"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1">
-                            <h6 class="mb-0">{{ $admin->name }}</h6>
-                            <small class="text-muted">{{ $admin->email }}</small>
-                        </div>
-                        <div>
-                            <span class="badge bg-{{ $admin->role === 'admin' ? 'success' : ($admin->role === 'manager' ? 'warning' : 'info') }}">
-                                {{ ucfirst($admin->role) }}
-                            </span>
+                            <h6 class="mb-1">{{ $admin->name }}</h6>
+                            <small class="text-muted d-block">{{ $admin->email }}</small>
+                            <div class="mt-1">
+                                <span class="badge bg-{{ $admin->role === 'admin' ? 'success' : ($admin->role === 'manager' ? 'warning' : 'info') }} me-2">
+                                    {{ ucfirst($admin->role) }}
+                                </span>
+                                <span class="badge bg-{{ $admin->is_active ? 'success' : 'danger' }}">
+                                    {{ $admin->is_active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </div>
+                            @if($admin->last_login_at)
+                            <small class="text-muted d-block mt-1">
+                                <i class="fas fa-clock me-1"></i>
+                                Last login: {{ $admin->last_login_at->diffForHumans() }}
+                            </small>
+                            @else
+                            <small class="text-muted d-block mt-1">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                Never logged in
+                            </small>
+                            @endif
                         </div>
                     </div>
                     @endforeach
                 @else
-                    <div class="text-center py-3">
-                        <i class="fas fa-users fa-2x text-muted mb-2"></i>
-                        <p class="text-muted mb-0">No admins found</p>
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No Business Admins</h6>
+                        <p class="text-muted">This business doesn't have any admin users yet.</p>
                     </div>
                 @endif
             </div>

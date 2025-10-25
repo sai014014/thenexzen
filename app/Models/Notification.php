@@ -79,20 +79,20 @@ class Notification extends Model
 
     public function scopeSnoozed($query)
     {
-        return $query->where('snooze_until', '>', Carbon::now());
+        return $query->where('snooze_until', '>', Carbon::now('Asia/Kolkata'));
     }
 
     public function scopeNotSnoozed($query)
     {
         return $query->where(function($q) {
             $q->whereNull('snooze_until')
-              ->orWhere('snooze_until', '<=', Carbon::now());
+              ->orWhere('snooze_until', '<=', Carbon::now('Asia/Kolkata'));
         });
     }
 
     public function scopeOverdue($query)
     {
-        return $query->where('due_date', '<', Carbon::now());
+        return $query->where('due_date', '<', Carbon::now('Asia/Kolkata'));
     }
 
     public function scopeDueToday($query)
@@ -102,7 +102,7 @@ class Notification extends Model
 
     public function scopeDueThisWeek($query)
     {
-        return $query->whereBetween('due_date', [Carbon::now(), Carbon::now()->addWeek()]);
+        return $query->whereBetween('due_date', [Carbon::now('Asia/Kolkata'), Carbon::now('Asia/Kolkata')->addWeek()]);
     }
 
     // Accessors & Mutators
@@ -144,11 +144,11 @@ class Notification extends Model
             return 'completed';
         }
 
-        if ($this->snooze_until && $this->snooze_until > Carbon::now()) {
+        if ($this->snooze_until && $this->snooze_until > Carbon::now('Asia/Kolkata')) {
             return 'snoozed';
         }
 
-        if ($this->due_date < Carbon::now()) {
+        if ($this->due_date < Carbon::now('Asia/Kolkata')) {
             return 'overdue';
         }
 
@@ -157,12 +157,12 @@ class Notification extends Model
 
     public function getIsOverdueAttribute()
     {
-        return $this->due_date < Carbon::now() && !$this->is_completed;
+        return $this->due_date < Carbon::now('Asia/Kolkata') && !$this->is_completed;
     }
 
     public function getIsSnoozedAttribute()
     {
-        return $this->snooze_until && $this->snooze_until > Carbon::now();
+        return $this->snooze_until && $this->snooze_until > Carbon::now('Asia/Kolkata');
     }
 
     // Static methods for creating notifications

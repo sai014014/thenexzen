@@ -179,9 +179,25 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::get('/subscription/packages/available', [\App\Http\Controllers\Business\BusinessSubscriptionController::class, 'getAvailablePackages'])->name('subscription.packages.available');
     });
 
+    // Manage Account Routes (outside subscription middleware)
+    Route::middleware(['business_admin', 'check.business.status', 'check.subscription.changes'])->group(function () {
+        Route::get('/manage-account', [\App\Http\Controllers\Business\ManageAccountController::class, 'index'])->name('manage-account.index');
+        Route::post('/manage-account/update-business', [\App\Http\Controllers\Business\ManageAccountController::class, 'updateBusinessDetails'])->name('manage-account.update-business');
+        Route::post('/manage-account/update-logo', [\App\Http\Controllers\Business\ManageAccountController::class, 'updateLogo'])->name('manage-account.update-logo');
+        Route::post('/manage-account/add-user', [\App\Http\Controllers\Business\ManageAccountController::class, 'addUser'])->name('manage-account.add-user');
+        Route::put('/manage-account/update-user/{id}', [\App\Http\Controllers\Business\ManageAccountController::class, 'updateUser'])->name('manage-account.update-user');
+        Route::delete('/manage-account/delete-user/{id}', [\App\Http\Controllers\Business\ManageAccountController::class, 'deleteUser'])->name('manage-account.delete-user');
+        Route::post('/manage-account/change-password', [\App\Http\Controllers\Business\ManageAccountController::class, 'changePassword'])->name('manage-account.change-password');
+        
+        // Activity Log Routes
+        Route::get('/activity-log', [\App\Http\Controllers\Business\ActivityLogController::class, 'index'])->name('activity-log.index');
+        Route::get('/activity-log/{activityLog}', [\App\Http\Controllers\Business\ActivityLogController::class, 'show'])->name('activity-log.show');
+    });
+
     // Main business routes (require active subscription)
     Route::middleware(['business_admin', 'check.business.status', 'check.subscription.changes', 'check.business.subscription'])->group(function () {
         Route::get('/dashboard', [BusinessDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/get-vehicles-data', [BusinessDashboardController::class, 'getVehiclesData'])->name('dashboard.vehicles-data');
         
         // Vehicle Management Routes
         Route::resource('vehicles', \App\Http\Controllers\Business\VehicleController::class);
@@ -318,5 +334,22 @@ Route::view('dashboard', 'dashboard')
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
+// Current system time route
+Route::get('/current-time', function () {
+    $now = \Carbon\Carbon::now('Asia/Kolkata');
+    
+    return response()->json([
+        'current_system_time' => $now->format('Y-m-d H:i:s'),
+        'timezone' => $now->timezone->getName(),
+        'day_name' => $now->format('l'),
+        'date_formatted' => $now->format('d M Y'),
+        'time_formatted' => $now->format('h:i:s A'),
+        'timestamp' => $now->timestamp,
+        'iso_format' => $now->toISOString(),
+        'app_timezone' => config('app.timezone'),
+        'php_timezone' => date_default_timezone_get()
+    ]);
+});
 
 require __DIR__.'/auth.php';

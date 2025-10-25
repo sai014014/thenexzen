@@ -37,7 +37,9 @@ class BusinessSubscriptionController extends Controller
             'currentSubscription',
             'availablePackages',
             'subscriptionHistory',
-            'hasSubscriptionHistory'
+            'hasSubscriptionHistory',
+            'business',
+            'businessAdmin'
         ));
     }
 
@@ -51,7 +53,7 @@ class BusinessSubscriptionController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        return view('business.subscription.show', compact('subscription'));
+        return view('business.subscription.show', compact('subscription', 'business', 'businessAdmin'));
     }
 
     public function startTrial(Request $request)

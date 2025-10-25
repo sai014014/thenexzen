@@ -20,11 +20,11 @@
     
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
-<body class="<?php echo e(request()->routeIs('business.dashboard') ? 'business-dashboard-page' : ''); ?>">
+<body class="<?php echo e(request()->routeIs('business.dashboard') ? 'business-dashboard-page' : ''); ?><?php echo e(request()->routeIs('business.vehicles.index') ? ' vehicle-management-page' : ''); ?><?php echo e(request()->routeIs('business.vendors.index') ? ' vendor-management-page' : ''); ?><?php echo e(request()->routeIs('business.customers.index') ? ' customer-management-page' : ''); ?>">
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="logo">
-            <img src="<?php echo e(asset('images/mainLogo.svg')); ?>" alt="Logo">
+            <img src="<?php echo e($business->logo ? asset('storage/' . $business->logo) : asset('images/mainLogo.svg')); ?>" alt="Logo" id="sidebarLogo">
             <h3><?php echo e($business->business_name ?? 'RENTCAR'); ?></h3>
         </div>
         
@@ -42,8 +42,8 @@
         
         <?php if($subscription): ?>
         <a href="<?php echo e(route('business.dashboard')); ?>" class="nav-link <?php echo e(request()->routeIs('business.dashboard') ? 'menuActive' : ''); ?> dashboard-link">
-            <svg width="31" height="30" viewBox="0 0 31 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0.5" width="30" height="30" rx="8" fill="white" />
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0.5" width="29" height="30" rx="8" fill="white" />
                 <path d="M15.6619 10.4674C15.6183 10.4256 15.5603 10.4023 15.4999 10.4023C15.4395 10.4023 15.3815 10.4256 15.3379 10.4674L9.94434 15.6198C9.92143 15.6417 9.90321 15.668 9.89077 15.6972C9.87833 15.7263 9.87194 15.7577 9.87197 15.7894L9.87109 20.6252C9.87109 20.8738 9.96987 21.1123 10.1457 21.2881C10.3215 21.4639 10.56 21.5627 10.8086 21.5627H13.624C13.7483 21.5627 13.8676 21.5133 13.9555 21.4254C14.0434 21.3375 14.0928 21.2182 14.0928 21.0939V17.1095C14.0928 17.0474 14.1175 16.9878 14.1614 16.9438C14.2054 16.8999 14.265 16.8752 14.3271 16.8752H16.6709C16.7331 16.8752 16.7927 16.8999 16.8366 16.9438C16.8806 16.9878 16.9053 17.0474 16.9053 17.1095V21.0939C16.9053 21.2182 16.9547 21.3375 17.0426 21.4254C17.1305 21.5133 17.2497 21.5627 17.374 21.5627H20.1883C20.4369 21.5627 20.6754 21.4639 20.8512 21.2881C21.027 21.1123 21.1258 20.8738 21.1258 20.6252V15.7894C21.1258 15.7577 21.1194 15.7263 21.107 15.6972C21.0945 15.668 21.0763 15.6417 21.0534 15.6198L15.6619 10.4674Z" fill="#6B6ADE" />
                 <path d="M22.3821 14.6528L20.1907 12.5563V9.375C20.1907 9.25068 20.1413 9.13145 20.0534 9.04354C19.9655 8.95564 19.8463 8.90625 19.722 8.90625H18.3157C18.1914 8.90625 18.0722 8.95564 17.9843 9.04354C17.8964 9.13145 17.847 9.25068 17.847 9.375V10.3125L16.1501 8.69004C15.9913 8.52949 15.7552 8.4375 15.5 8.4375C15.2457 8.4375 15.0102 8.52949 14.8514 8.69033L8.61993 14.6522C8.43771 14.828 8.41485 15.1172 8.58068 15.3076C8.62232 15.3557 8.6733 15.3948 8.73053 15.4225C8.78776 15.4502 8.85003 15.4661 8.91356 15.469C8.97709 15.4719 9.04054 15.4618 9.10006 15.4394C9.15958 15.417 9.21392 15.3827 9.25978 15.3387L15.3389 9.52969C15.3825 9.48796 15.4405 9.46468 15.5009 9.46468C15.5612 9.46468 15.6193 9.48796 15.6629 9.52969L21.7426 15.3387C21.8321 15.4246 21.9521 15.4714 22.0762 15.469C22.2002 15.4666 22.3183 15.4151 22.4044 15.3258C22.5843 15.1395 22.5693 14.8318 22.3821 14.6528Z" fill="#6B6ADE" />
             </svg>
@@ -129,21 +129,11 @@
 
         <?php if($canAccessNotifications): ?>
         <a href="<?php echo e(route('business.notifications.index')); ?>" class="nav-link <?php echo e(request()->routeIs('business.notifications.*') ? 'menuActive' : ''); ?> notifications-link">
-            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="20" height="20" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="30" height="30" rx="8" fill="white" />
                 <path d="M15 2.5C10.8575 2.5 7.5 5.8575 7.5 10V12.5L5 15V17.5H25V15L22.5 12.5V10C22.5 5.8575 19.1425 2.5 15 2.5ZM15 20C13.625 20 12.5 18.875 12.5 17.5H17.5C17.5 18.875 16.375 20 15 20Z" fill="#6B6ADE" />
             </svg>
             Notifications
-        </a>
-        <?php endif; ?>
-
-        <?php if($canAccessSubscription): ?>
-        <a href="<?php echo e(route('business.subscription.index')); ?>" class="nav-link <?php echo e(request()->routeIs('business.subscription.*') ? 'menuActive' : ''); ?> subscription-link">
-            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="30" height="30" rx="8" fill="white" />
-                <path d="M7.5 7.5H22.5V22.5H7.5V7.5ZM9.5 9.5V20.5H20.5V9.5H9.5ZM11.5 11.5H18.5V13.5H11.5V11.5ZM11.5 15.5H18.5V17.5H11.5V15.5Z" fill="#6B6ADE" />
-            </svg>
-            My Subscription
         </a>
         <?php endif; ?>
         </nav>
@@ -157,6 +147,22 @@
                         <div class="title_uptext"></div>
                         <h1><?php echo $__env->yieldContent('page-title', 'Dashboard'); ?></h1>
                     </div>
+                    <?php if(request()->routeIs('business.vehicles.index') || request()->routeIs('business.vendors.index') || request()->routeIs('business.customers.index')): ?>
+                    <!-- Common Management Header Controls -->
+                    <div class="common-header-controls">
+                        <div class="common-search-container">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" id="commonSearch" class="form-control" placeholder="Search <?php echo e(request()->routeIs('business.vehicles.index') ? 'vehicles' : (request()->routeIs('business.vendors.index') ? 'vendors' : 'customers')); ?>...">
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary" onclick="clearSearch()" title="Clear Search">
+                                <i class="fas fa-times me-1"></i>CLEAR
+                            </button>
+                        </div>
+                    </div>
+                    <?php endif; ?>
     </div>
             </div>
             <div class="col-md-6 profileCol">
@@ -174,6 +180,40 @@
                                 <div class="option globalFilterOption" data-range="this_year">This Year</div>
                                 <div class="option globalFilterOption" data-range="all">All Time</div>
                             </div>
+                        </div>
+                        <?php endif; ?>
+                        <?php if(request()->routeIs('business.vehicles.index') || request()->routeIs('business.vendors.index') || request()->routeIs('business.customers.index')): ?>
+                        <!-- Dynamic Add Button for Management Pages -->
+                        <div class="common-add-container">
+                            <?php if(request()->routeIs('business.vehicles.index')): ?>
+                                <?php
+                                    $businessAdmin = auth('business_admin')->user();
+                                    $business = $businessAdmin ? $businessAdmin->business : null;
+                                    $subscription = $business ? $business->subscriptions()->whereIn('status', ['active', 'trial'])->first() : null;
+                                    $capacityStatus = $subscription ? $subscription->getVehicleCapacityStatus() : null;
+                                ?>
+                                <?php if($capacityStatus && $capacityStatus['can_add']): ?>
+                                    <a href="<?php echo e(route('business.vehicles.create')); ?>" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>ADD NEW VEHICLE
+                                    </a>
+                                <?php elseif($capacityStatus && !$capacityStatus['can_add']): ?>
+                                    <button class="btn btn-primary" onclick="showVehicleLimitModal()">
+                                        <i class="fas fa-plus me-2"></i>ADD NEW VEHICLE
+                    </button>
+                                <?php else: ?>
+                                    <a href="<?php echo e(route('business.vehicles.create')); ?>" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>ADD NEW VEHICLE
+                                    </a>
+                                <?php endif; ?>
+                            <?php elseif(request()->routeIs('business.vendors.index')): ?>
+                                <a href="<?php echo e(route('business.vendors.create')); ?>" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>ADD NEW VENDOR
+                                </a>
+                            <?php elseif(request()->routeIs('business.customers.index')): ?>
+                                <a href="<?php echo e(route('business.customers.create')); ?>" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>ADD NEW CUSTOMER
+                                </a>
+                            <?php endif; ?>
                         </div>
                         <?php endif; ?>
                         <div class="scan" id="viewFullScreen">
@@ -228,7 +268,9 @@
                                 <img src="<?php echo e(asset('images/profile.svg')); ?>" alt="Profile" id="profileDropdown">
                             </div>
                             <div class="dropdown-menu" id="dropdownMenu">
-                                <a href="<?php echo e(route('business.dashboard')); ?>" class="menu-item manage-account">Manage Account</a>
+                                <a href="<?php echo e(route('business.manage-account.index')); ?>" class="menu-item manage-account">Manage Account</a>
+                                <a href="<?php echo e(route('business.activity-log.index')); ?>" class="menu-item">Activity Log</a>
+                                <a href="#" class="menu-item" onclick="showChangePasswordModal()">Change Password</a>
                                 <a href="<?php echo e(route('business.reports.index')); ?>" class="menu-item">Reports</a>
                             <form method="POST" action="<?php echo e(route('business.logout')); ?>">
                                 <?php echo csrf_field(); ?>
@@ -268,6 +310,7 @@
     <script src="<?php echo e(asset('dist/bootstrap/bootstrap.bundle.min.js')); ?>"></script>
     <script src="<?php echo e(asset('dist/js/common.js')); ?>"></script>
     <script src="<?php echo e(asset('dist/js/globalFilter.js')); ?>"></script>
+    <script src="<?php echo e(asset('js/custom-dropdowns.js')); ?>"></script>
 
     <div id="pageLoader" class="page-loader" style="display:none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index: 2000;">
         <div class="spinner-border text-light" role="status"></div>
@@ -374,5 +417,217 @@
     <script src="<?php echo e(asset('dist/js/dashboard/dashboard.js')); ?>"></script>
     
     <?php echo $__env->yieldPushContent('scripts'); ?>
+    
+    <!-- Common Search Functionality -->
+    <script>
+    
+    function performLiveSearch() {
+        const searchTerm = document.getElementById('commonSearch').value.toLowerCase().trim();
+        const currentPath = window.location.pathname;
+        
+        // Always use client-side search for live filtering
+        let tableBody = null;
+        let recordCountElement = null;
+        
+        if (currentPath.includes('/vehicles')) {
+            tableBody = document.getElementById('vehicleTableBody');
+            recordCountElement = document.querySelector('.record-count');
+        } else if (currentPath.includes('/vendors')) {
+            tableBody = document.getElementById('vendorTableBody');
+            recordCountElement = document.querySelector('.record-count');
+        } else if (currentPath.includes('/customers')) {
+            tableBody = document.getElementById('customerTableBody');
+            recordCountElement = document.querySelector('.record-count');
+        }
+        
+        if (!tableBody) return;
+        
+        const rows = tableBody.querySelectorAll('tr');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Update record count
+        if (recordCountElement) {
+            if (searchTerm) {
+                recordCountElement.textContent = `${visibleCount} Records Found (filtered from ${rows.length} total)`;
+            } else {
+                // Get original count from data attribute or calculate
+                const originalCount = recordCountElement.getAttribute('data-original-count') || rows.length;
+                recordCountElement.textContent = `${originalCount} Records Found`;
+            }
+        }
+        
+        // Hide/show pagination based on search results
+        const pagination = document.querySelector('.pagination');
+        if (pagination) {
+            if (searchTerm && visibleCount === 0) {
+                pagination.style.display = 'none';
+            } else {
+                pagination.style.display = '';
+            }
+        }
+    }
+    
+    function clearSearch() {
+        const searchInput = document.getElementById('commonSearch');
+        if (searchInput) {
+            searchInput.value = '';
+            performLiveSearch(); // Always use client-side clear
+        }
+    }
+    
+    // Initialize search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('commonSearch');
+        if (searchInput) {
+            // Store original record count
+            const recordCountElement = document.querySelector('.record-count');
+            if (recordCountElement && !recordCountElement.getAttribute('data-original-count')) {
+                const currentPath = window.location.pathname;
+                if (currentPath.includes('/vehicles')) {
+                    const tableBody = document.getElementById('vehicleTableBody');
+                    if (tableBody) {
+                        const rowCount = tableBody.querySelectorAll('tr').length;
+                        recordCountElement.setAttribute('data-original-count', rowCount);
+                    }
+                }
+            }
+            
+            // Live search works automatically on input - no button needed
+            
+            // Live search on input with debounce
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    performLiveSearch();
+                }, 200); // 200ms debounce for very responsive live search
+            });
+            
+            // Clear search on Escape key
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    clearSearch();
+                }
+            });
+        }
+    });
+    </script>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="changePasswordForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                            <div class="invalid-feedback" id="current_password_error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="new_password" name="new_password" required minlength="8">
+                            <div class="invalid-feedback" id="new_password_error"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="new_password_confirmation" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" required>
+                            <div class="invalid-feedback" id="new_password_confirmation_error"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="changePasswordBtn">
+                            <span class="btn-text">Change Password</span>
+                            <span class="btn-loading" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i> Changing...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function showChangePasswordModal() {
+        const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+        modal.show();
+    }
+
+    document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const changeBtn = document.getElementById('changePasswordBtn');
+        const btnText = changeBtn.querySelector('.btn-text');
+        const btnLoading = changeBtn.querySelector('.btn-loading');
+        
+        // Clear previous errors
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+        
+        // Show loading state
+        changeBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline-block';
+        
+        const formData = new FormData(this);
+        
+        fetch('<?php echo e(route("business.manage-account.change-password")); ?>', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                document.getElementById('changePasswordModal').querySelector('.btn-close').click();
+                document.getElementById('changePasswordForm').reset();
+            } else {
+                if (data.errors) {
+                    // Display validation errors
+                    Object.keys(data.errors).forEach(field => {
+                        const input = document.getElementById(field);
+                        const errorDiv = document.getElementById(field + '_error');
+                        if (input && errorDiv) {
+                            input.classList.add('is-invalid');
+                            errorDiv.textContent = data.errors[field][0];
+                        }
+                    });
+                } else {
+                    alert(data.message);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while changing password.');
+        })
+        .finally(() => {
+            changeBtn.disabled = false;
+            btnText.style.display = 'inline-block';
+            btnLoading.style.display = 'none';
+        });
+    });
+    </script>
 </body>
 </html><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/business/layouts/app.blade.php ENDPATH**/ ?>

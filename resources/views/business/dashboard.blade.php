@@ -11,7 +11,7 @@
         <div class="stats-content">
             <div class="stats-info">
                 <div class="stats-title">
-                    <h3>Net Earnings</h3>
+                    <h3>Total Revenue</h3>
                     <div class="stats-icon earnings">
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect width="40" height="40" rx="8" fill="#6B6ADE"/>
@@ -20,10 +20,10 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stats-value">₹{{ number_format($totalEarnings ?? 0) }}</div>
-                <div class="stats-change {{ ($earningsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
-                    <i class="fas fa-arrow-{{ ($earningsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
-                    <span>{{ abs($earningsChange ?? 0) }}% {{ ($earningsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
+                <div class="stats-value">₹{{ number_format($totalRevenue ?? 0) }}</div>
+                <div class="stats-change {{ ($revenueChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
+                    <i class="fas fa-arrow-{{ ($revenueChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
+                    <span>{{ abs($revenueChange ?? 0) }}% {{ ($revenueChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
         </div>
@@ -33,7 +33,7 @@
         <div class="stats-content">
             <div class="stats-info">
                 <div class="stats-title">
-                    <h3>Bookings</h3>
+                    <h3>Completed Bookings</h3>
                     <div class="stats-icon bookings">
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect width="40" height="40" rx="8" fill="#FFD700"/>
@@ -44,10 +44,10 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stats-value">{{ $totalBookings ?? 0 }}</div>
-                <div class="stats-change {{ ($bookingsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
-                    <i class="fas fa-arrow-{{ ($bookingsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
-                    <span>{{ abs($bookingsChange ?? 0) }}% {{ ($bookingsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
+                <div class="stats-value">{{ $completedBookings ?? 0 }}</div>
+                <div class="stats-change {{ ($completedBookingsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
+                    <i class="fas fa-arrow-{{ ($completedBookingsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
+                    <span>{{ abs($completedBookingsChange ?? 0) }}% {{ ($completedBookingsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
         </div>
@@ -57,7 +57,7 @@
         <div class="stats-content">
             <div class="stats-info">
                 <div class="stats-title">
-                    <h3>Vendors</h3>
+                    <h3>Ongoing <br> Bookings</h3>
                     <div class="stats-icon vendors">
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect width="40" height="40" rx="8" fill="#32CD32"/>
@@ -68,10 +68,10 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stats-value">{{ $totalVendors ?? 0 }}</div>
-                <div class="stats-change {{ ($vendorsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
-                    <i class="fas fa-arrow-{{ ($vendorsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
-                    <span>{{ abs($vendorsChange ?? 0) }}% {{ ($vendorsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
+                <div class="stats-value">{{ $ongoingBookings ?? 0 }}</div>
+                <div class="stats-change {{ ($ongoingBookingsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
+                    <i class="fas fa-arrow-{{ ($ongoingBookingsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
+                    <span>{{ abs($ongoingBookingsChange ?? 0) }}% {{ ($ongoingBookingsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
         </div>
@@ -81,7 +81,7 @@
         <div class="stats-content">
             <div class="stats-info">
                 <div class="stats-title">
-                    <h3>Vehicles</h3>
+                    <h3>Fleet Utilization</h3>
                     <div class="stats-icon vehicles">
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect width="40" height="40" rx="8" fill="#FF8C00"/>
@@ -92,10 +92,10 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stats-value">{{ $totalVehicles ?? 0 }}</div>
-                <div class="stats-change {{ ($vehiclesChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
-                    <i class="fas fa-arrow-{{ ($vehiclesChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
-                    <span>{{ abs($vehiclesChange ?? 0) }}% {{ ($vehiclesChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
+                <div class="stats-value">{{ $fleetUtilization ?? 0 }}%</div>
+                <div class="stats-change {{ ($fleetUtilizationChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
+                    <i class="fas fa-arrow-{{ ($fleetUtilizationChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
+                    <span>{{ abs($fleetUtilizationChange ?? 0) }}% {{ ($fleetUtilizationChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
         </div>
@@ -105,7 +105,7 @@
         <div class="stats-content">
             <div class="stats-info">
                 <div class="stats-title">
-                    <h3>Customers</h3>
+                    <h3>Outstanding Payments</h3>
                     <div class="stats-icon customers">
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect width="40" height="40" rx="8" fill="#4169E1"/>
@@ -114,10 +114,10 @@
                         </svg>
                     </div>
                 </div>
-                <div class="stats-value">{{ $totalCustomers ?? 0 }}</div>
-                <div class="stats-change {{ ($customersChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
-                    <i class="fas fa-arrow-{{ ($customersChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
-                    <span>{{ abs($customersChange ?? 0) }}% {{ ($customersChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
+                <div class="stats-value">₹{{ number_format($outstandingPayments ?? 0) }}</div>
+                <div class="stats-change {{ ($outstandingPaymentsChange ?? 0) >= 0 ? 'positive' : 'negative' }}">
+                    <i class="fas fa-arrow-{{ ($outstandingPaymentsChange ?? 0) >= 0 ? 'up' : 'down' }}"></i>
+                    <span>{{ abs($outstandingPaymentsChange ?? 0) }}% {{ ($outstandingPaymentsChange ?? 0) >= 0 ? 'Up' : 'Down' }} from yesterday</span>
                 </div>
             </div>
         </div>
@@ -299,48 +299,7 @@
 
 @push('styles')
 <style>
-/* Custom Dashboard Header Styles */
-body.business-dashboard-page .header {
-  height: 100px !important;
-  zoom: 0.9;
-  background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
-  box-shadow: 0 4px 20px rgba(107, 106, 222, 0.3);
-}
-
-body.business-dashboard-page .header h1 {
-  font-size: 30px;
-  font-weight: 400;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-left: 290px !important; /* Closer to sidebar but aligned with stats */
-}
-
-body.business-dashboard-page .header .title_uptext {
-  font-size: 16px;
-  opacity: 0.9;
-  font-weight: 500;
-  margin-left: 290px !important; /* Closer to sidebar but aligned with stats */
-}
-
-/* Custom header elements for dashboard */
-body.business-dashboard-page .header .head_right {
-  gap: 20px;
-}
-
-body.business-dashboard-page .header .select-button {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-}
-
-body.business-dashboard-page .header .select-button:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* Adjust main content margin for shorter header */
-body.business-dashboard-page .main-content {
-  margin-top: 100px !important;
-  zoom: 0.9;
-}
+/* Dashboard-specific styles (header styles now in common.css) */
 
 /* Dashboard Stats Text Wrapping */
 body.business-dashboard-page .stats-title {
@@ -633,13 +592,20 @@ body.business-dashboard-page .bookings-table tbody td:nth-child(6) {
 <script>
     // Net Earnings Chart
     const earningsCtx = document.getElementById('netEarningsChart').getContext('2d');
+    
+    // Debug: Log chart data
+    const chartLabels = {!! json_encode($chartLabels ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) !!};
+    const chartData = {!! json_encode($chartData ?? [0, 0, 0, 0, 0, 0, 0]) !!};
+    console.log('Chart Labels:', chartLabels);
+    console.log('Chart Data:', chartData);
+    
     new Chart(earningsCtx, {
         type: 'line',
         data: {
-            labels: {!! json_encode($chartLabels ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) !!},
+            labels: chartLabels,
             datasets: [{
                 label: 'Net Earnings',
-                data: {!! json_encode($chartData ?? [0, 0, 0, 0, 0, 0, 0]) !!},
+                data: chartData,
                 borderColor: 'rgba(255, 255, 255, 0.8)',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 borderWidth: 2,
@@ -664,17 +630,67 @@ body.business-dashboard-page .bookings-table tbody td:nth-child(6) {
                         color: 'rgba(255, 255, 255, 0.1)'
                     },
                     ticks: {
-                        color: 'white'
+                        color: 'white',
+                        maxTicksLimit: function(context) {
+                            // For hourly data (24 hours), show every 2 hours
+                            const labels = context.chart.data.labels;
+                            if (labels && labels.length === 24) {
+                                return 12; // Show every 2 hours (00:00, 02:00, 04:00, etc.)
+                            }
+                            return 7; // Default for daily data
+                        },
+                        callback: function(value, index, ticks) {
+                            const labels = this.chart.data.labels;
+                            if (labels && labels.length === 24) {
+                                // For hourly data, show every 2 hours
+                                if (index % 2 === 0) {
+                                    return labels[index];
+                                }
+                                return '';
+                            }
+                            // For daily data, show all labels
+                            return labels[index];
+                        }
                     }
                 },
                 y: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: function(context) {
+                        const data = context.chart.data.datasets[0].data;
+                        const maxValue = Math.max(...data);
+                        
+                        // If no data or all values are 0, show scale up to 5K
+                        if (maxValue === 0 || data.every(val => val === 0)) {
+                            return 5000;
+                        }
+                        
+                        // If data exists, set max to 20% above the highest value
+                        return Math.ceil(maxValue * 1.2);
+                    },
                     grid: {
                         color: 'rgba(255, 255, 255, 0.1)'
                     },
                     ticks: {
                         color: 'white',
+                        stepSize: function(context) {
+                            const data = context.chart.data.datasets[0].data;
+                            const maxValue = Math.max(...data);
+                            
+                            // If no data or all values are 0, show steps of 1K
+                            if (maxValue === 0 || data.every(val => val === 0)) {
+                                return 1000;
+                            }
+                            
+                            // If data exists, calculate appropriate step size
+                            return Math.ceil(maxValue / 5);
+                        },
                         callback: function(value) {
-                            return '₹' + (value / 1000) + 'K';
+                            if (value >= 1000) {
+                                return '₹' + (value / 1000) + 'K';
+                            } else {
+                                return '₹' + value;
+                            }
                         }
                     }
                 }

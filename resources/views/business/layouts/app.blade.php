@@ -40,6 +40,7 @@
             $canAccessSubscription = true; // Always allow access to subscription management
         @endphp
         
+        <div class="sidebar-nav-links">
         @if($subscription)
         <a href="{{ route('business.dashboard') }}" class="nav-link {{ request()->routeIs('business.dashboard') ? 'menuActive' : '' }} dashboard-link">
             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -136,6 +137,24 @@
             Notifications
         </a>
         @endif
+        </div>
+
+        <!-- Need Help Section in Sidebar -->
+        <div class="sidebar-need-help">
+            <div class="need-help-icon-sidebar">
+                <i class="fas fa-folder"></i>
+                <div class="need-help-docs-sidebar">
+                    <i class="fas fa-file-alt"></i>
+                    <i class="fas fa-file-pdf"></i>
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+            </div>
+            <h3 class="need-help-title-sidebar">Need help?</h3>
+            <p class="need-help-subtitle-sidebar">Please check our docs</p>
+            <button class="btn btn-documentation-sidebar">
+                DOCUMENTATION
+            </button>
+        </div>
         </nav>
 
     <!-- Header -->
@@ -194,7 +213,7 @@
                         @endif
                         <div class="profile_menu header-icon">
                             <div class="profile_img" id="profileBtn">
-                                <img src="{{ asset('images/profile.svg') }}" alt="Profile" id="profileDropdown">
+                                <i class="fas fa-user"></i>
                             </div>
                             <div class="dropdown-menu profile-dropdown-menu" id="dropdownMenu">
                                 <a href="{{ route('business.manage-account.index') }}" class="menu-item manage-account">Manage Account</a>

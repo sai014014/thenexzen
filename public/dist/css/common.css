@@ -29,18 +29,36 @@ p {
   width: 250px;
   box-shadow: -6px 5px 14px 3px #0000002e;
   font-family: 'Poppins', sans-serif;
-  height: 100%; /* 30px top + 30px bottom = 60px total gap */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   position: fixed;
-  top: 0px; /* 30px gap from top */
+  top: 0px;
   left: 0px;
   color: white;
   padding: 0px 15px 15px 15px;
-  display: flex;
-  flex-direction: column;
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
   z-index: 999;
   overflow-y: auto;
+}
+
+.sidebar-nav-links {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-nav-links::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav-links::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav-links::-webkit-scrollbar-thumb {
+  background: #6B6ADE;
+  border-radius: 2px;
 }
 .search_sec {
   position: relative;
@@ -241,7 +259,7 @@ p {
 }
 
 .header-icon i {
-  font-size: 18px;
+  font-size: 16px;
   color: white;
 }
 
@@ -296,10 +314,11 @@ p {
   font-size: 14px;
   margin-bottom: 15px;
   gap: 15px;
+  zoom:0.9;
   font-weight: 600;
   display: flex;
   align-items: center;
-  padding: 10px 15px;
+  padding: 8px 15px;
   text-decoration: none;
   transition: all 0.3s ease;
   border-radius: 8px;
@@ -526,6 +545,7 @@ p {
 /* Profile Dropdown */
 .profile_menu {
   position: relative;
+  display: inline-block;
 }
 
 .profile_img {
@@ -534,12 +554,20 @@ p {
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .profile_img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.profile_img i {
+  font-size: 32px;
+  color: white;
 }
 
 .dropdown-menu {
@@ -1092,40 +1120,6 @@ tbody tr {
 
 .menu-item.manage-account:hover {
   background-color: #e5edff;
-}
-.profile_menu {
-  position: relative;
-  display: inline-block;
-}
-
-.profile_menu .profile_img {
-  cursor: pointer;
-}
-
-.profile_menu .dropdown_menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background-color: #fff;
-  min-width: 200px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  border-radius: 4px;
-}
-
-.profile_menu .dropdown_menu a {
-  color: #000;
-  text-decoration: none;
-  display: block;
-  padding: 10px 15px;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-}
-
-.profile_menu .dropdown_menu a:hover {
-  background-color: #f0f0f0;
-  color: #007bff;
 }
 
 /* notifications */
@@ -1958,4 +1952,196 @@ label {
 
 .vehicle-color-badge:hover {
     transform: scale(1.1);
+}
+
+/* Need Help Section */
+.need-help-section {
+    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+    padding: 60px 20px;
+    text-align: center;
+    color: white;
+}
+
+.need-help-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.need-help-icon {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 30px;
+}
+
+.need-help-icon i.fa-folder {
+    font-size: 80px;
+    color: white;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+    position: relative;
+    z-index: 2;
+}
+
+.need-help-docs {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+}
+
+.need-help-docs i {
+    position: absolute;
+    font-size: 30px;
+    color: #E5E7EB;
+    opacity: 0.7;
+}
+
+.need-help-docs i.fa-file-alt {
+    top: -20px;
+    right: -20px;
+    transform: rotate(-15deg);
+}
+
+.need-help-docs i.fa-file-pdf {
+    bottom: -20px;
+    left: -30px;
+    transform: rotate(15deg);
+}
+
+.need-help-docs i.fa-chart-pie {
+    top: -10px;
+    left: -25px;
+    transform: rotate(-25deg);
+}
+
+.need-help-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.need-help-subtitle {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+}
+
+.btn-documentation {
+    background: white;
+    color: #6B6ADE;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-documentation:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Sidebar Need Help Section */
+.sidebar-need-help {
+    margin-top: auto;
+    padding: 0px;
+    text-align: center;
+    background: transparent;
+    border: 2px solid rgba(107, 106, 222, 0.2);
+    border:none;
+    margin-left: 15px;
+    margin-right: 15px;
+    margin-bottom: 20px;
+}
+
+.need-help-icon-sidebar {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.need-help-icon-sidebar i.fa-folder {
+    font-size: 50px;
+    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    position: relative;
+    z-index: 2;
+}
+
+.need-help-docs-sidebar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+}
+
+.need-help-docs-sidebar i {
+    position: absolute;
+    font-size: 18px;
+    color: rgba(107, 106, 222, 0.5);
+}
+
+.need-help-docs-sidebar i.fa-file-alt {
+    top: -12px;
+    right: -15px;
+    transform: rotate(-15deg);
+}
+
+.need-help-docs-sidebar i.fa-file-pdf {
+    bottom: -12px;
+    left: -20px;
+    transform: rotate(15deg);
+}
+
+.need-help-docs-sidebar i.fa-chart-pie {
+    top: -8px;
+    left: -18px;
+    transform: rotate(-25deg);
+}
+
+.need-help-title-sidebar {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.need-help-subtitle-sidebar {
+    font-size: 12px;
+    color: #6B7280;
+    margin-bottom: 15px;
+}
+
+.btn-documentation-sidebar {
+    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-documentation-sidebar:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 222, 0.3);
 }

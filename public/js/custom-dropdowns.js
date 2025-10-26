@@ -111,13 +111,37 @@ class CustomDropdown {
         if (selectedOption && selectedOption.value !== '') {
             this.selectedText.textContent = selectedOption.textContent;
         } else {
-            this.selectedText.textContent = 'Select an option';
+            // Check if there's a data-title attribute for filter dropdowns
+            const filterTitle = this.select.getAttribute('data-title');
+            if (filterTitle) {
+                this.selectedText.textContent = filterTitle;
+            } else {
+                // Get the first option text as default
+                const firstOption = this.select.querySelector('option');
+                if (firstOption) {
+                    this.selectedText.textContent = firstOption.textContent;
+                } else {
+                    this.selectedText.textContent = 'Select an option';
+                }
+            }
+        }
+        
+        // Add purple color for filter titles
+        if (this.select.hasAttribute('data-title')) {
+            this.selectedText.style.color = '#6B6ADE';
+            this.selectedText.style.fontWeight = '600';
         }
     }
     
     selectOption(value, text) {
         // Update selected text
         this.selectedText.textContent = text;
+        
+        // Reset color to default if it was a filter title
+        if (this.select.hasAttribute('data-title')) {
+            this.selectedText.style.color = '';
+            this.selectedText.style.fontWeight = '';
+        }
         
         // Update original select
         this.select.value = value;

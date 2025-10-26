@@ -16,11 +16,26 @@
                         <small class="text-muted">Manage your vendors and service partners</small>
                     </div>
                     <div class="col-md-6 text-end">
-                        <!-- Add button moved to header -->
+                        <!-- Add button moved to main content -->
                     </div>
                 </div>
 
-                <!-- Search moved to header -->
+                <!-- Search and Add Vendor Section -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" id="vendorSearch" class="form-control" placeholder="Search vendors...">
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ route('business.vendors.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>ADD NEW VENDOR
+                        </a>
+                    </div>
+                </div>
 
                 <div class="record-count">{{ $vendors->total() }} Records Found, Page {{ $vendors->currentPage() }} of {{ $vendors->lastPage() }}</div>
 
@@ -146,7 +161,7 @@
 @push('scripts')
 <script>
 // Search functionality
-document.getElementById('searchInput').addEventListener('input', function() {
+document.getElementById('vendorSearch').addEventListener('input', function() {
     const searchTerm = this.value;
     if (searchTerm.length >= 3 || searchTerm.length === 0) {
         applyFilters();
@@ -159,7 +174,7 @@ document.getElementById('sortByFilter').addEventListener('change', applyFilters)
 document.getElementById('sortDirectionFilter').addEventListener('change', applyFilters);
 
 function applyFilters() {
-    const search = document.getElementById('searchInput').value;
+    const search = document.getElementById('vendorSearch').value;
     const vendorType = document.getElementById('vendorTypeFilter').value;
     const sortBy = document.getElementById('sortByFilter').value;
     const sortDirection = document.getElementById('sortDirectionFilter').value;
@@ -174,7 +189,7 @@ function applyFilters() {
 }
 
 function clearFilters() {
-    document.getElementById('searchInput').value = '';
+    document.getElementById('vendorSearch').value = '';
     document.getElementById('vendorTypeFilter').value = '';
     document.getElementById('sortByFilter').value = 'created_at';
     document.getElementById('sortDirectionFilter').value = 'desc';

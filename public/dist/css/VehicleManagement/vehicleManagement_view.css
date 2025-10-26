@@ -15,10 +15,7 @@
   margin: 20px 0;
 }
 .filter-section {
-  background: #fff;
   padding: 15px 15px;
-  border-radius: 12px;
-  border: none;
 }
 .action-icons {
   cursor: pointer;
@@ -384,3 +381,4 @@ tr:nth-child(4n+4) .price-tooltip {
         width: 100%;
     }
 }
+

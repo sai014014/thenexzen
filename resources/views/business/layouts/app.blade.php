@@ -142,27 +142,10 @@
     <header class="header">
         <div class="row w-100">
             <div class="col-md-6">
-                <div class="head_left">
-                    <div class="header_title">
-                        <div class="title_uptext"></div>
+                <div class="head_lddeft">
+                    <div class="header_tdditle">
                         <h1>@yield('page-title', 'Dashboard')</h1>
                     </div>
-                    @if(request()->routeIs('business.vehicles.index') || request()->routeIs('business.vendors.index') || request()->routeIs('business.customers.index'))
-                    <!-- Common Management Header Controls -->
-                    <div class="common-header-controls">
-                        <div class="common-search-container">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                                <input type="text" id="commonSearch" class="form-control" placeholder="Search {{ request()->routeIs('business.vehicles.index') ? 'vehicles' : (request()->routeIs('business.vendors.index') ? 'vendors' : 'customers') }}...">
-                            </div>
-                            <button type="button" class="btn btn-outline-secondary" onclick="clearSearch()" title="Clear Search">
-                                <i class="fas fa-times me-1"></i>CLEAR
-                            </button>
-                        </div>
-                    </div>
-                    @endif
     </div>
             </div>
             <div class="col-md-6 profileCol">
@@ -182,67 +165,13 @@
                             </div>
                         </div>
                         @endif
-                        @if(request()->routeIs('business.vehicles.index') || request()->routeIs('business.vendors.index') || request()->routeIs('business.customers.index'))
-                        <!-- Dynamic Add Button for Management Pages -->
-                        <div class="common-add-container">
-                            @if(request()->routeIs('business.vehicles.index'))
-                                @php
-                                    $businessAdmin = auth('business_admin')->user();
-                                    $business = $businessAdmin ? $businessAdmin->business : null;
-                                    $subscription = $business ? $business->subscriptions()->whereIn('status', ['active', 'trial'])->first() : null;
-                                    $capacityStatus = $subscription ? $subscription->getVehicleCapacityStatus() : null;
-                                @endphp
-                                @if($capacityStatus && $capacityStatus['can_add'])
-                                    <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
-                                        <i class="fas fa-plus me-2"></i>ADD NEW VEHICLE
-                                    </a>
-                                @elseif($capacityStatus && !$capacityStatus['can_add'])
-                                    <button class="btn btn-primary" onclick="showVehicleLimitModal()">
-                                        <i class="fas fa-plus me-2"></i>ADD NEW VEHICLE
-                    </button>
-                                @else
-                                    <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
-                                        <i class="fas fa-plus me-2"></i>ADD NEW VEHICLE
-                                    </a>
-                                @endif
-                            @elseif(request()->routeIs('business.vendors.index'))
-                                <a href="{{ route('business.vendors.create') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>ADD NEW VENDOR
-                                </a>
-                            @elseif(request()->routeIs('business.customers.index'))
-                                <a href="{{ route('business.customers.create') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus me-2"></i>ADD NEW CUSTOMER
-                                </a>
-                            @endif
-                        </div>
-                        @endif
-                        <div class="scan" id="viewFullScreen">
-                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <g clip-path="url(#clip0_160_572)">
-                                    <path opacity="0.2" fill-rule="evenodd" clip-rule="evenodd" d="M20 40C31.0457 40 40 31.0457 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.0457 8.9543 40 20 40Z" fill="white" />
-                                    <path d="M28.25 15.5C28.25 15.9142 28.5858 16.25 29 16.25C29.4142 16.25 29.75 15.9142 29.75 15.5H28.25ZM24.5 10.25C24.0858 10.25 23.75 10.5858 23.75 11C23.75 11.4142 24.0858 11.75 24.5 11.75V10.25ZM11.75 24.5C11.75 24.0858 11.4142 23.75 11 23.75C10.5858 23.75 10.25 24.0858 10.25 24.5H11.75ZM15.5 29.75C15.9142 29.75 16.25 29.4142 16.25 29C16.25 28.5858 15.9142 28.25 15.5 28.25V29.75ZM15.5 11.75C15.9142 11.75 16.25 11.4142 16.25 11C16.25 10.5858 15.9142 10.25 15.5 10.25V11.75ZM10.25 15.5C10.25 15.9142 10.5858 16.25 11 16.25C11.4142 16.25 11.75 15.9142 11.75 15.5H10.25ZM24.5 28.25C24.0858 28.25 23.75 28.5858 23.75 29C23.75 29.4142 24.0858 29.75 24.5 29.75V28.25ZM29.75 24.5C29.75 24.0858 29.4142 23.75 29 23.75C28.5858 23.75 28.25 24.0858 28.25 24.5H29.75ZM29.75 15.5C29.75 12.6005 27.3995 10.25 24.5 10.25V11.75C26.5711 11.75 28.25 13.4289 28.25 15.5H29.75ZM10.25 24.5C10.25 27.3995 12.6005 29.75 15.5 29.75V28.25C13.4289 28.25 11.75 26.5711 11.75 24.5H10.25ZM15.5 10.25C12.6005 10.25 10.25 12.6005 10.25 15.5H11.75C11.75 13.4289 13.4289 11.75 15.5 11.75V10.25ZM24.5 29.75C27.3995 29.75 29.75 27.3995 29.75 24.5H28.25C28.25 26.5711 26.5711 28.25 24.5 28.25V29.75Z" fill="white" />
-                                </g>
-                                <defs>
-                                    <clipPath id="clip0_160_572">
-                                        <rect width="40" height="40" fill="white" />
-                                    </clipPath>
-                                </defs>
-                            </svg>
+                        <div class="scan header-icon" id="viewFullScreen">
+                            <i class="fas fa-expand"></i>
                         </div>
                         @if($canAccessNotifications)
-                        <div class="notify">
+                        <div class="notify header-icon">
                             <span class="notification-trigger">
-                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <g clip-path="url(#clip0_160_568)">
-                                        <path opacity="0.2" fill-rule="evenodd" clip-rule="evenodd" d="M20 40C31.0457 40 40 31.0457 40 20C40 8.9543 31.0457 0 20 0C8.9543 0 0 8.9543 0 20C0 31.0457 8.9543 40 20 40Z" fill="white" />
-                                        <path d="M14.0278 16.6326L14.7517 16.8287L14.7517 16.8287L14.0278 16.6326ZM18.1584 12.3022L17.9271 11.5888L18.1584 12.3022ZM13.983 16.798L13.2591 16.6019L13.2591 16.6019L13.983 16.798ZM13.7896 20.8674L14.5288 20.7409V20.7409L13.7896 20.8674ZM13.8121 20.9989L13.0728 21.1255L13.0728 21.1255L13.8121 20.9989ZM14.2876 25.4572L14.4373 24.7223L14.2876 25.4572ZM14.6552 25.5321L14.8049 24.7971H14.8049L14.6552 25.5321ZM25.3448 25.5321L25.1951 24.7971H25.1951L25.3448 25.5321ZM25.7124 25.4572L25.8621 26.1921L25.7124 25.4572ZM26.1922 20.9737L26.9315 21.1003V21.1003L26.1922 20.9737ZM26.2161 20.8343L25.4769 20.7077V20.7077L26.2161 20.8343ZM26.0417 16.8262L25.3163 17.0166V17.0166L26.0417 16.8262ZM25.9793 16.5883L26.7047 16.398V16.398L25.9793 16.5883ZM21.9671 12.3084L22.2023 11.5962V11.5962L21.9671 12.3084ZM26.353 21.3008L25.9868 21.9553L26.353 21.3008ZM13.668 21.2892L13.3088 20.6308L13.668 21.2892ZM20.75 11C20.75 10.5858 20.4142 10.25 20 10.25C19.5858 10.25 19.25 10.5858 19.25 11H20.75ZM19.25 12.0047C19.25 12.419 19.5858 12.7547 20 12.7547C20.4142 12.7547 20.75 12.419 20.75 12.0047H19.25ZM17.0091 25.9034L17.0929 25.1581L16.1956 25.0572L16.2611 25.9578L17.0091 25.9034ZM22.9909 25.9034L23.7389 25.9578L23.8044 25.0572L22.9071 25.1581L22.9909 25.9034ZM22.9001 26.4772L23.6285 26.6563L22.9001 26.4772ZM22.8182 26.8106L22.0899 26.6315L22.8182 26.8106ZM20.7039 28.917L20.8784 29.6464H20.8784L20.7039 28.917ZM19.2961 28.917L19.1216 29.6464H19.1216L19.2961 28.917ZM17.1818 26.8106L16.4535 26.9896L17.1818 26.8106ZM17.0999 26.4772L17.8282 26.2981H17.8282L17.0999 26.4772ZM14.7517 16.8287C15.2392 15.0293 16.6205 13.5891 18.3896 13.0157L17.9271 11.5888C15.6795 12.3173 13.925 14.1442 13.3039 16.4364L14.7517 16.8287ZM14.7069 16.9942L14.7517 16.8287L13.3039 16.4364L13.2591 16.6019L14.7069 16.9942ZM14.5288 20.7409C14.3153 19.4939 14.3761 18.215 14.7069 16.9942L13.2591 16.6019C12.8713 18.0331 12.8 19.5322 13.0503 20.994L14.5288 20.7409ZM14.5513 20.8723L14.5288 20.7409L13.0503 20.994L13.0728 21.1255L14.5513 20.8723ZM13.25 23.2604C13.25 22.6932 13.5638 22.2003 14.0271 21.9476L13.3088 20.6308C12.3807 21.137 11.75 22.1251 11.75 23.2604H13.25ZM14.4373 24.7223C13.7489 24.582 13.25 23.9725 13.25 23.2604H11.75C11.75 24.6807 12.7462 25.9085 14.1379 26.1921L14.4373 24.7223ZM14.8049 24.7971L14.4373 24.7223L14.1379 26.1921L14.5055 26.267L14.8049 24.7971ZM25.1951 24.7971C21.7666 25.4956 18.2334 25.4956 14.8049 24.7971L14.5055 26.267C18.1316 27.0057 21.8684 27.0057 25.4945 26.267L25.1951 24.7971ZM25.5627 24.7223L25.1951 24.7971L25.4945 26.267L25.8621 26.1921L25.5627 24.7223ZM26.75 23.2604C26.75 23.9725 26.2511 24.582 25.5627 24.7223L25.8621 26.1921C27.2538 25.9085 28.25 24.6807 28.25 23.2604H26.75ZM25.9868 21.9553C26.4425 22.2103 26.75 22.6989 26.75 23.2604H28.25C28.25 22.1365 27.6319 21.157 26.7192 20.6463L25.9868 21.9553ZM25.4769 20.7077L25.453 20.8471L26.9315 21.1003L26.9554 20.9608L25.4769 20.7077ZM25.3163 17.0166C25.6323 18.2211 25.6871 19.4799 25.4769 20.7077L26.9554 20.9608C27.2017 19.5223 27.1375 18.0474 26.7672 16.6359L25.3163 17.0166ZM25.2539 16.7787L25.3163 17.0166L26.7672 16.6359L26.7047 16.398L25.2539 16.7787ZM21.7319 13.0205C23.4622 13.592 24.7887 15.0057 25.2539 16.7787L26.7047 16.398C26.1113 14.1359 24.4174 12.3278 22.2023 11.5962L21.7319 13.0205ZM18.3896 13.0157C19.474 12.6642 20.6528 12.6642 21.7319 13.0205L22.2023 11.5962C20.8171 11.1387 19.3114 11.14 17.9271 11.5888L18.3896 13.0157ZM26.7192 20.6463C26.8626 20.7265 26.966 20.8988 26.9315 21.1003L25.453 20.8471C25.3735 21.3114 25.6116 21.7453 25.9868 21.9553L26.7192 20.6463ZM13.0728 21.1255C13.0358 20.9092 13.1471 20.719 13.3088 20.6308L14.0271 21.9476C14.3967 21.746 14.6284 21.3228 14.5513 20.8723L13.0728 21.1255ZM19.25 11V12.0047H20.75V11H19.25ZM16.9253 26.6487C18.9687 26.8784 21.0313 26.8784 23.0747 26.6487L22.9071 25.1581C20.9751 25.3753 19.0249 25.3753 17.0929 25.1581L16.9253 26.6487ZM23.6285 26.6563C23.6849 26.4268 23.7218 26.1932 23.7389 25.9578L22.2429 25.849C22.2319 26.0003 22.2081 26.1506 22.1718 26.2981L23.6285 26.6563ZM23.5465 26.9896L23.6285 26.6563L22.1718 26.2981L22.0899 26.6315L23.5465 26.9896ZM20.8784 29.6464C22.1945 29.3315 23.223 28.3052 23.5465 26.9896L22.0899 26.6315C21.8997 27.4047 21.2965 28.004 20.5294 28.1875L20.8784 29.6464ZM19.1216 29.6464C19.6991 29.7845 20.3009 29.7845 20.8784 29.6464L20.5294 28.1875C20.1813 28.2708 19.8187 28.2708 19.4706 28.1875L19.1216 29.6464ZM16.4535 26.9896C16.777 28.3052 17.8055 29.3315 19.1216 29.6464L19.4706 28.1875C18.7035 28.004 18.1003 27.4047 17.9101 26.6315L16.4535 26.9896ZM16.3715 26.6563L16.4535 26.9896L17.9101 26.6315L17.8282 26.2981L16.3715 26.6563ZM16.2611 25.9578C16.2782 26.1932 16.3151 26.4268 16.3715 26.6563L17.8282 26.2981C17.7919 26.1506 17.7681 26.0003 17.7571 25.849L16.2611 25.9578Z" fill="white" />
-                                    </g>
-                                    <defs>
-                                        <clipPath id="clip0_160_568">
-                                            <rect width="40" height="40" fill="white" />
-                                        </clipPath>
-                                    </defs>
-                                </svg>
+                                <i class="fas fa-bell"></i>
                             </span>
                             <div class="notification-badge"></div>
                             <div class="notifications-container" id="notificationsContainer">
@@ -263,11 +192,11 @@
                             </div>
                         </div>
                         @endif
-                        <div class="profile_menu">
+                        <div class="profile_menu header-icon">
                             <div class="profile_img" id="profileBtn">
                                 <img src="{{ asset('images/profile.svg') }}" alt="Profile" id="profileDropdown">
                             </div>
-                            <div class="dropdown-menu" id="dropdownMenu">
+                            <div class="dropdown-menu profile-dropdown-menu" id="dropdownMenu">
                                 <a href="{{ route('business.manage-account.index') }}" class="menu-item manage-account">Manage Account</a>
                                 <a href="{{ route('business.activity-log.index') }}" class="menu-item">Activity Log</a>
                                 <a href="#" class="menu-item" onclick="showChangePasswordModal()">Change Password</a>
@@ -415,111 +344,8 @@
     <script src="{{ asset('dist/js/dashboard/dashboard.js') }}"></script>
     
     @stack('scripts')
-    
-    <!-- Common Search Functionality -->
-    <script>
-    
-    function performLiveSearch() {
-        const searchTerm = document.getElementById('commonSearch').value.toLowerCase().trim();
-        const currentPath = window.location.pathname;
-        
-        // Always use client-side search for live filtering
-        let tableBody = null;
-        let recordCountElement = null;
-        
-        if (currentPath.includes('/vehicles')) {
-            tableBody = document.getElementById('vehicleTableBody');
-            recordCountElement = document.querySelector('.record-count');
-        } else if (currentPath.includes('/vendors')) {
-            tableBody = document.getElementById('vendorTableBody');
-            recordCountElement = document.querySelector('.record-count');
-        } else if (currentPath.includes('/customers')) {
-            tableBody = document.getElementById('customerTableBody');
-            recordCountElement = document.querySelector('.record-count');
-        }
-        
-        if (!tableBody) return;
-        
-        const rows = tableBody.querySelectorAll('tr');
-        let visibleCount = 0;
-        
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            if (text.includes(searchTerm)) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-        
-        // Update record count
-        if (recordCountElement) {
-            if (searchTerm) {
-                recordCountElement.textContent = `${visibleCount} Records Found (filtered from ${rows.length} total)`;
-            } else {
-                // Get original count from data attribute or calculate
-                const originalCount = recordCountElement.getAttribute('data-original-count') || rows.length;
-                recordCountElement.textContent = `${originalCount} Records Found`;
-            }
-        }
-        
-        // Hide/show pagination based on search results
-        const pagination = document.querySelector('.pagination');
-        if (pagination) {
-            if (searchTerm && visibleCount === 0) {
-                pagination.style.display = 'none';
-            } else {
-                pagination.style.display = '';
-            }
-        }
-    }
-    
-    function clearSearch() {
-        const searchInput = document.getElementById('commonSearch');
-        if (searchInput) {
-            searchInput.value = '';
-            performLiveSearch(); // Always use client-side clear
-        }
-    }
-    
-    // Initialize search functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('commonSearch');
-        if (searchInput) {
-            // Store original record count
-            const recordCountElement = document.querySelector('.record-count');
-            if (recordCountElement && !recordCountElement.getAttribute('data-original-count')) {
-                const currentPath = window.location.pathname;
-                if (currentPath.includes('/vehicles')) {
-                    const tableBody = document.getElementById('vehicleTableBody');
-                    if (tableBody) {
-                        const rowCount = tableBody.querySelectorAll('tr').length;
-                        recordCountElement.setAttribute('data-original-count', rowCount);
-                    }
-                }
-            }
-            
-            // Live search works automatically on input - no button needed
-            
-            // Live search on input with debounce
-            let searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    performLiveSearch();
-                }, 200); // 200ms debounce for very responsive live search
-            });
-            
-            // Clear search on Escape key
-            searchInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    clearSearch();
-                }
-            });
-        }
-    });
-    </script>
+
+    <!-- Change Password Modal -->
 
     <!-- Change Password Modal -->
     <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">

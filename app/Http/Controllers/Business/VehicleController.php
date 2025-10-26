@@ -58,7 +58,7 @@ class VehicleController extends Controller
             }
         }
 
-        $vehicles = $query->latest()->paginate(15);
+        $vehicles = $query->latest()->paginate(20);
         
         // Get subscription information for capacity display
         $subscription = $business->subscriptions()->whereIn('status', ['active', 'trial'])->first();
@@ -416,34 +416,73 @@ class VehicleController extends Controller
         }
 
         try {
-            $request->validate([
-                'is_available' => 'required|boolean',
-                'unavailable_from' => 'nullable|date',
-                'unavailable_until' => 'nullable|date|after_or_equal:unavailable_from',
-            ]);
-
-            $updateData = [
-                'is_available' => $request->is_available,
-            ];
-
-            // Only update unavailable dates if vehicle is being marked as unavailable
-            if (!$request->is_available) {
-                $updateData['unavailable_from'] = $request->unavailable_from;
-                $updateData['unavailable_until'] = $request->unavailable_until;
+            // Handle new status-based approach
+            if ($request->has('status')) {
+                $status = $request->status;
+                $updateData = ['vehicle_status' => $status];
+                
+                // Handle inactive with date or manual toggle
+                if ($status === 'inactive') {
+                    $updateData['is_available'] = false;
+                    
+                    if ($request->has('inactive_until_manual') && $request->inactive_until_manual) {
+                        // Set until manual toggle - leave unavailable_until as null or set to very far future
+                        // Don't set unavailable_until, will remain null or current value
+                        $updateData['unavailable_until'] = null;
+                    } elseif ($request->has('inactive_until_date') && $request->inactive_until_date) {
+                        // Set until specific date
+                        $updateData['unavailable_until'] = $request->inactive_until_date;
+                    }
+                } elseif ($status === 'under_maintenance') {
+                    // Mark as under maintenance
+                    $updateData['is_available'] = false;
+                } else {
+                    // Active - mark as available
+                    $updateData['is_available'] = true;
+                    $updateData['unavailable_until'] = null;
+                }
             } else {
-                // Clear unavailable dates when marking as available
-                $updateData['unavailable_from'] = null;
-                $updateData['unavailable_until'] = null;
+                // Old method - backward compatibility
+                $request->validate([
+                    'is_available' => 'required|boolean',
+                    'unavailable_from' => 'nullable|date',
+                    'unavailable_until' => 'nullable|date|after_or_equal:unavailable_from',
+                ]);
+
+                $updateData = [
+                    'is_available' => $request->is_available,
+                ];
+
+                // Only update unavailable dates if vehicle is being marked as unavailable
+                if (!$request->is_available) {
+                    $updateData['unavailable_from'] = $request->unavailable_from;
+                    $updateData['unavailable_until'] = $request->unavailable_until;
+                } else {
+                    // Clear unavailable dates when marking as available
+                    $updateData['unavailable_from'] = null;
+                    $updateData['unavailable_until'] = null;
+                }
             }
 
             $vehicle->update($updateData);
-
-            $status = $request->is_available ? 'available' : 'unavailable';
             
-            if ($request->ajax()) {
+            // Log the update for debugging
+            \Log::info('Vehicle status updated', [
+                'vehicle_id' => $vehicle->id,
+                'vehicle_status' => $vehicle->fresh()->vehicle_status,
+                'is_available' => $vehicle->fresh()->is_available,
+                'unavailable_until' => $vehicle->fresh()->unavailable_until,
+                'update_data' => $updateData
+            ]);
+
+            $statusMessage = $request->has('status') ? ucfirst(str_replace('_', ' ', $request->status)) : ($updateData['is_available'] ? 'available' : 'unavailable');
+            
+            // Always return JSON for API requests
+            if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => "Vehicle marked as {$status} successfully!",
+                    'message' => "Vehicle status updated to {$statusMessage} successfully!",
+                    'vehicle_status' => $vehicle->vehicle_status,
                     'is_available' => $vehicle->is_available,
                     'unavailable_from' => $vehicle->unavailable_from,
                     'unavailable_until' => $vehicle->unavailable_until,
@@ -451,7 +490,7 @@ class VehicleController extends Controller
             }
 
             return redirect()->back()
-                ->with('success', "Vehicle marked as {$status} successfully!");
+                ->with('success', "Vehicle status updated to {$statusMessage} successfully!");
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->ajax()) {
                 return response()->json([

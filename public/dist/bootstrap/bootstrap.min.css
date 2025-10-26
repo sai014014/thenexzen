@@ -2885,8 +2885,8 @@ textarea.form-control.is-invalid {
   }
 }
 .btn:hover {
-  color: var(--bs-btn-hover-color);
-  background-color: var(--bs-btn-hover-bg);
+  color: black;
+  background-color: #fff;
   border-color: var(--bs-btn-hover-border-color);
 }
 .btn-check + .btn:hover {
@@ -2911,9 +2911,9 @@ textarea.form-control.is-invalid {
 .btn.show,
 .btn:first-child:active,
 :not(.btn-check) + .btn:active {
-  color: var(--bs-btn-active-color);
-  background-color: var(--bs-btn-active-bg);
-  border-color: var(--bs-btn-active-border-color);
+  color: black;
+  background-color: #fff;
+ 
 }
 .btn-check:checked + .btn:focus-visible,
 .btn.active:focus-visible,

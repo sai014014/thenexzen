@@ -20,7 +20,22 @@
                 </div>
             </div>
             <div class="card-body">
-                <!-- Search moved to header -->
+                <!-- Search and Add Customer Section -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" id="customerSearch" class="form-control" placeholder="Search customers...">
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ route('business.customers.create') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>ADD NEW CUSTOMER
+                        </a>
+                    </div>
+                </div>
 
                 <div class="record-count">{{ $customers->total() }} Records Found, Page {{ $customers->currentPage() }} of {{ $customers->lastPage() }}</div>
 
@@ -192,7 +207,7 @@
 @push('scripts')
 <script>
 // Search functionality
-document.getElementById('searchInput').addEventListener('input', function() {
+document.getElementById('customerSearch').addEventListener('input', function() {
     const searchTerm = this.value;
     if (searchTerm.length >= 3 || searchTerm.length === 0) {
         applyFilters();
@@ -205,7 +220,7 @@ document.getElementById('statusFilter').addEventListener('change', applyFilters)
 document.getElementById('licenseStatusFilter').addEventListener('change', applyFilters);
 
 function applyFilters() {
-    const search = document.getElementById('searchInput').value;
+    const search = document.getElementById('customerSearch').value;
     const customerType = document.getElementById('customerTypeFilter').value;
     const status = document.getElementById('statusFilter').value;
     const licenseStatus = document.getElementById('licenseStatusFilter').value;
@@ -220,7 +235,7 @@ function applyFilters() {
 }
 
 function clearFilters() {
-    document.getElementById('searchInput').value = '';
+    document.getElementById('customerSearch').value = '';
     document.getElementById('customerTypeFilter').value = '';
     document.getElementById('statusFilter').value = '';
     document.getElementById('licenseStatusFilter').value = '';

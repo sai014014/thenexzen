@@ -72,7 +72,6 @@
                         </div>
                         <div>
                             <div class="fw-bold">{{ $customer->display_name }}</div>
-                            <small class="text-muted">{{ $customer->primary_contact }}</small>
                         </div>
                     </div>
                 </td>
@@ -89,10 +88,7 @@
                 </td>
                 <td>
                     <div>
-                        <i class="fas fa-phone me-1"></i>{{ $customer->primary_contact }}
-                        @if($customer->primary_email)
-                            <br><small class="text-muted"><i class="fas fa-envelope me-1"></i>{{ $customer->primary_email }}</small>
-                        @endif
+                        {{ $customer->primary_contact }}
                     </div>
                 </td>
                 <td>{{ $customer->created_at->format('M d, Y') }}</td>

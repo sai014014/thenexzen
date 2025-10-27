@@ -32,7 +32,7 @@ class AuthController extends Controller
                 'encryption' => 'tls',
                 'username' => 'arqam@hecown.com',
                 'password' => 'Hecown@2025',
-                'from_address' => 'info@thenexzen.com',
+                'from_address' => 'info@hecown.com',
                 'from_name' => 'NexZen',
             ],
             'active' => 'custom',

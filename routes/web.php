@@ -8,7 +8,6 @@ use App\Http\Controllers\SuperAdmin\BusinessController as SuperAdminBusinessCont
 use App\Http\Controllers\SuperAdmin\BugController as SuperAdminBugController;
 use App\Http\Controllers\Business\AuthController as BusinessAuthController;
 use App\Http\Controllers\Business\DashboardController as BusinessDashboardController;
-use App\Http\Controllers\TestOTPController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,72 +21,6 @@ use App\Http\Controllers\TestOTPController;
 */
 
 
-// Alternative routes without prefix (backup) - These should work
-Route::get('/test-otp-check-config', [TestOTPController::class, 'checkConfig']);
-Route::post('/test-otp-send-basic', [TestOTPController::class, 'sendBasic']);
-Route::post('/test-otp-send-otp', [TestOTPController::class, 'sendOTP']);
-Route::post('/test-otp-send-custom-smtp', [TestOTPController::class, 'sendCustomSMTP']);
-
-// Test email configuration
-Route::get('/test-email-config', function() {
-    $controller = new \App\Http\Controllers\Business\AuthController();
-    $reflection = new \ReflectionClass($controller);
-    $method = $reflection->getMethod('getActiveEmailConfig');
-    $method->setAccessible(true);
-    $config = $method->invoke($controller);
-    
-    return response()->json([
-        'email_config' => [
-            'host' => $config['host'],
-            'port' => $config['port'],
-            'username' => $config['username'],
-            'password' => substr($config['password'], 0, 3) . '***',
-            'from_address' => $config['from_address'],
-            'from_name' => $config['from_name'],
-        ],
-        'laravel_config' => [
-            'host' => config('mail.mailers.smtp.host'),
-            'port' => config('mail.mailers.smtp.port'),
-            'username' => config('mail.mailers.smtp.username'),
-        ]
-    ]);
-});
-
-// Test business registration OTP directly
-Route::post('/test-business-otp', function(\Illuminate\Http\Request $request) {
-    try {
-        $controller = new \App\Http\Controllers\Business\AuthController();
-        return $controller->sendOTP($request);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Exception: ' . $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-    } catch (Error $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'PHP Error: ' . $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-    }
-});
-
-// Simple working routes for testing
-Route::get('/email-config', function() {
-    $controller = new \App\Http\Controllers\TestOTPController();
-    return $controller->checkConfig();
-});
-
-Route::post('/email-test-basic', function(\Illuminate\Http\Request $request) {
-    $controller = new \App\Http\Controllers\TestOTPController();
-    return $controller->sendBasic($request);
-});
-
-Route::post('/email-test-otp', function(\Illuminate\Http\Request $request) {
-    $controller = new \App\Http\Controllers\TestOTPController();
-    return $controller->sendOTP($request);
-});
 
 Route::get('/', function () {
     return view('welcome');
@@ -188,6 +121,12 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::post('/register/verify-otp', [BusinessAuthController::class, 'verifyOTP'])->name('register.verify-otp');
         Route::post('/register/resend-otp', [BusinessAuthController::class, 'resendOTP'])->name('register.resend-otp');
         Route::post('/register', [BusinessAuthController::class, 'register'])->name('register.submit');
+        
+        // Password Reset Routes
+        Route::get('/password/reset', [BusinessAuthController::class, 'showLinkRequestForm'])->name('password.request');
+        Route::post('/password/email', [BusinessAuthController::class, 'sendResetLinkEmail'])->name('password.email');
+        Route::get('/password/reset/{token}', [BusinessAuthController::class, 'showResetForm'])->name('password.reset');
+        Route::post('/password/reset', [BusinessAuthController::class, 'resetPassword'])->name('password.update');
     });
 
     // Vehicle API Routes for dropdowns (accessible without authentication)
@@ -298,64 +237,6 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::get('/api/vehicles/available', [\App\Http\Controllers\Business\BookingController::class, 'getAvailableVehicles'])->name('api.vehicles.available');
         Route::get('/api/customers/search', [\App\Http\Controllers\Business\BookingController::class, 'searchCustomers'])->name('api.customers.search');
     });
-});
-
-// Test route
-Route::get('/test', function () {
-    return 'Hello World - Laravel 12 is working!';
-});
-
-// Simple test route
-Route::get('/test-simple-route', function () {
-    return response()->json([
-        'success' => true,
-        'message' => 'Simple route is working',
-        'time' => now(),
-        'laravel_version' => app()->version()
-    ]);
-});
-
-// Direct test for checkConfig method
-Route::get('/test-check-config', function () {
-    try {
-        $controller = new \App\Http\Controllers\TestOTPController();
-        return $controller->checkConfig();
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Exception: ' . $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-    } catch (Error $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'PHP Error: ' . $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-    }
-});
-
-// Debug route for TestOTPController
-Route::get('/test-otp-debug', function () {
-    try {
-        $controller = new \App\Http\Controllers\TestOTPController();
-        $reflection = new ReflectionClass($controller);
-        $method = $reflection->getMethod('getEmailConfig');
-        $method->setAccessible(true);
-        $config = $method->invoke($controller);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'TestOTPController is working',
-            'config' => $config
-        ]);
-    } catch (Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-    }
 });
 
 // Laravel Breeze routes (for user authentication)

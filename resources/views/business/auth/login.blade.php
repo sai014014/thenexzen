@@ -57,6 +57,9 @@
 
                             <label for="password">Password:</label>
                             <input class="loginInput" type="password" id="password" name="password" required>
+                            <div style="text-align: right; margin-top: -10px; margin-bottom: 15px;">
+                                <a href="{{ route('business.password.request') }}" style="color: #6B6ADE; text-decoration: none; font-size: 14px;">Forgot Password?</a>
+                            </div>
                             <button class="submit loginSubmit" type="submit">Log in</button>
                         </form>
                         <div class="register" style="text-align:center ">

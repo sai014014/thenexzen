@@ -15,6 +15,7 @@ use Illuminate\Support\Str;
 use App\Models\Business;
 use App\Models\BusinessAdmin;
 use App\Mail\BusinessRegistrationOTP;
+use App\Mail\BusinessPasswordReset;
 
 class AuthController extends Controller
 {
@@ -26,12 +27,12 @@ class AuthController extends Controller
         return [
             // Custom SMTP Configuration (Working configuration)
             'custom' => [
-                'host' => 'mail.zenvueservices.com',
-                'port' => 587,
+                'host' => 'mail.hecown.com',
+                'port' => 465,
                 'encryption' => 'tls',
-                'username' => 'vinay@zenvueservices.com',
-                'password' => 'Zenvue@2025',
-                'from_address' => 'info@nexzen.com',
+                'username' => 'arqam@hecown.com',
+                'password' => 'Hecown@2025',
+                'from_address' => 'info@thenexzen.com',
                 'from_name' => 'NexZen',
             ],
             'active' => 'custom',
@@ -434,5 +435,102 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('business.login');
+    }
+
+    // Password Reset Methods
+    public function showLinkRequestForm()
+    {
+        return view('business.auth.password.forgot');
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $businessAdmin = BusinessAdmin::where('email', $request->email)->first();
+
+        if (!$businessAdmin) {
+            // Don't reveal if email exists or not for security
+            return back()->with('status', 'If that email address exists in our system, we will send you a password reset link.');
+        }
+
+        // Generate password reset token
+        $token = Str::random(60);
+        
+        // Store in cache for 60 minutes
+        Cache::put("password_reset_token_{$token}", [
+            'email' => $businessAdmin->email,
+            'user_id' => $businessAdmin->id,
+            'created_at' => now()
+        ], 3600);
+
+        try {
+            // Apply email configuration
+            $this->applyEmailConfig();
+            
+            // Send password reset email
+            Mail::to($businessAdmin->email)->send(new BusinessPasswordReset($token, $businessAdmin));
+            
+            \Log::info("Password reset email sent to {$businessAdmin->email}");
+            
+            return back()->with('status', 'Password reset link sent successfully! Please check your email.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to send password reset email: ' . $e->getMessage());
+            
+            return back()->withErrors(['email' => 'Failed to send password reset email. Please try again later.']);
+        }
+    }
+
+    public function showResetForm(Request $request, $token)
+    {
+        $resetData = Cache::get("password_reset_token_{$token}");
+        
+        if (!$resetData) {
+            return redirect()->route('business.password.request')
+                ->withErrors(['token' => 'This password reset token is invalid or has expired.']);
+        }
+
+        return view('business.auth.password.reset', ['token' => $token, 'email' => $resetData['email']]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|string|min:6|confirmed'
+        ]);
+
+        $resetData = Cache::get("password_reset_token_{$request->token}");
+        
+        if (!$resetData) {
+            return back()->withErrors(['token' => 'This password reset token is invalid or has expired.']);
+        }
+
+        if ($resetData['email'] !== $request->email) {
+            return back()->withErrors(['email' => 'Email does not match.']);
+        }
+
+        // Find the user
+        $businessAdmin = BusinessAdmin::where('email', $request->email)->first();
+        
+        if (!$businessAdmin) {
+            return back()->withErrors(['email' => 'User not found.']);
+        }
+
+        // Update password
+        $businessAdmin->password = Hash::make($request->password);
+        $businessAdmin->save();
+
+        // Delete the token
+        Cache::forget("password_reset_token_{$request->token}");
+
+        \Log::info("Password reset successfully for user: {$businessAdmin->email}");
+
+        return redirect()->route('business.login')
+            ->with('status', 'Password has been reset successfully. You can now login with your new password.');
     }
 }

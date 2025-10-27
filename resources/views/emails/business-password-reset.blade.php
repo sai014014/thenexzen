@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Business Registration OTP - The NexZen</title>
+    <title>Reset Your Password - The NexZen</title>
     <style>
         body {
             font-family: 'Poppins', Arial, sans-serif;
@@ -30,21 +30,18 @@
             color: #6B6ADE;
             margin-bottom: 10px;
         }
-        .otp-box {
-            background-color: #f8f9fa;
-            border: 2px solid #6B6ADE;
-            border-radius: 8px;
-            padding: 25px;
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #6B6ADE;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
             text-align: center;
-            margin: 25px 0;
         }
-        .otp-code {
-            font-size: 36px;
-            font-weight: bold;
-            color: #6B6ADE;
-            letter-spacing: 8px;
-            margin: 15px 0;
-            font-family: 'Courier New', monospace;
+        .button:hover {
+            background-color: #5a5ac8;
         }
         .footer {
             margin-top: 30px;
@@ -62,49 +59,35 @@
             margin: 20px 0;
             color: #856404;
         }
-        .success {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 20px 0;
-            color: #155724;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="logo">The NexZen</div>
-            <h2>Business Registration Verification</h2>
+            <h2>Reset Your Password</h2>
         </div>
 
-        <p>Hello <strong><?php echo e($adminName); ?></strong>,</p>
+        <p>Hello {{ $businessAdmin->name }},</p>
 
-        <p>Thank you for registering your business <strong>"<?php echo e($businessName); ?>"</strong> with The NexZen platform.</p>
+        <p>We received a request to reset your password for your NexZen business account.</p>
 
-        <p>To complete your registration, please use the following One-Time Password (OTP):</p>
+        <p>Click the button below to reset your password:</p>
 
-        <div class="otp-box">
-            <p style="margin: 0 0 15px 0; font-weight: 600; font-size: 16px;">Your Verification Code:</p>
-            <div class="otp-code"><?php echo e($otp); ?></div>
-            <p style="margin: 15px 0 0 0; font-size: 14px; color: #6c757d;">Valid for 10 minutes</p>
+        <div style="text-align: center;">
+            <a href="{{ url('/business/password/reset/' . $token) }}" class="button">Reset Password</a>
         </div>
+
+        <p>Or copy and paste this link into your browser:</p>
+        <p style="word-break: break-all; color: #6B6ADE;">{{ url('/business/password/reset/' . $token) }}</p>
 
         <div class="warning">
             <strong>⚠️ Important Security Notice:</strong><br>
-            This OTP is valid for 10 minutes only. If you don't use it within this time, you'll need to request a new one. Never share this code with anyone.
+            This password reset link will expire in 60 minutes.<br>
+            If you didn't request a password reset, please ignore this email or contact support immediately.
         </div>
 
-        <div class="success">
-            <strong>✅ Next Steps:</strong><br>
-            1. Enter this OTP in the registration form<br>
-            2. Create your password<br>
-            3. Complete your business profile<br>
-            4. Start managing your fleet!
-        </div>
-
-        <p>If you didn't request this registration, please ignore this email or contact our support team immediately.</p>
+        <p>If you didn't request a password reset, please contact our support team or simply ignore this email.</p>
 
         <div class="footer">
             <p><strong>The NexZen Team</strong><br>
@@ -117,4 +100,5 @@
         </div>
     </div>
 </body>
-</html><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/emails/business-registration-otp.blade.php ENDPATH**/ ?>
+</html>
+

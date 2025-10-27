@@ -190,6 +190,15 @@ class AuthController extends Controller
             // Apply custom email configuration
             $this->applyEmailConfig();
             
+            // Log email attempt
+            \Log::info("Attempting to send OTP email to {$request->admin_email} for business: {$request->business_name}");
+            \Log::info("Email config: " . json_encode([
+                'host' => config('mail.mailers.smtp.host'),
+                'port' => config('mail.mailers.smtp.port'),
+                'username' => config('mail.mailers.smtp.username'),
+                'from' => config('mail.from.address')
+            ]));
+            
             // Send OTP via email using custom configuration
             Mail::to($request->admin_email)->send(new BusinessRegistrationOTP(
                 $otp,
@@ -201,7 +210,7 @@ class AuthController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'OTP sent successfully to your email!',
+                'message' => 'OTP sent successfully to your email! Please check your inbox (and spam folder).',
                 'session_id' => $sessionId,
                 'email' => $request->admin_email
             ]);
@@ -210,12 +219,15 @@ class AuthController extends Controller
             \Log::error('Failed to send OTP email: ' . $e->getMessage(), [
                 'email' => $request->admin_email,
                 'business_name' => $request->business_name,
-                'error' => $e->getTraceAsString()
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
             
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send OTP. Please check your email configuration or try again later.'
+                'message' => 'Failed to send OTP: ' . $e->getMessage() . '. Please check your email configuration.'
             ], 500);
         }
     }

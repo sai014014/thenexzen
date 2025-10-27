@@ -28,6 +28,31 @@ Route::post('/test-otp-send-basic', [TestOTPController::class, 'sendBasic']);
 Route::post('/test-otp-send-otp', [TestOTPController::class, 'sendOTP']);
 Route::post('/test-otp-send-custom-smtp', [TestOTPController::class, 'sendCustomSMTP']);
 
+// Test email configuration
+Route::get('/test-email-config', function() {
+    $controller = new \App\Http\Controllers\Business\AuthController();
+    $reflection = new \ReflectionClass($controller);
+    $method = $reflection->getMethod('getActiveEmailConfig');
+    $method->setAccessible(true);
+    $config = $method->invoke($controller);
+    
+    return response()->json([
+        'email_config' => [
+            'host' => $config['host'],
+            'port' => $config['port'],
+            'username' => $config['username'],
+            'password' => substr($config['password'], 0, 3) . '***',
+            'from_address' => $config['from_address'],
+            'from_name' => $config['from_name'],
+        ],
+        'laravel_config' => [
+            'host' => config('mail.mailers.smtp.host'),
+            'port' => config('mail.mailers.smtp.port'),
+            'username' => config('mail.mailers.smtp.username'),
+        ]
+    ]);
+});
+
 // Test business registration OTP directly
 Route::post('/test-business-otp', function(\Illuminate\Http\Request $request) {
     try {
@@ -128,6 +153,11 @@ Route::prefix('super-admin')->name('super-admin.')->group(function () {
         Route::delete('/bug-attachments/{attachment}', [SuperAdminBugController::class, 'deleteAttachment'])->name('bug-attachments.destroy');
         Route::resource('bugs', SuperAdminBugController::class);
         
+        // Notification Management Routes
+        Route::resource('notifications', \App\Http\Controllers\SuperAdmin\NotificationController::class);
+        Route::post('/notifications/bulk-send', [\App\Http\Controllers\SuperAdmin\NotificationController::class, 'bulkSend'])->name('notifications.bulk-send');
+        Route::post('/notifications/send-to-all', [\App\Http\Controllers\SuperAdmin\NotificationController::class, 'sendToAll'])->name('notifications.send-to-all');
+        
         // Cache Management Routes
         Route::post('/cache/clear', [\App\Http\Controllers\SuperAdmin\CacheController::class, 'clearAllCache'])->name('cache.clear');
         Route::get('/cache/status', [\App\Http\Controllers\SuperAdmin\CacheController::class, 'getCacheStatus'])->name('cache.status');
@@ -218,7 +248,9 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::resource('notifications', \App\Http\Controllers\Business\NotificationsController::class);
         Route::post('/notifications/{notification}/snooze', [\App\Http\Controllers\Business\NotificationsController::class, 'snooze'])->name('notifications.snooze');
         Route::post('/notifications/{notification}/complete', [\App\Http\Controllers\Business\NotificationsController::class, 'markCompleted'])->name('notifications.complete');
+        Route::delete('/notifications/{notification}', [\App\Http\Controllers\Business\NotificationsController::class, 'delete'])->name('notifications.delete');
         Route::get('/notifications/count', [\App\Http\Controllers\Business\NotificationsController::class, 'getNotificationCount'])->name('notifications.count');
+        Route::get('notificationManagement/get-dashboardNotifications', [\App\Http\Controllers\Business\NotificationsController::class, 'getDashboardNotifications'])->name('notifications.dashboard');
         
         // Customer Management Routes
         Route::resource('customers', \App\Http\Controllers\Business\CustomerController::class);

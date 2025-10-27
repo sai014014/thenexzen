@@ -322,7 +322,7 @@
 <!-- Notifications List -->
 @if($notifications->count() > 0)
     @foreach($notifications as $notification)
-        <div class="notification-card {{ $notification->status }}">
+        <div class="notification-card {{ $notification->status }}" id="notification-{{ $notification->id }}">
             <div class="notification-header">
                 <h5 class="notification-title">
                     <i class="{{ $notification->category_icon }} me-2"></i>
@@ -348,6 +348,11 @@
                             <i class="fas fa-exclamation-triangle"></i> Overdue
                         </span>
                     @endif
+                    @if($notification->is_snoozed)
+                        <span class="text-warning ms-2">
+                            <i class="fas fa-clock"></i> Snoozed until {{ $notification->snooze_until->format('M d, Y H:i') }}
+                        </span>
+                    @endif
                 </div>
                 <div>
                     @if($notification->vehicle)
@@ -363,7 +368,7 @@
                     </a>
                 @endif
 
-                @if(!$notification->is_completed)
+                @if(!$notification->is_completed && !$notification->is_snoozed)
                     <button type="button" class="btn btn-snooze btn-sm" data-bs-toggle="modal" data-bs-target="#snoozeModal" data-notification-id="{{ $notification->id }}">
                         <i class="fas fa-clock me-1"></i> Snooze
                     </button>
@@ -371,6 +376,13 @@
                     <button type="button" class="btn btn-complete btn-sm" onclick="markCompleted({{ $notification->id }})">
                         <i class="fas fa-check me-1"></i> Mark Complete
                     </button>
+                @elseif($notification->is_snoozed)
+                    <span class="badge bg-warning text-dark">
+                        <i class="fas fa-clock me-1"></i> Snoozed
+                    </span>
+                    <span class="text-muted small">
+                        Until: {{ $notification->snooze_until->format('M d, Y H:i') }}
+                    </span>
                 @endif
 
                 <button type="button" class="btn btn-delete btn-sm" onclick="deleteNotification({{ $notification->id }})">
@@ -520,7 +532,14 @@ function deleteNotification(notificationId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                location.reload();
+                // Show success message
+                alert('Notification deleted successfully');
+                // Remove the notification card from the DOM
+                document.getElementById('notification-' + notificationId).remove();
+                // If no more notifications, reload to show empty state
+                if (document.querySelectorAll('.notification-card').length === 0) {
+                    location.reload();
+                }
             } else {
                 alert('Error: ' + data.message);
             }

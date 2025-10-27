@@ -4,176 +4,138 @@
 @section('page-title', 'Customer Management')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h5 class="mb-0">
-                            <i class="fas fa-users me-2"></i>Customer Management
-                        </h5>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <!-- Add button moved to header -->
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- Search and Add Customer Section -->
-                <div class="row mb-3">
-                    <div class="col-md-8">
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input type="text" id="customerSearch" class="form-control" placeholder="Search customers...">
+<div class="content-wrapper">
+                <!-- Search, Filters and Add Customer Section -->
+                <div class="row mb-3 align-items-end filter-row">
+                    <div class="col-md-4">
+                        <div class="customer-search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="customerSearch" class="form-control search-input" placeholder="Search customers...">
                         </div>
                     </div>
-                    <div class="col-md-4 text-end">
+                    <div class="col-md-2">
+                        <select id="customerTypeFilter" class="form-select" data-title="Customer Type">
+                            <option value="">Customer Type</option>
+                            <option value="individual">Individual</option>
+                            <option value="corporate">Corporate</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select id="statusFilter" class="form-select" data-title="Status">
+                            <option value="">Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select id="licenseStatusFilter" class="form-select" data-title="License Status">
+                            <option value="">License Status</option>
+                            <option value="valid">Valid</option>
+                            <option value="expired">Expired</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 text-end">
                         <a href="{{ route('business.customers.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i>ADD NEW CUSTOMER
                         </a>
                     </div>
                 </div>
 
-                <div class="record-count">{{ $customers->total() }} Records Found, Page {{ $customers->currentPage() }} of {{ $customers->lastPage() }}</div>
-
-                <!-- Customer List Table -->
-                <div class="table-responsive">
-                    <table id="customerTable" class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Customer ID</th>
-                                <th>Type</th>
-                                <th>Name / Company</th>
-                                <th>Primary Contact</th>
-                                <th>Registration Date</th>
-                                <th>Status</th>
-                                <th>License Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customerTableBody">
-                            @forelse($customers as $customer)
-                            <tr>
-                                <td>
-                                    <span class="badge bg-secondary">#{{ str_pad($customer->id, 6, '0', STR_PAD_LEFT) }}</span>
-                                </td>
-                                <td>
-                                    @if($customer->customer_type === 'individual')
-                                        <span class="badge bg-info">
-                                            <i class="fas fa-user me-1"></i>Individual
-                                        </span>
-                                    @else
-                                        <span class="badge bg-warning">
-                                            <i class="fas fa-building me-1"></i>Corporate
-                                        </span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div>
-                                        <strong>{{ $customer->display_name }}</strong>
-                                        @if($customer->customer_type === 'corporate' && $customer->contact_person_name)
-                                            <br><small class="text-muted">Contact: {{ $customer->contact_person_name }}</small>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        <i class="fas fa-phone me-1"></i>{{ $customer->primary_contact }}
-                                        @if($customer->primary_email)
-                                            <br><small class="text-muted"><i class="fas fa-envelope me-1"></i>{{ $customer->primary_email }}</small>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td>{{ $customer->created_at->format('M d, Y') }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="form-check form-switch me-2">
-                                            <input class="form-check-input status-toggle" type="checkbox" 
-                                                   id="statusToggle{{ $customer->id }}" 
-                                                   data-customer-id="{{ $customer->id }}"
-                                                   {{ $customer->status === 'active' ? 'checked' : '' }}>
-                                        </div>
-                                        <div class="status-badge">
-                                            @switch($customer->status)
-                                                @case('active')
-                                                    <span class="badge bg-success" id="statusBadge{{ $customer->id }}">Active</span>
-                                                    @break
-                                                @case('inactive')
-                                                    <span class="badge bg-danger" id="statusBadge{{ $customer->id }}">Inactive</span>
-                                                    @break
-                                                @case('pending')
-                                                    <span class="badge bg-warning" id="statusBadge{{ $customer->id }}">Pending</span>
-                                                    @break
-                                            @endswitch
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    @if($customer->license_expiry_date)
-                                        @switch($customer->license_status)
-                                            @case('valid')
-                                                <span class="badge bg-success">Valid</span>
-                                                @break
-                                            @case('near_expiry')
-                                                <span class="badge bg-warning">Near Expiry</span>
-                                                @break
-                                            @case('expired')
-                                                <span class="badge bg-danger">Expired</span>
-                                                @break
-                                        @endswitch
-                                        <br><small class="text-muted">{{ $customer->license_expiry_date->format('M d, Y') }}</small>
-                                    @else
-                                        <span class="badge bg-secondary">N/A</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="{{ route('business.customers.show', $customer) }}" class="btn btn-sm btn-outline-primary" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('business.customers.edit', $customer) }}" class="btn btn-sm btn-outline-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="confirmDelete({{ $customer->id }})" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="8" class="text-center py-4">
-                                    <div class="text-muted">
-                                        <i class="fas fa-users fa-3x mb-3"></i>
-                                        <p>No customers found</p>
-                                        <a href="{{ route('business.customers.create') }}" class="btn btn-primary">
-                                            <i class="fas fa-plus me-2"></i>Add First Customer
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                @if($customers->hasPages())
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <div>
-                        Showing {{ $customers->firstItem() }} to {{ $customers->lastItem() }} of {{ $customers->total() }} results
+<!-- Customer List Table -->
+<div class="table-responsive">
+    <table id="customerTable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th class="customer_title">Customer</th>
+                <th>Type</th>
+                <th>Contact</th>
+                <th>Registration Date</th>
+                <th>Status</th>
+                <th>License Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="customerTableBody">
+            @forelse($customers as $customer)
+            <tr>
+                <td class="customer_title">
+                    <div class="d-flex align-items-center">
+                        @php
+                            $colors = ['#6B6ADE', '#FF6B6B', '#4ECDC4', '#FFE66D', '#FF8C94', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3', '#A8E6CF'];
+                            $colorIndex = $customer->id % count($colors);
+                            $customerColor = $colors[$colorIndex];
+                        @endphp
+                        <div class="brand-icon-placeholder me-2 d-flex align-items-center justify-content-center customer-color-badge" 
+                             style="width: 30px; height: 30px; background: {{ $customerColor }}; color: white; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                            {{ strtoupper(substr($customer->display_name, 0, 2)) }}
+                        </div>
+                        <div>
+                            <div class="fw-bold">{{ $customer->display_name }}</div>
+                            <small class="text-muted">{{ $customer->primary_contact }}</small>
+                        </div>
                     </div>
+                </td>
+                <td>
+                    @if($customer->customer_type === 'individual')
+                        <span class="badge bg-info">
+                            <i class="fas fa-user me-1"></i>Individual
+                        </span>
+                    @else
+                        <span class="badge bg-warning">
+                            <i class="fas fa-building me-1"></i>Corporate
+                        </span>
+                    @endif
+                </td>
+                <td>
                     <div>
-                        {{ $customers->appends(request()->query())->links() }}
+                        <i class="fas fa-phone me-1"></i>{{ $customer->primary_contact }}
+                        @if($customer->primary_email)
+                            <br><small class="text-muted"><i class="fas fa-envelope me-1"></i>{{ $customer->primary_email }}</small>
+                        @endif
                     </div>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
+                </td>
+                <td>{{ $customer->created_at->format('M d, Y') }}</td>
+                <td>
+                    @php
+                        $displayStatus = $customer->status;
+                        $badgeClass = $customer->status === 'active' ? 'success' : ($customer->status === 'inactive' ? 'secondary' : 'warning');
+                    @endphp
+                    <div>
+                        <span class="badge rounded-pill bg-{{ $badgeClass }} text-white fw-bold px-2 py-1">
+                            {{ ucfirst($displayStatus) }}
+                        </span>
+                    </div>
+                </td>
+                <td>
+                    @if($customer->license_expiry_date)
+                        @php
+                            $licenseBadgeClass = 'success';
+                            if($customer->license_status === 'near_expiry') {
+                                $licenseBadgeClass = 'warning';
+                            } elseif($customer->license_status === 'expired') {
+                                $licenseBadgeClass = 'danger';
+                            }
+                        @endphp
+                        <span class="badge bg-{{ $licenseBadgeClass }}">
+                            {{ ucfirst($customer->license_status) }}
+                        </span>
+                    @else
+                        <span class="badge bg-secondary">N/A</span>
+                    @endif
+                </td>
+                <td>
+                    <a href="{{ route('business.customers.show', $customer) }}" class="text-primary text-decoration-none" style="font-weight: 500;">View</a>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="7" class="text-center">No customers found.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -206,41 +168,78 @@
 
 @push('scripts')
 <script>
-// Search functionality
-document.getElementById('customerSearch').addEventListener('input', function() {
-    const searchTerm = this.value;
-    if (searchTerm.length >= 3 || searchTerm.length === 0) {
-        applyFilters();
+// Live search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const customerTypeFilter = document.getElementById('customerTypeFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const licenseStatusFilter = document.getElementById('licenseStatusFilter');
+    const searchInput = document.getElementById('customerSearch');
+    
+    // Get table rows
+    const rows = document.querySelectorAll('#customerTableBody tr');
+
+    function applyFilters() {
+        const customerType = customerTypeFilter.value.toLowerCase();
+        const status = statusFilter.value.toLowerCase();
+        const licenseStatus = licenseStatusFilter.value.toLowerCase();
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        rows.forEach(row => {
+            let showRow = true;
+            const text = row.textContent.toLowerCase();
+
+            // Apply search filter
+            if (searchTerm && !text.includes(searchTerm)) {
+                showRow = false;
+            }
+
+            // Apply customer type filter
+            if (customerType && showRow) {
+                if (customerType === 'individual' && !text.includes('individual')) {
+                    showRow = false;
+                } else if (customerType === 'corporate' && !text.includes('corporate')) {
+                    showRow = false;
+                }
+            }
+
+            // Apply status filter
+            if (status && showRow) {
+                if (status === 'active' && !text.includes('active')) {
+                    showRow = false;
+                } else if (status === 'inactive' && !text.includes('inactive')) {
+                    showRow = false;
+                }
+            }
+
+            // Apply license status filter
+            if (licenseStatus && showRow) {
+                if (licenseStatus === 'valid' && !text.includes('valid')) {
+                    showRow = false;
+                } else if (licenseStatus === 'expired' && !text.includes('expired')) {
+                    showRow = false;
+                } else if (licenseStatus === 'pending' && !text.includes('pending')) {
+                    showRow = false;
+                }
+            }
+
+            if (showRow) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Live filters - apply automatically on change
+    customerTypeFilter.addEventListener('change', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    licenseStatusFilter.addEventListener('change', applyFilters);
+    
+    // Add search input listener
+    if (searchInput) {
+        searchInput.addEventListener('input', applyFilters);
     }
 });
-
-// Filter functionality
-document.getElementById('customerTypeFilter').addEventListener('change', applyFilters);
-document.getElementById('statusFilter').addEventListener('change', applyFilters);
-document.getElementById('licenseStatusFilter').addEventListener('change', applyFilters);
-
-function applyFilters() {
-    const search = document.getElementById('customerSearch').value;
-    const customerType = document.getElementById('customerTypeFilter').value;
-    const status = document.getElementById('statusFilter').value;
-    const licenseStatus = document.getElementById('licenseStatusFilter').value;
-    
-    const url = new URL(window.location);
-    url.searchParams.set('search', search);
-    url.searchParams.set('customer_type', customerType);
-    url.searchParams.set('status', status);
-    url.searchParams.set('license_status', licenseStatus);
-    
-    window.location.href = url.toString();
-}
-
-function clearFilters() {
-    document.getElementById('customerSearch').value = '';
-    document.getElementById('customerTypeFilter').value = '';
-    document.getElementById('statusFilter').value = '';
-    document.getElementById('licenseStatusFilter').value = '';
-    applyFilters();
-}
 
 function confirmDelete(customerId) {
     const form = document.getElementById('deleteForm');

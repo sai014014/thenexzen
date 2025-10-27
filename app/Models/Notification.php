@@ -11,11 +11,15 @@ class Notification extends Model
 {
     use HasFactory;
 
+    protected $table = 'notifications';
+
     protected $fillable = [
         'business_id',
         'vehicle_id',
+        'booking_id',
         'title',
         'description',
+        'message',
         'category',
         'priority',
         'due_date',

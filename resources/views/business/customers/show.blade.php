@@ -4,30 +4,29 @@
 @section('page-title', 'Customer Details')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <!-- Header Section -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h5 class="mb-0">
-                            <i class="fas fa-user me-2"></i>{{ $customer->display_name }}
-                        </h5>
-                        <small class="text-muted">Customer ID: #{{ str_pad($customer->id, 6, '0', STR_PAD_LEFT) }}</small>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <span class="badge bg-{{ $customer->customer_type === 'individual' ? 'info' : 'warning' }} fs-6">
-                            @if($customer->customer_type === 'individual')
-                                <i class="fas fa-user me-1"></i>Individual
-                            @else
-                                <i class="fas fa-building me-1"></i>Corporate
-                            @endif
-                        </span>
-                    </div>
+<div class="content-wrapper">
+    <!-- Customer Header Section -->
+    <div class="customer-header-card">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="status-dot bg-{{ $customer->status === 'active' ? 'success' : 'secondary' }} me-3"></div>
+                <div>
+                    <span class="text-muted small">{{ $customer->customer_type === 'individual' ? 'Individual Customer' : 'Corporate Customer' }}</span>
+                    <h2 class="mb-0 fw-bold">{{ $customer->display_name }}</h2>
                 </div>
             </div>
+            
+            <div class="d-flex gap-3 align-items-center">
+                <span class="badge bg-{{ $customer->customer_type === 'individual' ? 'info' : 'warning' }} fs-6">
+                    @if($customer->customer_type === 'individual')
+                        <i class="fas fa-user me-1"></i>Individual
+                    @else
+                        <i class="fas fa-building me-1"></i>Corporate
+                    @endif
+                </span>
+            </div>
         </div>
+    </div>
 
         <div class="row">
             <!-- Basic Information -->
@@ -441,6 +440,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection
 

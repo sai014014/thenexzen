@@ -27,16 +27,9 @@ class BusinessSubscriptionController extends Controller
         // Get available packages
         $availablePackages = SubscriptionPackage::where('status', 'active')->get();
 
-        // Get subscription history
-        $subscriptionHistory = BusinessSubscription::where('business_id', $business->id)
-            ->with('subscriptionPackage')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
-
         return view('business.subscription.index', compact(
             'currentSubscription',
             'availablePackages',
-            'subscriptionHistory',
             'hasSubscriptionHistory',
             'business',
             'businessAdmin'
@@ -53,7 +46,14 @@ class BusinessSubscriptionController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        return view('business.subscription.show', compact('subscription', 'business', 'businessAdmin'));
+        // Get subscription history for this business
+        $subscriptionHistory = BusinessSubscription::where('business_id', $business->id)
+            ->with('subscriptionPackage')
+            ->where('id', '!=', $subscription->id) // Exclude current subscription
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('business.subscription.show', compact('subscription', 'subscriptionHistory', 'business', 'businessAdmin'));
     }
 
     public function startTrial(Request $request)

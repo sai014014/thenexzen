@@ -18,6 +18,9 @@ class NotificationsController extends Controller
 
         $query = Notification::where('business_id', $business->id)
             ->where('is_active', true);
+        
+        // Debug: Log the query to see what's being selected
+        \Log::info('Notifications query - Business ID: ' . $business->id);
 
         // Filter by category
         if ($request->filled('category')) {
@@ -50,15 +53,35 @@ class NotificationsController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             if ($request->status === 'snoozed') {
-                $query->where('snooze_until', '>', Carbon::now('Asia/Kolkata'));
-            } else {
-                $query->whereNull('snooze_until');
+                // Show only snoozed notifications
+                $query->whereNotNull('snooze_until')
+                      ->where('snooze_until', '>', Carbon::now('Asia/Kolkata'));
+            } elseif ($request->status === 'pending') {
+                // Show only non-snoozed, non-completed notifications
+                $query->where(function($q) {
+                    $q->whereNull('snooze_until')
+                      ->orWhere('snooze_until', '<=', Carbon::now('Asia/Kolkata'));
+                })->where('is_completed', false);
+            } elseif ($request->status === 'completed') {
+                // Show only completed notifications
+                $query->where('is_completed', true);
             }
+            // If status is empty or 'active', show everything (no filter)
+        } else {
+            // By default, show all notifications including snoozed ones
+            // No additional filter needed
         }
 
         $notifications = $query->orderBy('priority', 'desc')
             ->orderBy('due_date', 'asc')
             ->paginate(20);
+        
+        // Debug: Log the count and check snoozed notifications
+        \Log::info('Notifications found: ' . $notifications->total());
+        \Log::info('Current time: ' . Carbon::now('Asia/Kolkata')->format('Y-m-d H:i:s'));
+        foreach($notifications as $notif) {
+            \Log::info('Notification ID: ' . $notif->id . ', Title: ' . $notif->title . ', Snooze Until: ' . ($notif->snooze_until ? $notif->snooze_until->format('Y-m-d H:i:s') : 'NULL') . ', Status: ' . $notif->status);
+        }
 
         return view('business.notifications.index', compact('notifications', 'business', 'businessAdmin'));
     }
@@ -87,9 +110,6 @@ class NotificationsController extends Controller
                 return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
             }
 
-            // Debug: Log the request data
-            \Log::info('Snooze request data:', $request->all());
-
             $request->validate([
                 'snooze_period' => 'required|in:1_hour,1_day,1_week,custom',
                 'custom_date' => 'nullable|required_if:snooze_period,custom|date|after:now'
@@ -116,17 +136,11 @@ class NotificationsController extends Controller
                     break;
             }
 
-            // Debug: Log the snooze until value
-            \Log::info('Snooze until:', ['snooze_until' => $snoozeUntil]);
-
             $updateData = [
                 'snooze_until' => $snoozeUntil,
                 'snoozed_at' => Carbon::now('Asia/Kolkata'),
                 'snoozed_by' => $businessAdmin->id
             ];
-
-            // Debug: Log the update data
-            \Log::info('Update data:', $updateData);
 
             $notification->update($updateData);
 
@@ -216,5 +230,57 @@ class NotificationsController extends Controller
             ->count();
 
         return response()->json(['count' => $count]);
+    }
+
+    public function getDashboardNotifications()
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        $business = $businessAdmin->business;
+
+        $now = Carbon::now('Asia/Kolkata');
+
+        // Get all active notifications that are not snoozed
+        $allNotifications = Notification::where('business_id', $business->id)
+            ->where('is_active', true)
+            ->where(function($query) use ($now) {
+                $query->whereNull('snooze_until')
+                      ->orWhere('snooze_until', '<=', $now);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Get unread notifications (not completed)
+        $unreadNotifications = $allNotifications->where('is_completed', false);
+        
+        // Format notifications for the frontend
+        $formattedNotifications = $allNotifications->map(function($notification) {
+            return [
+                'notificationId' => $notification->id,
+                'bookingId' => $notification->booking_id ?? 0,
+                'vehicleId' => $notification->vehicle_id ?? 0,
+                'notificationHeading' => $notification->title,
+                'notificationDetail' => $notification->message ?? $notification->description ?? $notification->title,
+                'lastSnoozeTime' => $notification->created_at->format('Y-m-d H:i:s'),
+                'isRead' => $notification->is_completed ? 1 : 0,
+                'snoozeUntil' => $notification->snooze_until ? $notification->snooze_until->format('Y-m-d H:i:s') : null,
+                'isSnoozed' => $notification->is_snoozed ? 1 : 0
+            ];
+        });
+
+        return response()->json([
+            'allNotifications' => $formattedNotifications,
+            'unread_notifications' => $unreadNotifications->map(function($notification) {
+                return [
+                    'notificationId' => $notification->id,
+                    'bookingId' => $notification->booking_id ?? 0,
+                    'vehicleId' => $notification->vehicle_id ?? 0,
+                    'notificationHeading' => $notification->title,
+                    'notificationDetail' => $notification->message ?? $notification->description ?? $notification->title,
+                    'lastSnoozeTime' => $notification->created_at->format('Y-m-d H:i:s'),
+                    'isRead' => 0
+                ];
+            })->values(),
+            'total_unread_count' => $unreadNotifications->count()
+        ]);
     }
 }

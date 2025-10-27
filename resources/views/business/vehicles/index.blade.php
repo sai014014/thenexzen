@@ -14,11 +14,9 @@
 <!-- Search, Filters and Add Vehicle Section -->
 <div class="row mb-3 align-items-end filter-row">
     <div class="col-md-4">
-        <div class="input-group vehicle-search-bar">
-            <span class="input-group-text">
-                <i class="fas fa-search"></i>
-            </span>
-            <input type="text" id="vehicleSearch" class="form-control" placeholder="Search">
+        <div class="vehicle-search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="vehicleSearch" class="form-control search-input" placeholder="Search">
         </div>
     </div>
     <div class="col-md-2">
@@ -170,9 +168,6 @@
                                 <span class="badge rounded-pill bg-{{ $badgeClass }} text-white fw-bold px-2 py-1">
                                     {{ $displayStatus }}
                                 </span>
-                                @if($vehicle->vehicle_status === 'inactive' && $vehicle->unavailable_until)
-                                    <br><small class="text-muted mt-1 d-block">Until: {{ \Carbon\Carbon::parse($vehicle->unavailable_until)->format('M d, Y') }}</small>
-                                @endif
                             </div>
                         </td>
                         <td>

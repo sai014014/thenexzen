@@ -52,134 +52,84 @@
         </div>
     @endif
 
-    <!-- Subscription Status Banner -->
-    @if($currentSubscription)
-        <div class="alert alert-{{ $currentSubscription->is_paused ? 'warning' : ($currentSubscription->is_active ? 'success' : ($currentSubscription->is_trial ? 'info' : 'secondary')) }} alert-dismissible fade show" role="alert">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <strong>{{ $currentSubscription->subscriptionPackage->name ?? 'Unknown Package' }}</strong>
-                    @if($currentSubscription->is_paused)
-                        - Subscription Paused
-                    @elseif($currentSubscription->is_trial)
-                        - Trial Active ({{ $currentSubscription->days_remaining }} days remaining)
-                    @elseif($currentSubscription->is_active)
-                        - Active ({{ $currentSubscription->days_remaining }} days remaining)
-                    @endif
-                </div>
-                <div>
-                    @if($currentSubscription->is_active && !$currentSubscription->is_paused)
-                        <button class="btn btn-sm btn-outline-warning me-2" onclick="pauseSubscription()">
-                            <i class="fas fa-pause"></i> Pause
-                        </button>
-                    @elseif($currentSubscription->is_paused)
-                        <button class="btn btn-sm btn-success me-2" onclick="resumeSubscription()">
-                            <i class="fas fa-play"></i> Resume
-                        </button>
-                    @endif
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
-    @endif
-
     <!-- Available Packages -->
-    <div class="card mb-4" id="available-packages">
-        <div class="card-header">
-            <h5 class="mb-0">Available Packages</h5>
+    <div class="pricing-section" id="available-packages">
+        <div class="section-title text-center mb-5">
+            <h2 class="pricing-title">Available Packages</h2>
+            <span class="pricing-subtitle">Simple, scalable pricing for your business needs.</span>
         </div>
-        <div class="card-body">
-            @if($availablePackages->count() > 0)
-                <div class="row">
-                    @foreach($availablePackages as $package)
-                        <div class="col-md-4 mb-3">
-                            <div class="package-card h-100" data-package-id="{{ $package->id }}">
-                                <div class="card h-100">
-                                    <div class="card-header text-center">
-                                        <h6 class="mb-0">{{ $package->package_name }}</h6>
-                                        <h4 class="text-primary mt-2">{{ $package->formatted_price }}/month</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="text-muted small">{{ $package->description }}</p>
-                                        <ul class="list-unstyled small">
-                                            <li><i class="fas fa-check text-success me-2"></i>{{ $package->vehicle_capacity_display }} vehicles</li>
-                                            <li><i class="fas fa-check text-success me-2"></i>{{ ucfirst($package->status) }} support</li>
-                                            <li><i class="fas fa-check text-success me-2"></i>{{ $package->trial_period_days }} days trial</li>
-                                        </ul>
-                                    </div>
-                                    <div class="card-footer text-center">
-                                        @if(!$hasSubscriptionHistory)
-                                            <button class="btn btn-success btn-sm me-2" onclick="startTrialForPackage({{ $package->id }})">
-                                                <i class="fas fa-play"></i> Start Trial
-                                            </button>
-                                        @endif
-                                        <button class="btn btn-outline-primary btn-sm" onclick="upgradeToPackage({{ $package->id }})">
-                                            <i class="fas fa-arrow-up"></i> Upgrade
-                                        </button>
-                                    </div>
+
+        @if($availablePackages->count() > 0)
+            <div class="row advanced-pricing-table">
+                @foreach($availablePackages as $index => $package)
+                    @php
+                        $isCurrentPackage = $currentSubscription && $currentSubscription->subscription_package_id == $package->id;
+                    @endphp
+                    <div class="col-lg-4 mb-4">
+                        <div class="pricing-table style-two {{ $index == 1 ? 'featured' : '' }} price-two {{ $isCurrentPackage ? 'current-package' : '' }}" data-package-id="{{ $package->id }}">
+                            @if($index == 1 && !$isCurrentPackage)
+                                <span class="offer-tag">
+                                    <span class="tag">Popular</span>
+                                </span>
+                            @endif
+
+                            <div class="pricing-header pricing-amount">
+                                <h3 class="price-title">
+                                    {{ $package->package_name }}
+                                    @if($isCurrentPackage)
+                                        <span class="current-text">(Current)</span>
+                                    @endif
+                                </h3>
+                                <p>{{ $package->description ?? 'For creating impressive tools that generate results.' }}</p>
+
+                                <div class="monthly_price">
+                                    <h2 class="price">{{ $package->formatted_price }}</h2>
+                                    <span class="monthly">Per month</span>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="text-center py-4">
-                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No Packages Available</h5>
-                    <p class="text-muted">Please contact support for available subscription options.</p>
-                </div>
-            @endif
-        </div>
-    </div>
 
-    <!-- Subscription History -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Subscription History</h5>
-        </div>
-        <div class="card-body">
-            @if($subscriptionHistory->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Package</th>
-                                <th>Status</th>
-                                <th>Started</th>
-                                <th>Expires</th>
-                                <th>Amount Paid</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($subscriptionHistory as $subscription)
-                                <tr>
-                                    <td>{{ $subscription->subscriptionPackage->package_name }}</td>
-                                    <td>
-                                        <span class="badge bg-{{ $subscription->status === 'active' ? 'success' : ($subscription->status === 'trial' ? 'warning' : 'secondary') }}">
-                                            {{ $subscription->status_display }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $subscription->starts_at->format('M d, Y') }}</td>
-                                    <td>{{ $subscription->expires_at->format('M d, Y') }}</td>
-                                    <td>{{ $subscription->subscriptionPackage->currency }} {{ number_format($subscription->amount_paid, 2) }}</td>
-                                    <td>
-                                        <a href="{{ route('business.subscription.show', $subscription) }}" class="btn btn-sm btn-outline-info">
-                                            <i class="fas fa-eye"></i> View
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                {{ $subscriptionHistory->links() }}
-            @else
-                <div class="text-center py-4">
-                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">No subscription history found.</p>
-                </div>
-            @endif
-        </div>
+                            <div class="trail_btn">
+                                @if($isCurrentPackage)
+                                    <a href="#" class="pix-btn btn-outline-two" style="opacity: 0.5; cursor: not-allowed; pointer-events: none;">
+                                        Current Plan
+                                    </a>
+                                @elseif(!$hasSubscriptionHistory)
+                                    <a href="#" class="pix-btn btn-outline-two" onclick="startTrialForPackage({{ $package->id }}); return false;">
+                                        Start a free trial
+                                    </a>
+                                @else
+                                    <a href="#" class="pix-btn btn-outline-two" onclick="upgradeToPackage({{ $package->id }}); return false;">
+                                        Upgrade Now
+                                    </a>
+                                @endif
+                                @if(!$isCurrentPackage)
+                                    <span>No credit card required</span>
+                                @endif
+                            </div>
+
+                            <p class="key-features">Key features:</p>
+                            <ul class="price-feture">
+                                <li class="have">{{ $package->vehicle_capacity_display }} vehicles</li>
+                                <li class="have">{{ ucfirst($package->support_type) }} support</li>
+                                <li class="have">{{ $package->trial_period_days }} days trial</li>
+                                @if($package->booking_limit)
+                                    <li class="have">{{ $package->booking_limit }} bookings/month</li>
+                                @endif
+                                @if($package->user_limit)
+                                    <li class="have">{{ $package->user_limit }} team members</li>
+                                @endif
+                            </ul>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="text-center py-5">
+                <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">No Packages Available</h5>
+                <p class="text-muted">Please contact support for available subscription options.</p>
+            </div>
+        @endif
     </div>
 </div>
 
@@ -471,27 +421,221 @@ function resumeSubscription() {
 }
 </script>
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('homePage/assets/css/style.css') }}">
+@endpush
+
 <style>
 .subscription-detail {
     margin-bottom: 8px;
-}
-
-.package-card .card {
-    transition: transform 0.2s ease;
-}
-
-.package-card .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .subscription-actions .btn {
     margin-bottom: 5px;
 }
 
-.card-header h5 {
-    color: #495057;
+.pricing-section {
+    padding: 60px 0;
+}
+
+.pricing-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.pricing-subtitle {
+    font-size: 18px;
+    color: #666;
+}
+
+.advanced-pricing-table .pricing-table {
+    position: relative;
+    background: #fff;
+    border-radius: 15px;
+    padding: 40px 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+}
+
+.advanced-pricing-table .pricing-table:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 40px rgba(107, 106, 222, 0.15);
+}
+
+.advanced-pricing-table .pricing-table.featured {
+    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+    color: #fff;
+}
+
+.advanced-pricing-table .pricing-table.featured .price-title,
+.advanced-pricing-table .pricing-table.featured p,
+.advanced-pricing-table .pricing-table.featured .monthly {
+    color: #fff;
+}
+
+.price-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.current-text {
+    font-size: 16px;
     font-weight: 600;
+    color: #28a745;
+}
+
+.pricing-header p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.monthly_price .price {
+    font-size: 42px;
+    font-weight: 700;
+    color: #6B6ADE;
+    margin-bottom: 5px;
+}
+
+.monthly_price .monthly {
+    font-size: 14px;
+    color: #999;
+    display: block;
+}
+
+.trail_btn {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.pix-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: #fff;
+    color: #6B6ADE;
+    border: 2px solid #6B6ADE;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.pix-btn:hover {
+    background: #6B6ADE;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 222, 0.3);
+}
+
+.trail_btn span {
+    display: block;
+    font-size: 12px;
+    color: #999;
+    margin-top: 8px;
+}
+
+.key-features {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.price-feture {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.price-feture li {
+    padding: 10px 0;
+    font-size: 15px;
+    color: #333;
+    position: relative;
+    padding-left: 30px;
+}
+
+.price-feture li.have::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.price-feture li.not::before {
+    content: "✗";
+    position: absolute;
+    left: 0;
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.offer-tag {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 120px;
+    height: 120px;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.offer-tag::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 120px 120px 0;
+    border-color: transparent #13244D transparent transparent;
+}
+
+.offer-tag .tag {
+    position: absolute;
+    top: 25px;
+    right: -35px;
+    transform: rotate(45deg);
+    background: transparent;
+    color: #fff;
+    padding: 0;
+    border-radius: 0;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    z-index: 11;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.offer-tag .tag-current {
+    /* Green ribbon for current package */
+    /* Same positioning, color will be set via parent */
+}
+
+.current-package .offer-tag::before {
+    border-color: transparent #28a745 transparent transparent;
+}
+
+.current-package {
+    border: 3px solid #28a745;
+    box-shadow: 0 4px 20px rgba(40, 167, 69, 0.15);
+}
+
+.current-package:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 30px rgba(40, 167, 69, 0.25);
 }
 </style>
 @endsection

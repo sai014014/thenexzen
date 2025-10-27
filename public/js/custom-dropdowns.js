@@ -110,11 +110,13 @@ class CustomDropdown {
         const selectedOption = this.select.querySelector('option:checked');
         if (selectedOption && selectedOption.value !== '') {
             this.selectedText.textContent = selectedOption.textContent;
+            this.toggle.classList.add('has-selection');
         } else {
             // Check if there's a data-title attribute for filter dropdowns
             const filterTitle = this.select.getAttribute('data-title');
             if (filterTitle) {
                 this.selectedText.textContent = filterTitle;
+                this.toggle.classList.remove('has-selection');
             } else {
                 // Get the first option text as default
                 const firstOption = this.select.querySelector('option');
@@ -123,25 +125,14 @@ class CustomDropdown {
                 } else {
                     this.selectedText.textContent = 'Select an option';
                 }
+                this.toggle.classList.remove('has-selection');
             }
-        }
-        
-        // Add purple color for filter titles
-        if (this.select.hasAttribute('data-title')) {
-            this.selectedText.style.color = '#6B6ADE';
-            this.selectedText.style.fontWeight = '600';
         }
     }
     
     selectOption(value, text) {
         // Update selected text
         this.selectedText.textContent = text;
-        
-        // Reset color to default if it was a filter title
-        if (this.select.hasAttribute('data-title')) {
-            this.selectedText.style.color = '';
-            this.selectedText.style.fontWeight = '';
-        }
         
         // Update original select
         this.select.value = value;
@@ -153,6 +144,13 @@ class CustomDropdown {
                 option.classList.add('selected');
             }
         });
+        
+        // Add/remove has-selection class for filter rows
+        if (value && value !== '') {
+            this.toggle.classList.add('has-selection');
+        } else {
+            this.toggle.classList.remove('has-selection');
+        }
         
         // Close dropdown
         this.closeDropdown();

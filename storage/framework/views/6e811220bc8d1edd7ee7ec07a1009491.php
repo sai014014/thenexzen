@@ -4,16 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>Business Registration - TheNexZen</title>
-    <link rel="icon" href="{{ asset('homePage/assets/img/businesslogowhite.svg') }}" type="image/x-icon" />
-    <link href="{{ asset('dist/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="icon" href="<?php echo e(asset('homePage/assets/img/businesslogowhite.svg')); ?>" type="image/x-icon" />
+    <link href="<?php echo e(asset('dist/bootstrap/bootstrap.min.css')); ?>" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Racing+Sans+One&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('dist/css/login.css') }}">
-    <link rel="stylesheet" href="{{ asset('dist/css/common.css') }}">
-    <script src="{{ asset('dist/jquery.min.js') }}"></script>
+    <link rel="stylesheet" href="<?php echo e(asset('dist/css/login.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('dist/css/common.css')); ?>">
+    <script src="<?php echo e(asset('dist/jquery.min.js')); ?>"></script>
     
     <style>
         /* Register page specific styles */
@@ -266,7 +266,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="logo">
-                    <img src="{{ asset('images/login.png') }}" alt="Business Logo">
+                    <img src="<?php echo e(asset('images/login.png')); ?>" alt="Business Logo">
                 </div>
             </div>
             <div class="col-md-6">
@@ -282,26 +282,27 @@
                             <h1>Register Your Business</h1>
                         </div>
                         
-                        @if ($errors->any())
+                        <?php if($errors->any()): ?>
                             <div class="alert alert-danger">
                                 <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
-                        @if (session('success'))
+                        <?php if(session('success')): ?>
                             <div class="alert alert-success">
-                                {{ session('success') }}
+                                <?php echo e(session('success')); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <div class="form-container">
                             <!-- Step 1: Business Information Form -->
                             <form id="businessInfoForm">
-                                @csrf
+                                <?php echo csrf_field(); ?>
                                 
                                 <!-- Business Information -->
                                 <div class="form-group">
@@ -396,13 +397,13 @@
                         
                         <div class="register" style="text-align:center ">
                             <p>
-                                <a href="{{ route('business.login') }}">Already have an account? Login</a>
+                                <a href="<?php echo e(route('business.login')); ?>">Already have an account? Login</a>
                             </p>
                             <p>
-                                <a href="{{ route('super-admin.login') }}">Super Admin Login</a>
+                                <a href="<?php echo e(route('super-admin.login')); ?>">Super Admin Login</a>
                             </p>
                             <p>
-                                <a href="{{ url('/') }}">Back to Home</a>
+                                <a href="<?php echo e(url('/')); ?>">Back to Home</a>
                             </p>
                         </div>
                         <div id="errorMessage" style="color:red; display:none;"></div>
@@ -429,15 +430,15 @@
     </div>
     
     <script>
-    const baseUrl = '{{ url('/') }}';
+    const baseUrl = '<?php echo e(url('/')); ?>';
     let currentSessionId = null;
     
     // Check if registration was successful
-    @if(session('success'))
+    <?php if(session('success')): ?>
         document.addEventListener('DOMContentLoaded', function() {
             showSuccessModal();
         });
-    @endif
+    <?php endif; ?>
     
     function showSuccessModal() {
         const modal = document.getElementById('successModal');
@@ -445,11 +446,11 @@
     }
     
     function redirectToLogin() {
-        window.location.href = '{{ route("business.login") }}';
+        window.location.href = '<?php echo e(route("business.login")); ?>';
     }
     
     function redirectToDashboard() {
-        window.location.href = '{{ route("business.dashboard") }}';
+        window.location.href = '<?php echo e(route("business.dashboard")); ?>';
     }
     
     // Close modal when clicking outside
@@ -496,7 +497,7 @@
         
         console.log('Sending OTP with data:', data);
         
-        fetch('{{ route("business.register.send-otp") }}', {
+        fetch('<?php echo e(route("business.register.send-otp")); ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -544,7 +545,7 @@
             return;
         }
 
-        fetch('{{ route("business.register.verify-otp") }}', {
+        fetch('<?php echo e(route("business.register.verify-otp")); ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -584,7 +585,7 @@
             return;
         }
 
-        fetch('{{ route("business.register.submit") }}', {
+        fetch('<?php echo e(route("business.register.submit")); ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -614,7 +615,7 @@
     }
 
     function resendOTP() {
-        fetch('{{ route("business.register.resend-otp") }}', {
+        fetch('<?php echo e(route("business.register.resend-otp")); ?>', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -668,7 +669,8 @@
         }
     }
     </script>
-    <script src="{{ asset('dist/js/common.js') }}"></script>
+    <script src="<?php echo e(asset('dist/js/common.js')); ?>"></script>
 </body>
 
 </html>
+<?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/business/auth/register.blade.php ENDPATH**/ ?>

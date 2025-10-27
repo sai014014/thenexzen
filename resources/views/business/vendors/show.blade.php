@@ -4,26 +4,25 @@
 @section('page-title', 'Vendor Details')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <!-- Header Section -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h5 class="mb-0">
-                            <i class="fas fa-truck me-2"></i>{{ $vendor->vendor_name }}
-                        </h5>
-                        <small class="text-muted">Vendor ID: #{{ str_pad($vendor->id, 6, '0', STR_PAD_LEFT) }}</small>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <span class="badge bg-{{ $vendor->vendor_type === 'vehicle_provider' ? 'primary' : ($vendor->vendor_type === 'service_partner' ? 'success' : 'secondary') }} fs-6">
-                            {{ $vendor->vendor_type_label }}
-                        </span>
-                    </div>
+<div class="content-wrapper">
+    <!-- Vendor Header Section -->
+    <div class="vendor-header-card">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="status-dot bg-success me-3"></div>
+                <div>
+                    <span class="text-muted small">Vendor Partner</span>
+                    <h2 class="mb-0 fw-bold">{{ $vendor->vendor_name }}</h2>
                 </div>
             </div>
+            
+            <div class="d-flex gap-3 align-items-center">
+                <span class="badge bg-{{ $vendor->vendor_type === 'vehicle_provider' ? 'primary' : ($vendor->vendor_type === 'service_partner' ? 'success' : 'secondary') }} fs-6">
+                    {{ $vendor->vendor_type_label }}
+                </span>
+            </div>
         </div>
+    </div>
 
         <div class="row">
             <!-- Vendor Information -->
@@ -265,5 +264,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection

@@ -225,9 +225,20 @@
                 </div>
                 
                 <div class="subscription-actions">
-                    <a href="{{ route('business.subscription.show', $subscription->id) }}" class="btn btn-outline">
-                        View Full Details
-                    </a>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{{ route('business.subscription.show', $subscription->id) }}" class="btn btn-outline">
+                            View Full Details
+                        </a>
+                        @if($subscription->is_active && !$subscription->is_paused)
+                            <button class="btn btn-warning" onclick="pauseSubscription()">
+                                <i class="fas fa-pause"></i> Pause Subscription
+                            </button>
+                        @elseif($subscription->is_paused)
+                            <button class="btn btn-success" onclick="resumeSubscription()">
+                                <i class="fas fa-play"></i> Resume Subscription
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
             @else
@@ -557,6 +568,16 @@
 
 .btn-danger {
     background: #dc3545;
+    color: white;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #333;
+}
+
+.btn-success {
+    background: #28a745;
     color: white;
 }
 
@@ -998,6 +1019,65 @@ function showAlert(type, message) {
     setTimeout(() => {
         alertDiv.remove();
     }, 5000);
+}
+
+// Pause Subscription
+function pauseSubscription() {
+    const reason = prompt('Please provide a reason for pausing your subscription (optional):');
+    
+    if (reason === null) {
+        return; // User cancelled
+    }
+
+    fetch('{{ route("business.subscription.pause") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            reason: reason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', data.message);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', 'An error occurred while pausing the subscription');
+    });
+}
+
+// Resume Subscription
+function resumeSubscription() {
+    if (confirm('Are you sure you want to resume your subscription?')) {
+        fetch('{{ route("business.subscription.resume") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showAlert('error', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('error', 'An error occurred while resuming the subscription');
+        });
+    }
 }
 
 // Close modals when clicking outside

@@ -119,6 +119,12 @@
                         Bug Tracking
                     </a>
                         </li>
+                        <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('super-admin.notifications.*') ? 'active' : '' }}" href="{{ route('super-admin.notifications.index') }}">
+                        <i class="fas fa-bell"></i>
+                        Notifications
+                    </a>
+                        </li>
                     </ul>
                 </div>
             </nav>

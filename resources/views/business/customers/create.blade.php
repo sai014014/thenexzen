@@ -3,30 +3,95 @@
 @section('title', 'Add New Customer - ' . $business->business_name)
 @section('page-title', 'Add New Customer')
 
+@push('styles')
+<style>
+/* Customer Add Page Specific Styles - Match Vehicle Create */
+.customer-add-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.form-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+    padding: 24px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-control, .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #6B6ADE;
+    box-shadow: 0 0 0 0.2rem rgba(107, 106, 222, 0.25);
+}
+
+.save-button {
+    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+    border: none;
+    color: white;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.save-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 222, 0.4);
+}
+
+.back-button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+}
+</style>
+@endpush
+
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="card">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h5 class="mb-0">
-                            <i class="fas fa-user-plus me-2"></i>
-                            @if($customerType === 'individual')
-                                Individual Customer Registration
-                            @else
-                                Corporate Customer Registration
-                            @endif
-                        </h5>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <a href="{{ route('business.customers.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Customers
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
+<div class="customer-add-container">
+    <div class="container-fluid">
+        <!-- Back Button -->
+        <div class="mb-3">
+            <a href="{{ route('business.customers.index') }}" class="btn btn-outline-secondary back-button">
+                <i class="fas fa-arrow-left me-2"></i>Back to Customers
+            </a>
+        </div>
                 <form method="POST" action="{{ route('business.customers.store') }}" enctype="multipart/form-data" id="customerForm">
                     @csrf
                     <input type="hidden" name="customer_type" value="{{ $customerType }}">
@@ -42,13 +107,11 @@
                         <a href="{{ route('business.customers.index') }}" class="btn btn-secondary">
                             <i class="fas fa-times me-2"></i>Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn save-button">
                             <i class="fas fa-save me-2"></i>Register Customer
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
     </div>
 </div>
 @endsection

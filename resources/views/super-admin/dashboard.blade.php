@@ -17,7 +17,7 @@
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-building fa-2x text-gray-300"></i>
-                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -31,10 +31,10 @@
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                             Active Businesses</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['active_businesses'] ?? 0 }}</div>
-                    </div>
+                        </div>
                     <div class="col-auto">
                         <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -48,10 +48,10 @@
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Total Bugs</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['total_bugs'] ?? 0 }}</div>
-                    </div>
+                        </div>
                     <div class="col-auto">
                         <i class="fas fa-bug fa-2x text-gray-300"></i>
-                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -65,10 +65,10 @@
                         <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
                             Critical Bugs</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $stats['critical_bugs'] ?? 0 }}</div>
-                    </div>
+                        </div>
                     <div class="col-auto">
                         <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
-                    </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -87,18 +87,18 @@
                 <span class="badge bg-warning">{{ $pending_subscriptions->count() }} Pending</span>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
+                    <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead>
-                            <tr>
+                            <thead>
+                                <tr>
                                 <th>Business</th>
                                 <th>Package</th>
                                 <th>Requested</th>
                                 <th>Amount</th>
                                 <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                                </tr>
+                            </thead>
+                            <tbody>
                             @foreach($pending_subscriptions as $subscription)
                             <tr>
                                 <td>
@@ -136,13 +136,13 @@
                                         <a href="{{ route('super-admin.businesses.show', $subscription->business) }}" class="btn btn-info btn-sm">
                                             <i class="fas fa-eye"></i> View
                                         </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                                                    </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
             </div>
         </div>
     </div>
@@ -182,8 +182,8 @@
                                     </td>
                                     <td>{{ $business->created_at->format('M d, Y') }}</td>
                                 </tr>
-                                @endforeach
-                            @else
+                    @endforeach
+                @else
                                 <tr>
                                     <td colspan="5" class="text-center text-muted py-4">
                                         <i class="fas fa-building fa-2x mb-2"></i>
@@ -193,7 +193,7 @@
                             @endif
                         </tbody>
                     </table>
-                </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -217,9 +217,9 @@
                         <i class="fas fa-download me-2"></i>
                         Export Data
                     </button>
-                </div>
-            </div>
         </div>
+    </div>
+</div>
 
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -237,7 +237,7 @@
                         <span>API Services</span>
                         <span class="badge badge-success">Online</span>
                     </div>
-                </div>
+                    </div>
                 <div class="mb-3">
                     <div class="d-flex justify-content-between">
                         <span>Email Service</span>

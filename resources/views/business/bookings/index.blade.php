@@ -8,98 +8,77 @@
 @endpush
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h5 class="mb-0">
-                            <i class="fas fa-calendar-alt me-2"></i>Booking Management
-                        </h5>
-                        <small class="text-muted">Manage your vehicle bookings efficiently</small>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <div class="btn-group">
-                            <a href="{{ route('business.bookings.create') }}" class="btn btn-primary">
-                                <i class="fas fa-magic me-2"></i>5-Step Flow
-                            </a>
-                            <a href="{{ route('business.bookings.quick-create') }}" class="btn btn-outline-primary">
-                                <i class="fas fa-bolt me-2"></i>Quick Create
-                            </a>
-                        </div>
-                    </div>
-                </div>
+<div class="content-wrapper">
+    <!-- Booking Action Buttons -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="btn-group">
+            <a href="{{ route('business.bookings.create') }}" class="btn btn-primary">
+                <i class="fas fa-magic me-2"></i>5-Step Flow
+            </a>
+            <a href="{{ route('business.bookings.quick-create') }}" class="btn btn-outline-primary">
+                <i class="fas fa-bolt me-2"></i>Quick Create
+            </a>
+        </div>
+    </div>
 
-                <!-- Status Tabs -->
-                <ul class="nav nav-tabs mt-3" id="bookingTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {{ $status === 'all' ? 'active' : '' }}" 
-                                id="all-tab" 
-                                data-bs-toggle="tab" 
-                                data-bs-target="#all" 
-                                type="button" 
-                                role="tab"
-                                onclick="switchTab('all')">
-                            <i class="fas fa-list me-1"></i>All Bookings
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {{ $status === 'upcoming' ? 'active' : '' }}" 
-                                id="upcoming-tab" 
-                                data-bs-toggle="tab" 
-                                data-bs-target="#upcoming" 
-                                type="button" 
-                                role="tab"
-                                onclick="switchTab('upcoming')">
-                            <i class="fas fa-clock me-1"></i>Upcoming
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {{ $status === 'ongoing' ? 'active' : '' }}" 
-                                id="ongoing-tab" 
-                                data-bs-toggle="tab" 
-                                data-bs-target="#ongoing" 
-                                type="button" 
-                                role="tab"
-                                onclick="switchTab('ongoing')">
-                            <i class="fas fa-play-circle me-1"></i>Ongoing
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {{ $status === 'completed' ? 'active' : '' }}" 
-                                id="completed-tab" 
-                                data-bs-toggle="tab" 
-                                data-bs-target="#completed" 
-                                type="button" 
-                                role="tab"
-                                onclick="switchTab('completed')">
-                            <i class="fas fa-check-circle me-1"></i>Completed
-                        </button>
-                    </li>
-                </ul>
-            </div>
+    <!-- Status Tabs -->
+    <ul class="nav nav-tabs mb-3" id="bookingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {{ $status === 'all' ? 'active' : '' }}" 
+                    id="all-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#all" 
+                    type="button" 
+                    role="tab"
+                    onclick="switchTab('all')">
+                <i class="fas fa-list me-1"></i>All Bookings
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {{ $status === 'upcoming' ? 'active' : '' }}" 
+                    id="upcoming-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#upcoming" 
+                    type="button" 
+                    role="tab"
+                    onclick="switchTab('upcoming')">
+                <i class="fas fa-clock me-1"></i>Upcoming
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {{ $status === 'ongoing' ? 'active' : '' }}" 
+                    id="ongoing-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#ongoing" 
+                    type="button" 
+                    role="tab"
+                    onclick="switchTab('ongoing')">
+                <i class="fas fa-play-circle me-1"></i>Ongoing
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {{ $status === 'completed' ? 'active' : '' }}" 
+                    id="completed-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#completed" 
+                    type="button" 
+                    role="tab"
+                    onclick="switchTab('completed')">
+                <i class="fas fa-check-circle me-1"></i>Completed
+            </button>
+        </li>
+    </ul>
 
-            <div class="card-body">
-                <!-- Search and Filter Section -->
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" id="searchInput" placeholder="Search by booking ID, customer, or vehicle..." value="{{ request('search') }}">
-                        </div>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
-                            <i class="fas fa-times me-1"></i>Clear Filters
-                        </button>
-                    </div>
-                </div>
+    <!-- Search Bar -->
+    <div class="booking-search-container mb-3">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="bookingSearch" class="form-control search-input" placeholder="Search by booking ID, customer, or vehicle..." value="{{ request('search') }}">
+    </div>
 
-                <!-- Bookings Table -->
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
+    <!-- Bookings Table -->
+    <div class="table-responsive">
+        <table id="bookingTable" class="table table-striped table-bordered">
+            <thead>
                             <tr>
                                 <th>Booking ID</th>
                                 <th>Customer Name</th>
@@ -207,8 +186,6 @@
                     </div>
                 </div>
                 @endif
-            </div>
-        </div>
     </div>
 </div>
 @endsection
@@ -216,7 +193,7 @@
 @push('scripts')
 <script>
 // Search functionality
-document.getElementById('searchInput').addEventListener('input', function() {
+document.getElementById('bookingSearch').addEventListener('input', function() {
     const searchTerm = this.value;
     if (searchTerm.length >= 3 || searchTerm.length === 0) {
         applyFilters();
@@ -232,7 +209,7 @@ function switchTab(status) {
 
 // Apply filters
 function applyFilters() {
-    const search = document.getElementById('searchInput').value;
+    const search = document.getElementById('bookingSearch').value;
     const currentStatus = '{{ $status }}' || 'all';
     
     const params = new URLSearchParams();
@@ -244,7 +221,7 @@ function applyFilters() {
 
 // Clear filters
 function clearFilters() {
-    document.getElementById('searchInput').value = '';
+    document.getElementById('bookingSearch').value = '';
     const currentStatus = '{{ $status }}' || 'all';
     window.location.href = '{{ route("business.bookings.index") }}?status=' + currentStatus;
 }

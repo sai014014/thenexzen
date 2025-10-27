@@ -2345,7 +2345,8 @@ label {
 /* Unified Search Bar Container */
 .vehicle-search-container,
 .customer-search-container,
-.vendor-search-container {
+.vendor-search-container,
+.booking-search-container {
     position: relative;
     border-radius: 8px;
     border: 0.5px solid #dee2e6;
@@ -2355,7 +2356,8 @@ label {
 
 .vehicle-search-container .search-icon,
 .customer-search-container .search-icon,
-.vendor-search-container .search-icon {
+.vendor-search-container .search-icon,
+.booking-search-container .search-icon {
     position: absolute;
     left: 15px;
     top: 50%;
@@ -2368,7 +2370,8 @@ label {
 
 .vehicle-search-container .search-input,
 .customer-search-container .search-input,
-.vendor-search-container .search-input {
+.vendor-search-container .search-input,
+.booking-search-container .search-input {
     width: 100% !important;
     height: 44px !important;
     padding: 0 15px 0 45px !important;
@@ -2382,7 +2385,8 @@ label {
 
 .vehicle-search-container .search-input:focus,
 .customer-search-container .search-input:focus,
-.vendor-search-container .search-input:focus {
+.vendor-search-container .search-input:focus,
+.booking-search-container .search-input:focus {
     outline: none !important;
     box-shadow: none !important;
     border: none !important;

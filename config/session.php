@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'file'),
+    'driver' => env('SESSION_DRIVER', 'database'),
 
     /*
     |--------------------------------------------------------------------------
@@ -31,7 +31,7 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 120),
+    'lifetime' => env('SESSION_LIFETIME', 480),
 
     'expire_on_close' => false,
 
@@ -46,11 +46,39 @@ return [
     |
     */
 
-    'encrypt' => false,
+    'encrypt' => true,
 
     /*
-    |--------------------------------------------------------------------------
-    | Session File Location
+     |--------------------------------------------------------------------------
+     | Session Serialization
+     |--------------------------------------------------------------------------
+     |
+     | This option determines how session data is serialized and stored. The
+     | "php" option uses the native PHP session serializer, while "json" 
+     | provides better security and cross-language compatibility.
+     |
+     | Supported: "php", "json"
+     |
+     */
+
+    'serialize' => 'json',
+
+    /*
+     |--------------------------------------------------------------------------
+     | Session Prefix
+     |--------------------------------------------------------------------------
+     |
+     | Here you may set a prefix for all session keys. This is useful if you
+     | are hosting multiple applications on the same server and want to ensure
+     | session data doesn't collide between applications.
+     |
+     */
+
+    'prefix' => env('SESSION_PREFIX', 'nexzen_session_'),
+
+    /*
+     |--------------------------------------------------------------------------
+     | Session File Location
     |--------------------------------------------------------------------------
     |
     | When using the native session driver, we need a location where session
@@ -100,7 +128,7 @@ return [
     |
     */
 
-    'store' => env('SESSION_STORE'),
+    'store' => env('SESSION_STORE', 'redis'),
 
     /*
     |--------------------------------------------------------------------------
@@ -168,7 +196,7 @@ return [
     |
     */
 
-    'secure' => env('SESSION_SECURE_COOKIE'),
+    'secure' => env('SESSION_SECURE_COOKIE', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -196,6 +224,6 @@ return [
     |
     */
 
-    'same_site' => 'lax',
+    'same_site' => env('SESSION_SAME_SITE', 'strict'),
 
 ];

@@ -1,3 +1,4 @@
 # Only ignore .env file and log files
 .env
 storage/logs/laravel.log
+config/session.php

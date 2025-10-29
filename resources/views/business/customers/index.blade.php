@@ -27,14 +27,7 @@
                             <option value="inactive">Inactive</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
-                        <select id="licenseStatusFilter" class="form-select" data-title="License Status">
-                            <option value="">License Status</option>
-                            <option value="valid">Valid</option>
-                            <option value="expired">Expired</option>
-                            <option value="pending">Pending</option>
-                        </select>
-                    </div>
+                    
                     <div class="col-md-2 text-end">
                         <a href="{{ route('business.customers.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i>ADD NEW CUSTOMER
@@ -52,7 +45,6 @@
                 <th>Contact</th>
                 <th>Registration Date</th>
                 <th>Status</th>
-                <th>License Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -103,30 +95,14 @@
                         </span>
                     </div>
                 </td>
-                <td>
-                    @if($customer->license_expiry_date)
-                        @php
-                            $licenseBadgeClass = 'success';
-                            if($customer->license_status === 'near_expiry') {
-                                $licenseBadgeClass = 'warning';
-                            } elseif($customer->license_status === 'expired') {
-                                $licenseBadgeClass = 'danger';
-                            }
-                        @endphp
-                        <span class="badge bg-{{ $licenseBadgeClass }}">
-                            {{ ucfirst($customer->license_status) }}
-                        </span>
-                    @else
-                        <span class="badge bg-secondary">N/A</span>
-                    @endif
-                </td>
+                
                 <td>
                     <a href="{{ route('business.customers.show', $customer) }}" class="text-primary text-decoration-none" style="font-weight: 500;">View</a>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="7" class="text-center">No customers found.</td>
+                <td colspan="6" class="text-center">No customers found.</td>
             </tr>
             @endforelse
         </tbody>
@@ -168,7 +144,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const customerTypeFilter = document.getElementById('customerTypeFilter');
     const statusFilter = document.getElementById('statusFilter');
-    const licenseStatusFilter = document.getElementById('licenseStatusFilter');
+    
     const searchInput = document.getElementById('customerSearch');
     
     // Get table rows
@@ -177,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function applyFilters() {
         const customerType = customerTypeFilter.value.toLowerCase();
         const status = statusFilter.value.toLowerCase();
-        const licenseStatus = licenseStatusFilter.value.toLowerCase();
+        
         const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
         rows.forEach(row => {
@@ -207,16 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // Apply license status filter
-            if (licenseStatus && showRow) {
-                if (licenseStatus === 'valid' && !text.includes('valid')) {
-                    showRow = false;
-                } else if (licenseStatus === 'expired' && !text.includes('expired')) {
-                    showRow = false;
-                } else if (licenseStatus === 'pending' && !text.includes('pending')) {
-                    showRow = false;
-                }
-            }
+            
 
             if (showRow) {
                 row.style.display = '';
@@ -229,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Live filters - apply automatically on change
     customerTypeFilter.addEventListener('change', applyFilters);
     statusFilter.addEventListener('change', applyFilters);
-    licenseStatusFilter.addEventListener('change', applyFilters);
+    
     
     // Add search input listener
     if (searchInput) {

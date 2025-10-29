@@ -304,12 +304,12 @@ class SubscriptionPackageController extends Controller
                 'due_date' => now()->addDays(7),
                 'is_active' => true,
                 'is_completed' => false,
-                'metadata' => json_encode([
+                'metadata' => [
                     'subscription_id' => $subscription->id,
                     'package_id' => $package->id,
                     'package_name' => $package->package_name,
                     'enabled_modules' => $package->enabled_modules
-                ])
+                ]
             ]);
 
         } catch (\Exception $e) {

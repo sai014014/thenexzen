@@ -217,7 +217,7 @@ class VendorController extends Controller
                 'vendor_name' => 'required|string|max:255',
                 'mobile_number' => 'required|string|max:15', // quick-add: allow existing numbers
                 'office_address' => 'required|string',
-                'commission_type' => 'required|in:fixed_amount,percentage_of_revenue',
+                'commission_type' => 'required|in:fixed_amount,percentage_of_revenue,per_booking_per_day,lease_to_rent',
                 'commission_rate' => 'required|numeric|min:0',
             ]);
             
@@ -279,7 +279,15 @@ class VendorController extends Controller
             abort(403, 'Unauthorized access to vendor.');
         }
 
-        return view('business.vendors.show', compact('vendor', 'business', 'businessAdmin'));
+        // Get vehicles associated with this vendor (by vendor_name)
+        $vehicles = $business->vehicles()
+            ->where('vendor_name', $vendor->vendor_name)
+            ->where('ownership_type', 'vendor_provided')
+            ->orderBy('vehicle_make')
+            ->orderBy('vehicle_model')
+            ->get();
+
+        return view('business.vendors.show', compact('vendor', 'business', 'businessAdmin', 'vehicles'));
     }
 
     /**
@@ -470,7 +478,7 @@ class VendorController extends Controller
             'payout_day_of_week' => 'required_if:payout_frequency,weekly,bi_weekly|nullable|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
             'payout_day_of_month' => 'required_if:payout_frequency,monthly,quarterly|nullable|integer|min:1|max:31',
             'payout_terms' => 'nullable|string',
-            'commission_type' => 'required|in:fixed_amount,percentage_of_revenue',
+            'commission_type' => 'required|in:fixed_amount,percentage_of_revenue,per_booking_per_day,lease_to_rent',
             'commission_rate' => 'required|numeric|min:0',
             'vendor_agreement' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'gstin_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',

@@ -297,8 +297,10 @@
                             <label for="commission_type" class="form-label">Commission Type *</label>
                             <select class="form-select" id="commission_type" name="commission_type" required onchange="toggleCommissionFields()">
                                 <option value="">Select Commission Type</option>
-                                <option value="fixed_amount" {{ old('commission_type', $vendor->commission_type) == 'fixed_amount' ? 'selected' : '' }}>Fixed Amount</option>
+                                <option value="fixed_amount" {{ old('commission_type', $vendor->commission_type) == 'fixed_amount' ? 'selected' : '' }}>Fixed Amount Per Month</option>
                                 <option value="percentage_of_revenue" {{ old('commission_type', $vendor->commission_type) == 'percentage_of_revenue' ? 'selected' : '' }}>Percentage of Revenue</option>
+                                <option value="per_booking_per_day" {{ old('commission_type', $vendor->commission_type) == 'per_booking_per_day' ? 'selected' : '' }}>Per Booking Per Day</option>
+                                <option value="lease_to_rent" {{ old('commission_type', $vendor->commission_type) == 'lease_to_rent' ? 'selected' : '' }}>Lease-to-Rent</option>
                             </select>
                             @error('commission_type')
                                 <div class="text-danger small">{{ $message }}</div>
@@ -311,6 +313,23 @@
                                 <span class="input-group-text" id="commissionUnit">₹</span>
                             </div>
                             @error('commission_rate')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    
+                    <!-- Lease Commitment (only for lease-to-rent) -->
+                    <div class="row mb-4" id="leaseCommitmentSection" style="display: none;">
+                        <div class="col-md-6 mb-3">
+                            <label for="lease_commitment_months" class="form-label">Lease Commitment (Months) *</label>
+                            <select class="form-select" id="lease_commitment_months" name="lease_commitment_months">
+                                <option value="">Select Commitment Period</option>
+                                <option value="3" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == '3' ? 'selected' : '' }}>3 Months</option>
+                                <option value="6" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == '6' ? 'selected' : '' }}>6 Months</option>
+                                <option value="12" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == '12' ? 'selected' : '' }}>12 Months</option>
+                                <option value="24" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == '24' ? 'selected' : '' }}>24 Months</option>
+                            </select>
+                            @error('lease_commitment_months')
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
@@ -452,11 +471,25 @@ function togglePayoutSchedule() {
 function toggleCommissionFields() {
     const commissionType = document.getElementById('commission_type').value;
     const commissionUnit = document.getElementById('commissionUnit');
+    const leaseCommitmentSection = document.getElementById('leaseCommitmentSection');
+    const leaseCommitmentMonths = document.getElementById('lease_commitment_months');
     
     if (commissionType === 'percentage_of_revenue') {
         commissionUnit.textContent = '%';
+        if (leaseCommitmentSection) leaseCommitmentSection.style.display = 'none';
+        if (leaseCommitmentMonths) leaseCommitmentMonths.required = false;
+    } else if (commissionType === 'per_booking_per_day') {
+        commissionUnit.textContent = '₹/day';
+        if (leaseCommitmentSection) leaseCommitmentSection.style.display = 'none';
+        if (leaseCommitmentMonths) leaseCommitmentMonths.required = false;
+    } else if (commissionType === 'lease_to_rent') {
+        commissionUnit.textContent = '₹';
+        if (leaseCommitmentSection) leaseCommitmentSection.style.display = 'block';
+        if (leaseCommitmentMonths) leaseCommitmentMonths.required = true;
     } else {
         commissionUnit.textContent = '₹';
+        if (leaseCommitmentSection) leaseCommitmentSection.style.display = 'none';
+        if (leaseCommitmentMonths) leaseCommitmentMonths.required = false;
     }
 }
 

@@ -3,12 +3,9 @@
 @endphp
 
 <!-- Company Information -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h6 class="text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-building me-2"></i>Company Information
-        </h6>
-    </div>
+<div class="form-section">
+    <h3 class="section-title">Company Information</h3>
+    <div class="row">
     <div class="col-md-6 mb-3">
         <label for="company_name" class="form-label">Company Name *</label>
         <input type="text" class="form-control" id="company_name" name="company_name" value="{{ old('company_name', $customer && $customer->company_name ? $customer->company_name : '') }}" required>
@@ -40,15 +37,13 @@
         <label for="company_address" class="form-label">Company Address *</label>
         <textarea class="form-control" id="company_address" name="company_address" rows="3" required>{{ old('company_address', $customer && $customer->company_address ? $customer->company_address : '') }}</textarea>
     </div>
+    </div>
 </div>
 
 <!-- Primary Contact Person -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h6 class="text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-user-tie me-2"></i>Primary Contact Person
-        </h6>
-    </div>
+<div class="form-section">
+    <h3 class="section-title">Primary Contact Person</h3>
+    <div class="row">
     <div class="col-md-6 mb-3">
         <label for="contact_person_name" class="form-label">Contact Person Name *</label>
         <input type="text" class="form-control" id="contact_person_name" name="contact_person_name" value="{{ old('contact_person_name', $customer && $customer->contact_person_name ? $customer->contact_person_name : '') }}" required>
@@ -67,17 +62,17 @@
     </div>
     <div class="col-md-6 mb-3">
         <label for="contact_person_alternate" class="form-label">Alternate Contact Number</label>
-        <input type="tel" class="form-control" id="contact_person_alternate" name="contact_person_alternate" value="{{ old('contact_person_alternate', $customer && $customer->contact_person_alternate ? $customer->contact_person_alternate : '') }}">
+            <input type="tel" class="form-control" id="contact_person_alternate" name="contact_person_alternate" value="{{ old('contact_person_alternate', $customer && $customer->contact_person_alternate ? $customer->contact_person_alternate : '') }}">
+    </div>
     </div>
 </div>
 
 <!-- Authorized Driver(s) Information -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="text-primary border-bottom pb-2 mb-0">
-                <i class="fas fa-car me-2"></i>Authorized Driver(s) Information
-            </h6>
+<div class="form-section">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="section-title mb-0">
+            Authorized Driver(s) Information
+        </h3>
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="addDriver()">
                 <i class="fas fa-plus me-2"></i>Add Driver
             </button>
@@ -110,8 +105,15 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Upload Driving License</label>
-                                <input type="file" class="form-control" name="drivers[{{ $index + 1 }}][driving_license_file]" accept=".pdf,.jpg,.jpeg,.png">
-                                <div class="form-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+                                <div class="file-upload-area" onclick="document.getElementById('driver_license_{{ $index + 1 }}').click()">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
+                                </div>
+                                <input type="file" class="form-control" id="driver_license_{{ $index + 1 }}" name="drivers[{{ $index + 1 }}][driving_license_file]" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="updateFileLabel('driver_license_{{ $index + 1 }}', this)">
+                                <div class="helper-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+                                <div id="driver_license_{{ $index + 1 }}_label" class="mt-2 small text-muted" style="display: none;"></div>
                                 @if($driver->driving_license_path)
                                 <div class="mt-2">
                                     <small class="text-muted">Current file: </small>
@@ -151,9 +153,18 @@
                                 <input type="date" class="form-control" name="drivers[1][license_expiry_date]" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Upload Driving License</label>
-                                <input type="file" class="form-control" name="drivers[1][driving_license_file]" accept=".pdf,.jpg,.jpeg,.png">
-                                <div class="form-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+                                <div class="form-group">
+                                    <label class="form-label">Upload Driving License</label>
+                                    <div class="file-upload-area" onclick="document.getElementById('driver_license_1').click()">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
+                                    </div>
+                                    <input type="file" class="form-control" id="driver_license_1" name="drivers[1][driving_license_file]" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="updateFileLabel('driver_license_1', this)">
+                                    <div class="helper-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+                                    <div id="driver_license_1_label" class="mt-2 small text-muted" style="display: none;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -164,12 +175,9 @@
 </div>
 
 <!-- Invoicing and Payment Preferences -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h6 class="text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-file-invoice me-2"></i>Invoicing and Payment Preferences
-        </h6>
-    </div>
+<div class="form-section">
+    <h3 class="section-title">Invoicing and Payment Preferences</h3>
+    <div class="row">
     <div class="col-md-6 mb-3">
         <label for="billing_name" class="form-label">Billing Name *</label>
         <input type="text" class="form-control" id="billing_name" name="billing_name" value="{{ old('billing_name', $customer && $customer->billing_name ? $customer->billing_name : '') }}" required>
@@ -202,17 +210,33 @@
             <option value="monthly" {{ old('invoice_frequency', $customer && $customer->invoice_frequency ? $customer->invoice_frequency : '') == 'monthly' ? 'selected' : '' }}>Monthly</option>
         </select>
     </div>
+    </div>
 </div>
 
 <!-- Additional Information -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h6 class="text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-info-circle me-2"></i>Additional Information
-        </h6>
-    </div>
+<div class="form-section">
+    <h3 class="section-title">Additional Information</h3>
+    <div class="row">
     <div class="col-12 mb-3">
         <label for="additional_information" class="form-label">Remarks/Additional Notes</label>
         <textarea class="form-control" id="additional_information" name="additional_information" rows="3" placeholder="Any other requests or requirements...">{{ old('additional_information', $customer && $customer->additional_information ? $customer->additional_information : '') }}</textarea>
     </div>
+    </div>
 </div>
+
+<script>
+function updateFileLabel(inputId, input) {
+    const labelDiv = document.getElementById(inputId + '_label');
+    if (input.files && input.files.length > 0) {
+        let labelText = `Selected: ${input.files[0].name}`;
+        if (labelDiv) {
+            labelDiv.textContent = labelText;
+            labelDiv.style.display = 'block';
+        }
+    } else {
+        if (labelDiv) {
+            labelDiv.style.display = 'none';
+        }
+    }
+}
+</script>

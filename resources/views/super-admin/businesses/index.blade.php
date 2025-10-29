@@ -76,14 +76,14 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <form class="status-form" data-business-id="{{ $business->id }}" style="display: inline;">
+                                    <form class="status-form" data-business-id="{{ $business->id }}" action="{{ route('super-admin.businesses.update-status', $business) }}" method="POST" style="display: inline;">
                                         @csrf
+                                        @method('PATCH')
                                         <select class="form-select form-select-sm status-select" name="status" style="width: auto; min-width: 100px;">
                                             <option value="active" {{ $business->status === 'active' ? 'selected' : '' }}>Active</option>
                                             <option value="inactive" {{ $business->status === 'inactive' ? 'selected' : '' }}>Inactive</option>
                                             <option value="suspended" {{ $business->status === 'suspended' ? 'selected' : '' }}>Suspended</option>
                                         </select>
-                                        <button type="submit" class="btn btn-sm btn-outline-primary ms-1" style="display: none;" id="status-submit-{{ $business->id }}">Update</button>
                                     </form>
                                     @if($business->is_verified)
                                         <br><small class="text-success ms-2"><i class="fas fa-check-circle"></i> Verified</small>
@@ -188,22 +188,35 @@ document.addEventListener('DOMContentLoaded', function() {
             this.disabled = true;
             this.style.opacity = '0.6';
             
-            // Make AJAX request
-            fetch(`/super-admin/businesses/${businessId}/status`, {
-                method: 'PATCH',
+            // Build URL from form action to avoid hardcoded paths
+            const url = form.getAttribute('action') || `/super-admin/businesses/${businessId}/status`;
+            
+            // Use POST with method override to avoid servers blocking PATCH
+            const fd = new FormData(form);
+            fd.set('status', newStatus);
+            fd.set('_method', 'PATCH');
+
+            fetch(url, {
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({
-                    status: newStatus
-                })
+                body: fd,
+                credentials: 'same-origin'
             })
             .then(response => {
                 console.log('Response status:', response.status);
+                const ct = response.headers.get('content-type') || '';
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    // Try to parse JSON error if available
+                    if (ct.includes('application/json')) {
+                        return response.json().then(err => { throw new Error(err.message || `HTTP ${response.status}`); });
+                    }
+                    return response.text().then(text => { throw new Error(`HTTP ${response.status}`); });
+                }
+                if (!ct.includes('application/json')) {
+                    return response.text().then(() => { throw new Error('Unexpected non-JSON response'); });
                 }
                 return response.json();
             })
@@ -227,11 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.value = originalValue;
                 showAlert('error', 'An error occurred: ' + error.message);
                 
-                // Show the submit button as fallback
-                const submitBtn = document.getElementById(`status-submit-${businessId}`);
-                if (submitBtn) {
-                    submitBtn.style.display = 'inline-block';
-                }
+                // No fallback button; keep inline select only
             })
             .finally(() => {
                 // Remove loading state
@@ -244,12 +253,13 @@ document.addEventListener('DOMContentLoaded', function() {
         select.dataset.originalValue = select.value;
     });
     
-    // Handle form submission as fallback
+    // Handle form submission as fallback (no visible button)
     const statusForms = document.querySelectorAll('.status-form');
     statusForms.forEach(form => {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const businessId = this.dataset.businessId;
+            const url = this.getAttribute('action') || `/super-admin/businesses/${businessId}/status`;
             const formData = new FormData(this);
             
             // Show loading state
@@ -257,16 +267,30 @@ document.addEventListener('DOMContentLoaded', function() {
             select.disabled = true;
             select.style.opacity = '0.6';
             
-            // Submit form via AJAX
-            fetch(`/super-admin/businesses/${businessId}/status`, {
-                method: 'PATCH',
+            // Submit form via AJAX (POST + method override)
+            formData.set('_method', 'PATCH');
+            fetch(url, {
+                method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': formData.get('_token'),
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: formData
+                body: formData,
+                credentials: 'same-origin'
             })
-            .then(response => response.json())
+            .then(response => {
+                const ct = response.headers.get('content-type') || '';
+                if (!response.ok) {
+                    if (ct.includes('application/json')) {
+                        return response.json().then(err => { throw new Error(err.message || `HTTP ${response.status}`); });
+                    }
+                    return response.text().then(text => { throw new Error('Unexpected non-JSON response'); });
+                }
+                if (!ct.includes('application/json')) {
+                    return response.text().then(() => { throw new Error('Unexpected non-JSON response'); });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     showAlert('success', data.message);

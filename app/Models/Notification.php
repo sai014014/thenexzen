@@ -172,16 +172,22 @@ class Notification extends Model
     // Static methods for creating notifications
     public static function createServiceReminder(Vehicle $vehicle, Carbon $dueDate, $priority = 'medium')
     {
+        $vehicleName = $vehicle->vehicle_make . ' ' . $vehicle->vehicle_model . ' (' . $vehicle->vehicle_number . ')';
+        
         return self::create([
             'business_id' => $vehicle->business_id,
             'vehicle_id' => $vehicle->id,
-            'title' => 'Service Reminder - ' . $vehicle->vehicle_name,
-            'description' => "Vehicle {$vehicle->vehicle_name} is due for service on {$dueDate->format('M d, Y')}.",
+            'title' => 'Service Reminder - ' . $vehicleName,
+            'description' => "Vehicle {$vehicleName} is due for service on {$dueDate->format('M d, Y')}.",
             'category' => 'service_reminder',
             'priority' => $priority,
             'due_date' => $dueDate,
+            'is_active' => true,
+            'is_completed' => false,
             'metadata' => [
-                'vehicle_name' => $vehicle->vehicle_name,
+                'vehicle_make' => $vehicle->vehicle_make,
+                'vehicle_model' => $vehicle->vehicle_model,
+                'vehicle_number' => $vehicle->vehicle_number,
                 'vehicle_id' => $vehicle->id,
                 'service_type' => 'routine_service'
             ]
@@ -190,16 +196,22 @@ class Notification extends Model
 
     public static function createInsuranceReminder(Vehicle $vehicle, Carbon $dueDate, $priority = 'high')
     {
+        $vehicleName = $vehicle->vehicle_make . ' ' . $vehicle->vehicle_model . ' (' . $vehicle->vehicle_number . ')';
+        
         return self::create([
             'business_id' => $vehicle->business_id,
             'vehicle_id' => $vehicle->id,
-            'title' => 'Insurance Renewal - ' . $vehicle->vehicle_name,
-            'description' => "Insurance for {$vehicle->vehicle_name} expires on {$dueDate->format('M d, Y')}. Please renew to avoid coverage lapse.",
+            'title' => 'Insurance Renewal - ' . $vehicleName,
+            'description' => "Insurance for {$vehicleName} expires on {$dueDate->format('M d, Y')}. Please renew to avoid coverage lapse.",
             'category' => 'insurance_renewal',
             'priority' => $priority,
             'due_date' => $dueDate,
+            'is_active' => true,
+            'is_completed' => false,
             'metadata' => [
-                'vehicle_name' => $vehicle->vehicle_name,
+                'vehicle_make' => $vehicle->vehicle_make,
+                'vehicle_model' => $vehicle->vehicle_model,
+                'vehicle_number' => $vehicle->vehicle_number,
                 'vehicle_id' => $vehicle->id,
                 'insurance_type' => 'comprehensive'
             ]

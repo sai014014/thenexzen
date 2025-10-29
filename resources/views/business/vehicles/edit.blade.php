@@ -630,13 +630,16 @@
                                         <p class="text-muted mb-2"><strong>Existing Images:</strong></p>
                                         <div class="d-flex flex-wrap gap-2">
                                             @foreach($vehicle->images as $image)
-                                            <div class="position-relative existing-image-item" data-image-id="{{ $image->id }}" style="width: 100px; height: 100px; border: 2px solid #ced4da; border-radius: 8px; overflow: hidden;">
+                                            <div class="position-relative existing-image-item" data-image-id="{{ $image->id }}" style="width: 100px; height: 100px; border: 2px solid {{ $image->is_primary ? '#28a745' : '#ced4da' }}; border-radius: 8px; overflow: hidden;">
                                                 <img src="{{ asset('storage/' . $image->image_path) }}" alt="Vehicle Image" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='{{ asset('images/car.png') }}';">
                                                 <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: 2px; right: 2px; padding: 2px 6px; font-size: 10px;" onclick="removeExistingImage({{ $image->id }}, this)">
                                                     <i class="fas fa-times"></i>
                                                 </button>
+                                                <button type="button" class="btn btn-sm btn-primary position-absolute set-primary-btn existing-primary-btn {{ $image->is_primary ? 'active' : '' }}" style="bottom: 2px; right: 2px; padding: 2px 6px; font-size: 10px;" onclick="setExistingImagePrimary({{ $image->id }}, this)" title="Set as Primary">
+                                                    <i class="fas fa-star"></i>@if($image->is_primary)<span style="font-size: 8px; margin-left: 2px;">Primary</span>@endif
+                                                </button>
                                                 @if($image->is_primary)
-                                                <span class="badge bg-success position-absolute" style="bottom: 2px; left: 2px; font-size: 8px;">Primary</span>
+                                                <span class="badge bg-success position-absolute primary-badge" style="bottom: 2px; left: 2px; font-size: 8px; padding: 2px 4px; z-index: 2;">Primary</span>
                                                 @endif
                                             </div>
                                             @endforeach
@@ -815,6 +818,19 @@
                             </div>
                         </div>
 
+                        <!-- Use Vendor Default Commission -->
+                        <div class="row vendor-fields" style="display: none;">
+                            <div class="col-md-12">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" value="1" id="use_vendor_default_commission" name="use_vendor_default_commission"
+                                        {{ old('use_vendor_default_commission') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="use_vendor_default_commission">
+                                        Use vendor default commission
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Commission Fields (only for vendor-provided vehicles) -->
                         <div class="row vendor-fields" style="display: none;">
                             <div class="col-md-6">
@@ -831,13 +847,21 @@
                                                     $commissionValue = 'fixed';
                                                 } elseif($vehicle->commission_type == 'percentage_of_revenue' || $vehicle->commission_type == 'percentage') {
                                                     $commissionValue = 'percentage';
+                                                } elseif($vehicle->commission_type == 'per_booking_per_day') {
+                                                    $commissionValue = 'per_booking_per_day';
+                                                } elseif($vehicle->commission_type == 'lease_to_rent') {
+                                                    $commissionValue = 'lease_to_rent';
+                                                } else {
+                                                    $commissionValue = $vehicle->commission_type;
                                                 }
                                             }
                                         @endphp
-                                        <option value="fixed" {{ old('commission_type', $commissionValue) == 'fixed' ? 'selected' : '' }}>Fixed Amount</option>
-                                        <option value="percentage" {{ old('commission_type', $commissionValue) == 'percentage' ? 'selected' : '' }}>Percentage</option>
+                                        <option value="fixed" {{ old('commission_type', $commissionValue) == 'fixed' ? 'selected' : '' }}>Fixed Amount Per Month</option>
+                                        <option value="percentage" {{ old('commission_type', $commissionValue) == 'percentage' ? 'selected' : '' }}>Percentage of Revenue</option>
+                                        <option value="per_booking_per_day" {{ old('commission_type', $commissionValue) == 'per_booking_per_day' ? 'selected' : '' }}>Per Booking Per Day</option>
+                                        <option value="lease_to_rent" {{ old('commission_type', $commissionValue) == 'lease_to_rent' ? 'selected' : '' }}>Lease-to-Rent</option>
                             </select>
-                                    <div class="helper-text">Required for vendor-provided vehicles</div>
+                                    <div class="helper-text" id="commissionHelperText">Required for vendor-provided vehicles</div>
                             @error('commission_type')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -855,8 +879,30 @@
                                    step="0.01" 
                                    min="0"
                                            placeholder="Enter commission value">
-                                    <div class="helper-text">Commission amount (₹) or percentage (%) for vendor-provided vehicles</div>
+                                    <div class="helper-text" id="commissionValueHelper">Commission amount (₹) or percentage (%) for vendor-provided vehicles</div>
                             @error('commission_value')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                                </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lease Commitment Months (only for lease-to-rent) -->
+                    <div class="row vendor-fields" id="leaseCommitmentField" style="display: none;">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="lease_commitment_months" class="form-label">Lease Commitment (Months)</label>
+                                <select class="form-select @error('lease_commitment_months') is-invalid @enderror" 
+                                        id="lease_commitment_months" 
+                                        name="lease_commitment_months">
+                                    <option value="">Select Commitment Period</option>
+                                    <option value="3" {{ old('lease_commitment_months', $vehicle->lease_commitment_months) == '3' ? 'selected' : '' }}>3 Months</option>
+                                    <option value="6" {{ old('lease_commitment_months', $vehicle->lease_commitment_months) == '6' ? 'selected' : '' }}>6 Months</option>
+                                    <option value="12" {{ old('lease_commitment_months', $vehicle->lease_commitment_months) == '12' ? 'selected' : '' }}>12 Months</option>
+                                    <option value="24" {{ old('lease_commitment_months', $vehicle->lease_commitment_months) == '24' ? 'selected' : '' }}>24 Months</option>
+                                </select>
+                                <div class="helper-text">Required for lease-to-rent commission type</div>
+                                @error('lease_commitment_months')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                                 </div>
@@ -1097,6 +1143,12 @@
     </div>
 </div>
 
+@push('styles')
+<style>
+@keyframes nxz-spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+</style>
+@endpush
+
 <!-- Add Vendor Modal -->
 <div class="modal fade" id="addVendorModal" tabindex="-1" aria-labelledby="addVendorModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -1187,10 +1239,7 @@ function previewMultipleImages(input) {
 
 // Vendor search functions
 function searchVendors(query) {
-    if (!vendorDropdown) {
-        console.error('Vendor dropdown element not found');
-        return;
-    }
+    if (!vendorDropdown) { return; }
     
     const url = `{{ url("/business/vendors/search") }}?q=${encodeURIComponent(query)}`;
     
@@ -1209,10 +1258,7 @@ function searchVendors(query) {
             displayNoVendorsFound();
         }
     })
-    .catch(error => {
-        console.error('Error searching vendors:', error);
-        displayNoVendorsFound();
-    });
+    .catch(() => { displayNoVendorsFound(); });
 }
 
 function displayVendorOptions(vendors) {
@@ -1312,10 +1358,7 @@ function saveNewVendor() {
             showAlert(data.message || 'Error adding vendor', 'danger');
         }
     })
-    .catch(error => {
-        console.error('Error adding vendor:', error);
-        showAlert(`Error adding vendor: ${error.message}`, 'danger');
-    });
+    .catch(() => { showAlert('Error adding vendor.', 'danger'); });
 }
 
 function showAlert(message, type) {
@@ -1350,19 +1393,100 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (ownershipType === 'vendor_provided') {
             vendorFieldsElements.forEach(field => field.style.display = 'block');
+            // Respect vendor default checkbox for required toggles
+            const useDefault = document.getElementById('use_vendor_default_commission');
+            const typeEl = document.getElementById('commission_type');
+            const valEl = document.getElementById('commission_value');
+            const leaseSel = document.getElementById('lease_commitment_months');
+            const isUseDefault = useDefault && useDefault.checked;
+            if (typeEl) typeEl.required = !isUseDefault;
+            if (valEl) valEl.required = !isUseDefault;
+            if (leaseSel && typeEl && typeEl.value === 'lease_to_rent') leaseSel.required = !isUseDefault;
         } else {
             vendorFieldsElements.forEach(field => field.style.display = 'none');
         }
     }
 
+    // No full-page overlay; inline spinner handled on the button
     // Event listeners
     const ownershipTypeSelect = document.getElementById('ownership_type');
     if (ownershipTypeSelect) {
         ownershipTypeSelect.addEventListener('change', toggleVendorFields);
     }
+    const useDefaultCb = document.getElementById('use_vendor_default_commission');
+    if (useDefaultCb) {
+        useDefaultCb.addEventListener('change', toggleVendorFields);
+    }
+    
+    // Commission type change handler
+    const commissionTypeSelect = document.getElementById('commission_type');
+    if (commissionTypeSelect) {
+        commissionTypeSelect.addEventListener('change', function() {
+            handleCommissionTypeChange(this.value);
+        });
+    }
+
+    // Function to handle commission type changes
+    function handleCommissionTypeChange(commissionType) {
+        const leaseField = document.getElementById('leaseCommitmentField');
+        const leaseSelect = document.getElementById('lease_commitment_months');
+        const helperText = document.getElementById('commissionHelperText');
+        const valueHelper = document.getElementById('commissionValueHelper');
+        const valueInput = document.getElementById('commission_value');
+        
+        if (commissionType === 'lease_to_rent') {
+            if (leaseField) leaseField.style.display = 'block';
+            if (leaseSelect) leaseSelect.required = true;
+            if (helperText) helperText.textContent = 'Required for vendor-provided vehicles';
+            if (valueHelper) valueHelper.textContent = 'Flat monthly amount (₹)';
+            if (valueInput) { valueInput.removeAttribute('max'); valueInput.setAttribute('min', '0'); }
+        } else if (commissionType === 'per_booking_per_day') {
+            if (leaseField) leaseField.style.display = 'none';
+            if (leaseSelect) leaseSelect.required = false;
+            if (helperText) helperText.textContent = 'Required for vendor-provided vehicles';
+            if (valueHelper) valueHelper.textContent = 'Per day commission amount (₹)';
+            if (valueInput) { valueInput.removeAttribute('max'); valueInput.setAttribute('min', '0'); }
+        } else if (commissionType === 'percentage') {
+            if (leaseField) leaseField.style.display = 'none';
+            if (leaseSelect) leaseSelect.required = false;
+            if (helperText) helperText.textContent = 'Required for vendor-provided vehicles';
+            if (valueHelper) valueHelper.textContent = 'Percentage of total booking revenue (%)';
+            if (valueInput) { valueInput.setAttribute('max', '100'); valueInput.setAttribute('min', '0'); }
+        } else if (commissionType === 'fixed') {
+            if (leaseField) leaseField.style.display = 'none';
+            if (leaseSelect) leaseSelect.required = false;
+            if (helperText) helperText.textContent = 'Required for vendor-provided vehicles';
+            if (valueHelper) valueHelper.textContent = 'Fixed monthly amount (₹)';
+            if (valueInput) { valueInput.removeAttribute('max'); valueInput.setAttribute('min', '0'); }
+        } else {
+            if (leaseField) leaseField.style.display = 'none';
+            if (leaseSelect) leaseSelect.required = false;
+            if (helperText) helperText.textContent = 'Required for vendor-provided vehicles';
+            if (valueHelper) valueHelper.textContent = 'Commission amount (₹) or percentage (%) for vendor-provided vehicles';
+            if (valueInput) { valueInput.removeAttribute('max'); valueInput.setAttribute('min', '0'); }
+        }
+    }
+
+    // Clamp value to 100 when percentage
+    const commissionValueEl = document.getElementById('commission_value');
+    if (commissionValueEl) {
+        commissionValueEl.addEventListener('input', function() {
+            const typeSel = document.getElementById('commission_type');
+            if (typeSel && typeSel.value === 'percentage') {
+                let v = parseFloat(this.value);
+                if (!isNaN(v) && v > 100) this.value = 100;
+                if (!isNaN(v) && v < 0) this.value = 0;
+            }
+        });
+    }
 
     // Initialize on page load
     toggleVendorFields();
+    
+    // Initialize commission type display
+    if (commissionTypeSelect && commissionTypeSelect.value) {
+        handleCommissionTypeChange(commissionTypeSelect.value);
+    }
 
     // Vendor search event listener
     if (vendorSearchInput) {
@@ -1374,8 +1498,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (vendorDropdown) {
                     vendorDropdown.style.display = 'none';
                 }
-            return;
-        }
+        return;
+    }
 
             vendorSearchTimeout = setTimeout(() => {
                 searchVendors(query);
@@ -1435,7 +1559,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 const data = await response.json();
                 if (!data.success) throw { status: 400, data };
-                showAlert('Vehicle registered successfully! Redirecting...', 'success');
+                showAlert('Vehicle updated successfully! Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = data.redirect_url || '{{ route("business.vehicles.index") }}';
                 }, 2000);
@@ -1586,14 +1710,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(vendorForm);
             
             // Map form values to backend expectations
-            const commissionRateValue = formData.get('commission_value');
+            const commissionRateValue = (document.getElementById('quick_commission_rate')?.value || '').toString().trim();
+            if (!commissionRateValue) {
+                showNotification('Please enter a commission value', 'error');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
             
             // Remove old values
             formData.delete('commission_type');
             formData.delete('commission_value');
             
-            // Add correct field names and values
-            formData.append('commission_type', commissionTypeValue === 'fixed' ? 'fixed_amount' : 'percentage_of_revenue');
+            // Map commission type to backend values (fixed/percentage legacy)
+            let backendCommissionType = commissionTypeValue;
+            if (commissionTypeValue === 'fixed') {
+                backendCommissionType = 'fixed_amount';
+            } else if (commissionTypeValue === 'percentage') {
+                backendCommissionType = 'percentage_of_revenue';
+            }
+            formData.append('commission_type', backendCommissionType);
             formData.append('commission_rate', commissionRateValue);
             
             // Add CSRF token
@@ -1627,7 +1763,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         const commissionValueInput = document.getElementById('commission_value');
                         
                         if (commissionTypeSelect) {
-                            const mappedType = (data.vendor.commission_type === 'fixed_amount' ? 'fixed' : (data.vendor.commission_type === 'percentage_of_revenue' ? 'percentage' : (data.vendor.commission_type || '')));
+                            let mappedType = '';
+                            if (data.vendor.commission_type === 'fixed_amount' || data.vendor.commission_type === 'fixed') {
+                                mappedType = 'fixed';
+                            } else if (data.vendor.commission_type === 'percentage_of_revenue' || data.vendor.commission_type === 'percentage') {
+                                mappedType = 'percentage';
+                            } else if (data.vendor.commission_type === 'per_booking_per_day') {
+                                mappedType = 'per_booking_per_day';
+                            } else if (data.vendor.commission_type === 'lease_to_rent') {
+                                mappedType = 'lease_to_rent';
+                            } else {
+                                mappedType = (data.vendor.commission_type || '');
+                            }
                             
                             // Set the native select value first
                             commissionTypeSelect.value = mappedType;
@@ -1887,19 +2034,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     vendorData = data.vendors.map(vendor => vendor.vendor_name);
                     filteredVendors = [...vendorData];
                     renderVendorOptions();
-            } else {
-                    console.error('Failed to load vendors:', data.message);
-                    vendorData = [];
-                    filteredVendors = [];
-                    renderVendorOptions();
-                }
+                } else { vendorData = []; filteredVendors = []; renderVendorOptions(); }
             })
-            .catch(error => {
-                console.error('Error loading vendors:', error);
-                vendorData = [];
-                filteredVendors = [];
-                renderVendorOptions();
-            });
+            .catch(() => { vendorData = []; filteredVendors = []; renderVendorOptions(); });
         }
         
         // Search vendors with API call
@@ -1920,17 +2057,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     filteredVendors = data.vendors.map(vendor => vendor.vendor_name);
                     selectedIndex = -1;
                     renderVendorOptions();
-            } else {
-                    console.error('Failed to search vendors:', data.message);
-                    filteredVendors = [];
-                    renderVendorOptions();
-            }
+            } else { filteredVendors = []; renderVendorOptions(); }
         })
-        .catch(error => {
-                console.error('Error searching vendors:', error);
-                filteredVendors = [];
-                renderVendorOptions();
-            });
+        .catch(() => { filteredVendors = []; renderVendorOptions(); });
         }
         
         // Fetch vendor commission details
@@ -1970,17 +2099,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (vendor) {
                         // Map commission type from database to form values
                         let commissionType = '';
-                        if (vendor.commission_type === 'fixed_amount') {
+                        if (vendor.commission_type === 'fixed_amount' || vendor.commission_type === 'fixed') {
                             commissionType = 'fixed';
-                        } else if (vendor.commission_type === 'percentage_of_revenue') {
+                        } else if (vendor.commission_type === 'percentage_of_revenue' || vendor.commission_type === 'percentage') {
                             commissionType = 'percentage';
+                        } else if (vendor.commission_type === 'per_booking_per_day') {
+                            commissionType = 'per_booking_per_day';
+                        } else if (vendor.commission_type === 'lease_to_rent') {
+                            commissionType = 'lease_to_rent';
                         }
                         
                         // Set commission type
                         commissionTypeSelect.value = commissionType;
                         
+                        // Trigger UI updates (including lease commitment visibility)
+                        const changeEvent = new Event('change', { bubbles: true });
+                        commissionTypeSelect.dispatchEvent(changeEvent);
+                        
                         // Set commission value
                         commissionValueInput.value = vendor.commission_rate || '';
+
+                        // If lease-to-rent, set lease commitment
+                        const leaseField = document.getElementById('leaseCommitmentField');
+                        const leaseSelect = document.getElementById('lease_commitment_months');
+                        if (commissionType === 'lease_to_rent') {
+                            if (leaseField) leaseField.style.display = '';
+                            if (leaseSelect) leaseSelect.value = vendor.lease_commitment_months || '';
+                        } else {
+                            if (leaseSelect) leaseSelect.value = '';
+                        }
+
+                        // Do not auto-check vendor default checkbox; allow manual override
                             
                             // Refresh custom dropdowns to show the selected value
                             refreshCustomDropdowns();
@@ -1990,10 +2139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             })
-            .catch(error => {
-                console.error('Error fetching vendor commission details:', error);
-                showNotification('Failed to load commission details', 'error');
-            })
+            .catch(() => { showNotification('Failed to load commission details', 'error'); })
             .finally(() => {
                 // Re-enable fields
                 commissionTypeSelect.disabled = false;
@@ -2002,10 +2148,48 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             }, 100); // Small delay to ensure fields are visible
         }
+        
+        // Handle use vendor default commission checkbox
+        const useDefaultCb = document.getElementById('use_vendor_default_commission');
+        if (useDefaultCb) {
+            useDefaultCb.addEventListener('change', function() {
+                if (this.checked) {
+                    const vnInput = document.getElementById('vendor_name');
+                    const vn = vnInput ? vnInput.value.trim() : '';
+                    if (vn) {
+                        fetchVendorCommissionDetails(vn);
+                    }
+                }
+            });
+        }
     }
 });
 </script>
 @endsection
+
+
+
+@push('scripts')
+<script>
+
+
+document.addEventListener('DOMContentLoaded', function () {
+	const editForm = document.getElementById('vehicleForm');
+	if (editForm) {
+		editForm.addEventListener('submit', function () { showLoader(); });
+	}
+
+	// Ensure loader hides on unexpected fetch errors
+	const originalFetch = window.fetch;
+	window.fetch = function () {
+		return originalFetch.apply(this, arguments).catch(function (err) {
+			hideLoader();
+			throw err;
+		});
+	};
+});
+</script>
+@endpush
 
 <!-- Vendor Quick Add Modal -->
 <div class="modal fade" id="vendorQuickAddModal" tabindex="-1" aria-labelledby="vendorQuickAddModalLabel" aria-hidden="true">
@@ -2047,8 +2231,10 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <label for="quick_commission_type" class="form-label required">Commission Type</label>
                                 <select class="form-select" id="quick_commission_type" name="commission_type" required data-skip-custom-dropdown="true">
                                     <option value="">Select Type</option>
-                                    <option value="fixed">Fixed Amount</option>
-                                    <option value="percentage">Percentage</option>
+                                    <option value="fixed">Fixed Amount Per Month</option>
+                                    <option value="percentage">Percentage of Revenue</option>
+                                    <option value="per_booking_per_day">Per Booking Per Day</option>
+                                    <option value="lease_to_rent">Lease-to-Rent</option>
                                 </select>
                             </div>
                         </div>
@@ -2123,16 +2309,25 @@ function uploadVehicleImages(files) {
                 });
                 
                 // Update preview with actual image
+                previewDiv.setAttribute('data-image-id', data.image_id);
                 previewDiv.innerHTML = `
                     <img src="${data.preview_url}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
                     <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: 2px; right: 2px; padding: 2px 6px; font-size: 10px;" onclick="removeVehicleImage(${data.image_id}, this)">
                         <i class="fas fa-times"></i>
                     </button>
+                    <button type="button" class="btn btn-sm btn-primary position-absolute set-primary-btn" style="bottom: 2px; right: 2px; padding: 2px 6px; font-size: 10px;" onclick="setVehicleImagePrimary(${data.image_id}, this)" title="Set as Primary">
+                        <i class="fas fa-star"></i>
+                    </button>
                 `;
                 
-                // Update hidden input
+                // Set first new image as primary if no primary exists
+                if (window.uploadedVehicleImageIds.length === 0 && !document.querySelector('.existing-image-item[data-is-primary="true"]')) {
+                    setVehicleImagePrimary(data.image_id, previewDiv.querySelector('.set-primary-btn'));
+                }
+                
+                // Update hidden inputs
                 document.getElementById('uploaded_image_ids').value = window.uploadedVehicleImageIds.map(img => img.id).join(',');
-    } else {
+                    } else {
                 alert('Failed to upload file: ' + data.message);
                 previewDiv.remove();
                 }
@@ -2145,12 +2340,144 @@ function uploadVehicleImages(files) {
         });
     }
 
+// Track primary image ID for edit page
+window.primaryVehicleImageId = null;
+window.existingPrimaryImageId = {{ $vehicle->images->where('is_primary', true)->first()->id ?? 'null' }};
+
+// Set vehicle image as primary (for newly uploaded images)
+function setVehicleImagePrimary(imageId, buttonElement) {
+    // Remove primary status from all images (both existing and new)
+    document.querySelectorAll('[data-image-id]').forEach(el => {
+        el.classList.remove('primary-image');
+        el.style.borderColor = '#ced4da';
+        const primaryBtn = el.querySelector('.set-primary-btn');
+        if (primaryBtn && !primaryBtn.classList.contains('existing-primary-btn')) {
+            primaryBtn.classList.remove('active');
+            primaryBtn.innerHTML = '<i class="fas fa-star"></i>';
+        }
+        const existingBadge = el.querySelector('.primary-badge');
+        if (existingBadge && !el.classList.contains('existing-image-item')) existingBadge.remove();
+    });
+    
+    // Also update existing images
+    document.querySelectorAll('.existing-image-item').forEach(el => {
+        el.style.borderColor = '#ced4da';
+        el.style.borderWidth = '2px';
+        const primaryBtn = el.querySelector('.existing-primary-btn');
+        if (primaryBtn) {
+            primaryBtn.classList.remove('active');
+            primaryBtn.innerHTML = '<i class="fas fa-star"></i>';
+        }
+        const existingBadge = el.querySelector('.primary-badge');
+        if (existingBadge) existingBadge.remove();
+    });
+    
+    // Set this image as primary
+    const imageContainer = buttonElement.closest('[data-image-id]');
+    if (imageContainer) {
+        imageContainer.classList.add('primary-image');
+        imageContainer.style.borderColor = '#28a745';
+        imageContainer.style.borderWidth = '2px';
+        buttonElement.classList.add('active');
+        buttonElement.innerHTML = '<i class="fas fa-star"></i><span style="font-size: 8px; margin-left: 2px;">Primary</span>';
+        
+        // Add primary badge
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-success position-absolute primary-badge';
+        badge.style.cssText = 'bottom: 2px; left: 2px; font-size: 8px; padding: 2px 4px; z-index: 2;';
+        badge.textContent = 'Primary';
+        imageContainer.appendChild(badge);
+    }
+    
+    // Track primary image ID
+    window.primaryVehicleImageId = imageId;
+    window.existingPrimaryImageId = null;
+    
+    // Update hidden input
+    let primaryInput = document.getElementById('primary_image_id');
+    if (!primaryInput) {
+        primaryInput = document.createElement('input');
+        primaryInput.type = 'hidden';
+        primaryInput.id = 'primary_image_id';
+        primaryInput.name = 'primary_image_id';
+        document.getElementById('vehicleForm').appendChild(primaryInput);
+    }
+    primaryInput.value = imageId;
+}
+
+// Set existing image as primary
+function setExistingImagePrimary(imageId, buttonElement) {
+    // Remove primary status from all images (both existing and new)
+    document.querySelectorAll('[data-image-id]').forEach(el => {
+        el.classList.remove('primary-image');
+        el.style.borderColor = '#ced4da';
+        const primaryBtn = el.querySelector('.set-primary-btn');
+        if (primaryBtn && !primaryBtn.classList.contains('existing-primary-btn')) {
+            primaryBtn.classList.remove('active');
+            primaryBtn.innerHTML = '<i class="fas fa-star"></i>';
+        }
+        const existingBadge = el.querySelector('.primary-badge');
+        if (existingBadge && !el.classList.contains('existing-image-item')) existingBadge.remove();
+    });
+    
+    // Also update existing images
+    document.querySelectorAll('.existing-image-item').forEach(el => {
+        el.style.borderColor = '#ced4da';
+        el.style.borderWidth = '2px';
+        const primaryBtn = el.querySelector('.existing-primary-btn');
+        if (primaryBtn) {
+            primaryBtn.classList.remove('active');
+            primaryBtn.innerHTML = '<i class="fas fa-star"></i>';
+        }
+        const existingBadge = el.querySelector('.primary-badge');
+        if (existingBadge) existingBadge.remove();
+    });
+    
+    // Set this existing image as primary
+    const imageContainer = buttonElement.closest('.existing-image-item');
+    if (imageContainer) {
+        imageContainer.style.borderColor = '#28a745';
+        imageContainer.style.borderWidth = '2px';
+        buttonElement.classList.add('active');
+        buttonElement.innerHTML = '<i class="fas fa-star"></i><span style="font-size: 8px; margin-left: 2px;">Primary</span>';
+        
+        // Add primary badge
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-success position-absolute primary-badge';
+        badge.style.cssText = 'bottom: 2px; left: 2px; font-size: 8px; padding: 2px 4px; z-index: 2;';
+        badge.textContent = 'Primary';
+        imageContainer.appendChild(badge);
+    }
+    
+    // Track primary image ID (existing image)
+    window.existingPrimaryImageId = imageId;
+    window.primaryVehicleImageId = null;
+    
+    // Update hidden input
+    let primaryInput = document.getElementById('primary_image_id');
+    if (!primaryInput) {
+        primaryInput = document.createElement('input');
+        primaryInput.type = 'hidden';
+        primaryInput.id = 'primary_image_id';
+        primaryInput.name = 'primary_image_id';
+        document.getElementById('vehicleForm').appendChild(primaryInput);
+    }
+    primaryInput.value = 'existing_' + imageId;
+}
+
 // Remove vehicle image
 function removeVehicleImage(imageId, buttonElement) {
+    // If removing primary image, clear primary tracking
+    if (window.primaryVehicleImageId === imageId) {
+        window.primaryVehicleImageId = null;
+        const primaryInput = document.getElementById('primary_image_id');
+        if (primaryInput) primaryInput.value = '';
+    }
+    
     // Remove from tracking array
     window.uploadedVehicleImageIds = window.uploadedVehicleImageIds.filter(img => img.id !== imageId);
     
-    // Update hidden input
+    // Update hidden inputs
     document.getElementById('uploaded_image_ids').value = window.uploadedVehicleImageIds.map(img => img.id).join(',');
     
     // Remove preview
@@ -2161,9 +2488,26 @@ function removeVehicleImage(imageId, buttonElement) {
     if (container && container.children.length === 0) {
         container.style.display = 'none';
     }
+    
+    // If no primary exists and images remain, check for existing primary first, then set first new as primary
+    if (!window.primaryVehicleImageId && !window.existingPrimaryImageId && window.uploadedVehicleImageIds.length > 0) {
+        const firstImageId = window.uploadedVehicleImageIds[0].id;
+        const firstImageEl = document.querySelector(`[data-image-id="${firstImageId}"]`);
+        if (firstImageEl) {
+            const primaryBtn = firstImageEl.querySelector('.set-primary-btn');
+            if (primaryBtn) setVehicleImagePrimary(firstImageId, primaryBtn);
+        }
+    }
 }
 
 function removeExistingImage(imageId, buttonElement) {
+    // If removing primary image, clear primary tracking
+    if (window.existingPrimaryImageId === imageId) {
+        window.existingPrimaryImageId = null;
+        const primaryInput = document.getElementById('primary_image_id');
+        if (primaryInput) primaryInput.value = '';
+    }
+    
     // Get or initialize deleted images array
     if (!window.deletedImageIds) {
         window.deletedImageIds = [];
@@ -2178,7 +2522,15 @@ function removeExistingImage(imageId, buttonElement) {
     // Remove the image element
     buttonElement.closest('.existing-image-item').remove();
     
-    console.log('Image marked for deletion:', imageId);
+    // If no primary exists and new images remain, set first new as primary
+    if (!window.primaryVehicleImageId && !window.existingPrimaryImageId && window.uploadedVehicleImageIds.length > 0) {
+        const firstImageId = window.uploadedVehicleImageIds[0].id;
+        const firstImageEl = document.querySelector(`[data-image-id="${firstImageId}"]`);
+        if (firstImageEl) {
+            const primaryBtn = firstImageEl.querySelector('.set-primary-btn');
+            if (primaryBtn) setVehicleImagePrimary(firstImageId, primaryBtn);
+        }
+    }
 }
 
 // Document upload functions
@@ -2229,7 +2581,7 @@ function uploadDocument(file, type) {
                     // Reset the file input to allow re-uploading the same file if needed
                     const inputEl = document.getElementById(type + '_document');
                     if (inputEl) inputEl.value = '';
-                } else {
+                    } else {
                     alert('Upload failed: ' + response.message);
                     progressContainer.classList.remove('active');
                 }

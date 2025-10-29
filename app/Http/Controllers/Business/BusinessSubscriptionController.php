@@ -15,13 +15,19 @@ class BusinessSubscriptionController extends Controller
         $businessAdmin = Auth::guard('business_admin')->user();
         $business = $businessAdmin->business;
 
-        // Get current subscription
+        // Get current subscription (active or trial)
         $currentSubscription = BusinessSubscription::where('business_id', $business->id)
             ->whereIn('status', ['active', 'trial'])
             ->with('subscriptionPackage')
             ->first();
 
+        // If trial subscription has expired, treat it as no subscription
+        if ($currentSubscription && $currentSubscription->status === 'trial' && $currentSubscription->is_expired) {
+            $currentSubscription = null;
+        }
+
         // Determine if this is a new user (no subscription history)
+        // This checks if they have ANY subscription history (expired, cancelled, etc.)
         $hasSubscriptionHistory = BusinessSubscription::where('business_id', $business->id)->exists();
         
         // Get available packages

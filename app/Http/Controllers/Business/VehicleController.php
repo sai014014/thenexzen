@@ -126,6 +126,13 @@ class VehicleController extends Controller
         }
 
         try {
+            // Server-side fallback: map commission_value -> commission_rate before validation
+            if ($request->input('ownership_type') === 'vendor_provided') {
+                if ($request->filled('commission_value') && !$request->filled('commission_rate')) {
+                    $request->merge(['commission_rate' => $request->input('commission_value')]);
+                }
+            }
+
             $request->validate($this->getValidationRules($request));
 
             $data = $request->all();
@@ -166,6 +173,50 @@ class VehicleController extends Controller
             if (isset($data['vehicle_number'])) {
                 $data['rc_number'] = $data['vehicle_number'];
             }
+            
+            // Handle vendor default commission override
+            if (($data['ownership_type'] ?? null) === 'vendor_provided' && $request->boolean('use_vendor_default_commission')) {
+                $vendorName = $data['vendor_name'] ?? null;
+                if ($vendorName) {
+                    $vendor = \App\Models\Vendor::where('business_id', $business->id)
+                        ->where('vendor_name', $vendorName)
+                        ->first();
+                    if ($vendor) {
+                        // Map vendor commission type to vehicle enum
+                        $vendorToVehicleType = [
+                            'fixed_amount' => 'fixed',
+                            'percentage_of_revenue' => 'percentage',
+                            'per_booking_per_day' => 'per_booking_per_day',
+                            'lease_to_rent' => 'lease_to_rent',
+                            // Also handle already-normalized values
+                            'fixed' => 'fixed',
+                            'percentage' => 'percentage',
+                        ];
+                        $data['commission_type'] = $vendorToVehicleType[$vendor->commission_type] ?? $vendor->commission_type;
+                        $data['commission_rate'] = $vendor->commission_rate;
+                        $data['lease_commitment_months'] = ($data['commission_type'] === 'lease_to_rent')
+                            ? ($vendor->lease_commitment_months ?? null)
+                            : null;
+                    }
+                }
+            } else {
+                // Map commission_type form values to DB values
+                if (isset($data['commission_type'])) {
+                    $commissionTypeMapping = [
+                        'fixed' => 'fixed',
+                        'percentage' => 'percentage',
+                        'per_booking_per_day' => 'per_booking_per_day',
+                        'lease_to_rent' => 'lease_to_rent'
+                    ];
+                    $data['commission_type'] = $commissionTypeMapping[$data['commission_type']] ?? $data['commission_type'];
+                }
+            }
+            
+            // Map commission_value to commission_rate if provided
+            if (isset($data['commission_value']) && !isset($data['commission_rate'])) {
+                $data['commission_rate'] = $data['commission_value'];
+            }
+            unset($data['commission_value']); // Remove the old key
 
             $vehicle = Vehicle::create($data);
 
@@ -182,11 +233,23 @@ class VehicleController extends Controller
                             'sort_order' => \DB::raw('id')
                         ]);
                     
-                    // Set first image as primary if none exists
-                    $hasPrimary = $vehicle->images()->where('is_primary', true)->exists();
-                    if (!$hasPrimary && count($imageIds) > 0) {
-                        VehicleImage::where('id', $imageIds[0])
+                    // Handle primary image selection
+                    if ($request->filled('primary_image_id')) {
+                        // User selected a primary image
+                        $primaryImageId = $request->primary_image_id;
+                        // Remove primary status from all images
+                        $vehicle->images()->update(['is_primary' => false]);
+                        // Set selected image as primary
+                        VehicleImage::where('id', $primaryImageId)
+                            ->where('vehicle_id', $vehicle->id)
                             ->update(['is_primary' => true]);
+                    } else {
+                        // Set first image as primary if none exists
+                        $hasPrimary = $vehicle->images()->where('is_primary', true)->exists();
+                        if (!$hasPrimary && count($imageIds) > 0) {
+                            VehicleImage::where('id', $imageIds[0])
+                                ->update(['is_primary' => true]);
+                        }
                     }
                 }
             } elseif ($request->hasFile('vehicle_images')) {
@@ -312,6 +375,13 @@ class VehicleController extends Controller
         }
 
         try {
+            // Server-side fallback: map commission_value -> commission_rate before validation
+            if ($request->input('ownership_type') === 'vendor_provided') {
+                if ($request->filled('commission_value') && !$request->filled('commission_rate')) {
+                    $request->merge(['commission_rate' => $request->input('commission_value')]);
+                }
+            }
+
             $request->validate($this->getValidationRules($request, $vehicle->id));
 
             $data = $request->all();
@@ -373,6 +443,74 @@ class VehicleController extends Controller
                 $data['seating_capacity'] = $data['seating_capacity_heavy'];
                 unset($data['seating_capacity_heavy']);
             }
+            
+            // Handle vendor default commission override
+            if (($data['ownership_type'] ?? null) === 'vendor_provided' && $request->boolean('use_vendor_default_commission')) {
+                $vendorName = $data['vendor_name'] ?? null;
+                if ($vendorName) {
+                    $vendor = \App\Models\Vendor::where('business_id', $business->id)
+                        ->where('vendor_name', $vendorName)
+                        ->first();
+                    if ($vendor) {
+                        // Map vendor commission type to vehicle enum
+                        $vendorToVehicleType = [
+                            'fixed_amount' => 'fixed',
+                            'percentage_of_revenue' => 'percentage',
+                            'per_booking_per_day' => 'per_booking_per_day',
+                            'lease_to_rent' => 'lease_to_rent',
+                            // Also handle already-normalized values
+                            'fixed' => 'fixed',
+                            'percentage' => 'percentage',
+                        ];
+                        $data['commission_type'] = $vendorToVehicleType[$vendor->commission_type] ?? $vendor->commission_type;
+                        $data['commission_rate'] = $vendor->commission_rate;
+                        $data['lease_commitment_months'] = ($data['commission_type'] === 'lease_to_rent')
+                            ? ($vendor->lease_commitment_months ?? $vehicle->lease_commitment_months)
+                            : null;
+                    }
+                }
+            } else {
+                // Map commission_type form values to DB values
+                if (isset($data['commission_type'])) {
+                    $commissionTypeMapping = [
+                        'fixed' => 'fixed',
+                        'percentage' => 'percentage',
+                        'per_booking_per_day' => 'per_booking_per_day',
+                        'lease_to_rent' => 'lease_to_rent'
+                    ];
+                    $data['commission_type'] = $commissionTypeMapping[$data['commission_type']] ?? $data['commission_type'];
+                }
+            }
+            
+            // Map commission_value to commission_rate - prioritize commission_value from form
+            if (isset($data['commission_value'])) {
+                // Check if commission_value is not empty (including '0' as valid)
+                $commissionValue = trim($data['commission_value']);
+                if ($commissionValue !== '' && $commissionValue !== null) {
+                    // Always use commission_value from form as it's what user submitted
+                    $data['commission_rate'] = $commissionValue;
+                }
+            }
+            // Always remove commission_value as we use commission_rate in DB
+            unset($data['commission_value']);
+            
+            // Handle lease_commitment_months
+            if (isset($data['commission_type']) && $data['commission_type'] !== 'lease_to_rent') {
+                // Clear lease commitment if commission type is not lease_to_rent
+                $data['lease_commitment_months'] = null;
+            } elseif (isset($data['lease_commitment_months'])) {
+                // Commission type is lease_to_rent
+                $commitmentValue = trim($data['lease_commitment_months']);
+                if ($commitmentValue !== '' && $commitmentValue !== null) {
+                    // Save the provided value
+                    $data['lease_commitment_months'] = (int)$commitmentValue;
+                } else {
+                    // Empty value - preserve existing commitment if vehicle already has one
+                    unset($data['lease_commitment_months']);
+                }
+            }
+            // If lease_commitment_months not in $data and commission_type is lease_to_rent, 
+            // existing value will be preserved (not updated)
 
             $vehicle->update($data);
 
@@ -397,11 +535,41 @@ class VehicleController extends Controller
                     $image = VehicleImage::find($imageId);
                     if ($image && !$image->vehicle_id) {
                         $image->vehicle_id = $vehicle->id;
-                        // Set as primary if no primary exists
-                        if (!$vehicle->images()->where('is_primary', true)->exists()) {
-                            $image->is_primary = true;
-                        }
                         $image->save();
+                    }
+                }
+            }
+            
+            // Handle primary image selection
+            if ($request->filled('primary_image_id')) {
+                $primaryImageIdValue = $request->primary_image_id;
+                
+                // Check if it's an existing image (prefixed with 'existing_')
+                if (str_starts_with($primaryImageIdValue, 'existing_')) {
+                    $actualImageId = (int) str_replace('existing_', '', $primaryImageIdValue);
+                    // Remove primary status from all images
+                    $vehicle->images()->update(['is_primary' => false]);
+                    // Set existing image as primary
+                    VehicleImage::where('id', $actualImageId)
+                        ->where('vehicle_id', $vehicle->id)
+                        ->update(['is_primary' => true]);
+                } else {
+                    // New uploaded image
+                    $actualImageId = (int) $primaryImageIdValue;
+                    // Remove primary status from all images
+                    $vehicle->images()->update(['is_primary' => false]);
+                    // Set new image as primary
+                    VehicleImage::where('id', $actualImageId)
+                        ->where('vehicle_id', $vehicle->id)
+                        ->update(['is_primary' => true]);
+                }
+            } else {
+                // If no primary selected and none exists, set first image as primary
+                $hasPrimary = $vehicle->images()->where('is_primary', true)->exists();
+                if (!$hasPrimary) {
+                    $firstImage = $vehicle->images()->first();
+                    if ($firstImage) {
+                        $firstImage->update(['is_primary' => true]);
                     }
                 }
             }
@@ -460,6 +628,11 @@ class VehicleController extends Controller
         }
         if ($vehicle->rc_document_path) {
             Storage::disk('public')->delete($vehicle->rc_document_path);
+        }
+        
+        // Delete legacy vehicle_image_path if it exists
+        if ($vehicle->vehicle_image_path) {
+            Storage::disk('public')->delete($vehicle->vehicle_image_path);
         }
 
         // Delete all vehicle images and their files
@@ -674,8 +847,9 @@ class VehicleController extends Controller
             'extra_price_per_km' => 'nullable|numeric|min:0',
             'ownership_type' => 'required|in:owned,leased,vendor_provided',
             'vendor_name' => 'nullable|string|max:100',
-            'commission_type' => 'nullable|in:fixed,percentage',
+            'commission_type' => 'nullable|in:fixed,percentage,per_booking_per_day,lease_to_rent',
             'commission_value' => 'nullable|numeric|min:0',
+            'lease_commitment_months' => 'nullable|integer|in:3,6,12,24',
             'insurance_provider' => 'required|string|max:100',
             'policy_number' => 'required|string|max:100',
             'insurance_expiry_date' => 'required|date|after_or_equal:today',
@@ -705,6 +879,27 @@ class VehicleController extends Controller
             $rules['seating_capacity_heavy'] = 'nullable|integer|min:1|max:100';
             $rules['payload_capacity_tons'] = 'nullable|numeric|min:0|max:100';
             $rules['transmission_type'] = 'required|in:manual,automatic,hybrid';
+        }
+        
+        // Vendor-provided vehicle commission requirements
+        if ($request->ownership_type === 'vendor_provided') {
+            if ($request->boolean('use_vendor_default_commission')) {
+                // Using vendor defaults; form commission fields not required
+                $rules['commission_type'] = 'nullable|in:fixed,percentage,per_booking_per_day,lease_to_rent';
+                $rules['commission_rate'] = 'nullable|numeric|min:0';
+                $rules['lease_commitment_months'] = 'nullable|integer|in:3,6,12,24';
+            } else {
+                $rules['commission_type'] = 'required|in:fixed,percentage,per_booking_per_day,lease_to_rent';
+                // Cap percentage type at 100
+                $rules['commission_rate'] = $request->commission_type === 'percentage'
+                    ? 'required|numeric|min:0|max:100'
+                    : 'required|numeric|min:0';
+                
+                // Lease commitment required for lease-to-rent type
+                if ($request->commission_type === 'lease_to_rent') {
+                    $rules['lease_commitment_months'] = 'required|integer|in:3,6,12,24';
+                }
+            }
         }
 
         return $rules;

@@ -198,9 +198,6 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Documents</h5>
-                    <button class="btn btn-link p-0">
-                        <i class="fas fa-chevron-down text-primary"></i>
-                    </button>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -208,8 +205,12 @@
                         <div class="col-6 col-md-4 mb-3 text-center">
                             <div class="document-item">
                                 @if($vehicle->insurance_document_path)
+                                    @php
+                                        $insuranceExtension = strtolower(pathinfo($vehicle->insurance_document_path, PATHINFO_EXTENSION));
+                                        $isInsurancePdf = $insuranceExtension === 'pdf';
+                                    @endphp
                                     <a href="{{ route('business.vehicles.view-document', ['vehicle' => $vehicle->id, 'type' => 'insurance']) }}" target="_blank" class="text-decoration-none">
-                                        <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
+                                        <i class="fas fa-file-{{ $isInsurancePdf ? 'pdf' : 'image' }} fa-3x text-{{ $isInsurancePdf ? 'danger' : 'success' }} mb-2"></i>
                                         <p class="mb-0 small text-primary">Insurance</p>
                                         <small class="text-muted">Click to view</small>
                                     </a>
@@ -225,8 +226,12 @@
                         <div class="col-6 col-md-4 mb-3 text-center">
                             <div class="document-item">
                                 @if($vehicle->rc_document_path)
+                                    @php
+                                        $rcExtension = strtolower(pathinfo($vehicle->rc_document_path, PATHINFO_EXTENSION));
+                                        $isRcPdf = $rcExtension === 'pdf';
+                                    @endphp
                                     <a href="{{ route('business.vehicles.view-document', ['vehicle' => $vehicle->id, 'type' => 'rc']) }}" target="_blank" class="text-decoration-none">
-                                        <i class="fas fa-file-image fa-3x text-success mb-2"></i>
+                                        <i class="fas fa-file-{{ $isRcPdf ? 'pdf' : 'image' }} fa-3x text-{{ $isRcPdf ? 'danger' : 'success' }} mb-2"></i>
                                         <p class="mb-0 small text-primary">RC Document</p>
                                         <small class="text-muted">Click to view</small>
                                     </a>
@@ -239,13 +244,7 @@
                 </div>
 
                         <!-- Additional Documents Placeholder -->
-                        <div class="col-6 col-md-4 mb-3 text-center">
-                            <div class="document-item">
-                                <i class="fas fa-file-alt fa-3x text-muted mb-2"></i>
-                                <p class="mb-0 small text-muted">Other Documents</p>
-                                <small class="text-muted">Coming soon</small>
-                    </div>
-                    </div>
+                        
                 </div>
                 </div>
             </div>
@@ -467,23 +466,49 @@
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Commission Type</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->commission_type ? ucfirst(str_replace('_', ' ', $vehicle->commission_type)) : 'N/A' }}</p>
+                                <p class="mb-0 fw-bold">
+                                    @php
+                                        $typeLabelMap = [
+                                            'fixed' => 'Fixed Amount Per Month',
+                                            'percentage' => 'Percentage of Revenue',
+                                            'per_booking_per_day' => 'Per Booking Per Day',
+                                            'lease_to_rent' => 'Lease-to-Rent',
+                                        ];
+                                        $commissionTypeLabel = $vehicle->commission_type ? ($typeLabelMap[$vehicle->commission_type] ?? ucfirst(str_replace('_', ' ', $vehicle->commission_type))) : null;
+                                    @endphp
+                                    {{ $commissionTypeLabel ?? 'N/A' }}
+                                </p>
                             </div>
                         </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Commission Value</label>
                                 <p class="mb-0 fw-bold">
-                                    @if($vehicle->commission_type === 'percentage' && $vehicle->commission_value !== null)
-                                        {{ rtrim(rtrim(number_format($vehicle->commission_value, 2), '0'), '.') }}%
-                                    @elseif($vehicle->commission_type === 'fixed' && $vehicle->commission_value !== null)
-                                        ₹{{ number_format($vehicle->commission_value, 2) }}
+                                    @php 
+                                        $rate = $vehicle->commission_rate ?? $vehicle->commission_value; // fallback for legacy data
+                                    @endphp
+                                    @if($vehicle->commission_type === 'percentage' && $rate !== null)
+                                        {{ rtrim(rtrim(number_format($rate, 2), '0'), '.') }}%
+                                    @elseif($vehicle->commission_type === 'fixed' && $rate !== null)
+                                        ₹{{ number_format($rate, 2) }} / month
+                                    @elseif($vehicle->commission_type === 'per_booking_per_day' && $rate !== null)
+                                        ₹{{ number_format($rate, 2) }} / day per booking
+                                    @elseif($vehicle->commission_type === 'lease_to_rent' && $rate !== null)
+                                        ₹{{ number_format($rate, 2) }} / month
                                     @else
                                         N/A
                                     @endif
                                 </p>
                             </div>
                         </div>
+                        @if($vehicle->commission_type === 'lease_to_rent' && $vehicle->lease_commitment_months)
+                        <div class="col-6 mb-3">
+                            <div class="info-item">
+                                <label class="form-label small text-muted mb-1">Lease Commitment</label>
+                                <p class="mb-0 fw-bold">{{ $vehicle->lease_commitment_months }} Months</p>
+                            </div>
+                        </div>
+                        @endif
                         @endif
                 </div>
 

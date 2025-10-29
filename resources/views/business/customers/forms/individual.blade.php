@@ -3,12 +3,9 @@
 @endphp
 
 <!-- Basic Customer Information -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h6 class="text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-user me-2"></i>Basic Customer Information
-        </h6>
-    </div>
+<div class="form-section">
+    <h3 class="section-title">Basic Customer Information</h3>
+    <div class="row">
     <div class="col-md-6 mb-3">
         <label for="full_name" class="form-label">Full Name *</label>
         <input type="text" class="form-control" id="full_name" name="full_name" value="{{ old('full_name', $customer && $customer->full_name ? $customer->full_name : '') }}" required>
@@ -30,15 +27,13 @@
         <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', $customer && $customer->date_of_birth ? $customer->date_of_birth->format('Y-m-d') : '') }}" required>
         <div class="form-text">Must be 18 years or older</div>
     </div>
+    </div>
 </div>
 
 <!-- Address Information -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h6 class="text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-map-marker-alt me-2"></i>Address Information
-        </h6>
-    </div>
+<div class="form-section">
+    <h3 class="section-title">Address Information</h3>
+    <div class="row">
     <div class="col-12 mb-3">
         <label for="permanent_address" class="form-label">Permanent Address *</label>
         <textarea class="form-control" id="permanent_address" name="permanent_address" rows="3" required>{{ old('permanent_address', $customer && $customer->permanent_address ? $customer->permanent_address : '') }}</textarea>
@@ -53,17 +48,15 @@
     </div>
     <div class="col-12 mb-3">
         <label for="current_address" class="form-label">Current Address</label>
-        <textarea class="form-control" id="current_address" name="current_address" rows="3">{{ old('current_address', $customer && $customer->current_address ? $customer->current_address : '') }}</textarea>
+        <textarea class="form-control" id="current_address" name="current_address" rows="3">{{ old('current_address', $customer && $customer->current_address ? $customer->current_address : '') }}        </textarea>
+    </div>
     </div>
 </div>
 
 <!-- Identity Information -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h6 class="text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-id-card me-2"></i>Identity Information
-        </h6>
-    </div>
+<div class="form-section">
+    <h3 class="section-title">Identity Information</h3>
+    <div class="row">
     <div class="col-md-6 mb-3">
         <label for="government_id_type" class="form-label">Government ID Type *</label>
         <select class="form-select" id="government_id_type" name="government_id_type" required>
@@ -87,27 +80,37 @@
         <input type="date" class="form-control" id="license_expiry_date" name="license_expiry_date" value="{{ old('license_expiry_date', $customer && $customer->license_expiry_date ? $customer->license_expiry_date->format('Y-m-d') : '') }}">
     </div>
     <div class="col-12 mb-3">
-        <label for="driving_license" class="form-label">Upload Driving License</label>
-        <input type="file" class="form-control" id="driving_license" name="driving_license" accept=".pdf,.jpg,.jpeg,.png">
-        <div class="form-text">PDF, JPG, PNG files only. Max size: 10MB</div>
-        @if(isset($customer) && $customer && $customer->driving_license_path)
-        <div class="mt-2">
-            <small class="text-muted">Current file: </small>
-            <a href="{{ route('business.customers.download-document', ['customer' => $customer, 'type' => 'driving_license']) }}" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-download me-1"></i>Download Current
-            </a>
+        <div class="form-group">
+            <label for="driving_license" class="form-label">Upload Driving License</label>
+            <div class="file-upload-area" onclick="document.getElementById('driving_license').click()">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
+            </div>
+            <input type="file" class="form-control @error('driving_license') is-invalid @enderror" id="driving_license" name="driving_license" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="updateFileLabel('driving_license', this)">
+            <div class="helper-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+            @error('driving_license')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+            <div id="driving_license_label" class="mt-2 small text-muted" style="display: none;"></div>
+            @if(isset($customer) && $customer && $customer->driving_license_path)
+            <div class="mt-2">
+                <small class="text-muted">Current file: </small>
+                <a href="{{ route('business.customers.download-document', ['customer' => $customer, 'type' => 'driving_license']) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-download me-1"></i>Download Current
+                </a>
+            </div>
+            @endif
         </div>
-        @endif
+    </div>
     </div>
 </div>
 
 <!-- Additional Contact Information -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h6 class="text-primary border-bottom pb-2 mb-3">
-            <i class="fas fa-phone me-2"></i>Additional Contact Information
-        </h6>
-    </div>
+<div class="form-section">
+    <h3 class="section-title">Additional Contact Information</h3>
+    <div class="row">
     <div class="col-md-6 mb-3">
         <label for="emergency_contact_name" class="form-label">Emergency Contact Name</label>
         <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" value="{{ old('emergency_contact_name', $customer && $customer->emergency_contact_name ? $customer->emergency_contact_name : '') }}">
@@ -118,6 +121,24 @@
     </div>
     <div class="col-12 mb-3">
         <label for="additional_information" class="form-label">Additional Information</label>
-        <textarea class="form-control" id="additional_information" name="additional_information" rows="3" placeholder="Any additional comments, notes, or instructions...">{{ old('additional_information', $customer && $customer->additional_information ? $customer->additional_information : '') }}</textarea>
+            <textarea class="form-control" id="additional_information" name="additional_information" rows="3" placeholder="Any additional comments, notes, or instructions...">{{ old('additional_information', $customer && $customer->additional_information ? $customer->additional_information : '') }}</textarea>
+    </div>
     </div>
 </div>
+
+<script>
+function updateFileLabel(inputId, input) {
+    const labelDiv = document.getElementById(inputId + '_label');
+    if (input.files && input.files.length > 0) {
+        let labelText = `Selected: ${input.files[0].name}`;
+        if (labelDiv) {
+            labelDiv.textContent = labelText;
+            labelDiv.style.display = 'block';
+        }
+    } else {
+        if (labelDiv) {
+            labelDiv.style.display = 'none';
+        }
+    }
+}
+</script>

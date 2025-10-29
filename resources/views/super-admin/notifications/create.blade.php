@@ -129,18 +129,55 @@ document.getElementById('notificationForm').addEventListener('submit', function(
             due_date: dueDate
         })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Failed to send notification');
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            let message = data.message;
+            if (data.failed_count > 0 && data.errors && data.errors.length > 0) {
+                message += '\n\nErrors:\n' + data.errors.slice(0, 5).join('\n');
+                if (data.errors.length > 5) {
+                    message += '\n... and ' + (data.errors.length - 5) + ' more errors.';
+                }
+            }
+            alert(message);
             window.location.href = '{{ route("super-admin.notifications.index") }}';
         } else {
-            alert('Error: ' + (data.message || 'Failed to send notification'));
+            let errorMessage = data.message || 'Failed to send notification';
+            if (data.errors && Array.isArray(data.errors)) {
+                errorMessage += '\n\n' + data.errors.join('\n');
+            } else if (data.errors && typeof data.errors === 'object') {
+                // Handle validation errors object
+                const errorList = Object.values(data.errors).flat().join('\n');
+                errorMessage += '\n\n' + errorList;
+            }
+            alert('Error: ' + errorMessage);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while sending the notification.');
+        let errorMessage = error.message || 'An error occurred while sending the notification.';
+        
+        // Try to parse if it's a JSON error
+        try {
+            if (error.response) {
+                error.response.json().then(data => {
+                    alert('Error: ' + (data.message || errorMessage));
+                }).catch(() => {
+                    alert('Error: ' + errorMessage);
+                });
+            } else {
+                alert('Error: ' + errorMessage);
+            }
+        } catch (e) {
+            alert('Error: ' + errorMessage);
+        }
     });
 });
 

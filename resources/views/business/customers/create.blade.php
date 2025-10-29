@@ -58,6 +58,53 @@
     box-shadow: 0 0 0 0.2rem rgba(107, 106, 222, 0.25);
 }
 
+.file-upload-area {
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #6B6ADE;
+    background-color: #f0f0ff;
+}
+
+.file-upload-area.dragover {
+    border-color: #6B6ADE;
+    background-color: #f0f0ff;
+}
+
+.upload-icon {
+    font-size: 24px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.upload-text {
+    color: #6c757d;
+    font-size: 12px;
+    margin: 0;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 10px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
 .save-button {
     background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
     border: none;
@@ -168,11 +215,20 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <label class="form-label">License Expiry Date *</label>
                                     <input type="date" class="form-control" name="drivers[${driverCount}][license_expiry_date]" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
                                     <label class="form-label">Upload Driving License</label>
-                                    <input type="file" class="form-control" name="drivers[${driverCount}][driving_license_file]" accept=".pdf,.jpg,.jpeg,.png">
-                                    <div class="form-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+                                    <div class="file-upload-area" onclick="document.getElementById('driver_license_${driverCount}').click()">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
+                                    </div>
+                                    <input type="file" class="form-control" id="driver_license_${driverCount}" name="drivers[${driverCount}][driving_license_file]" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="updateFileLabel('driver_license_${driverCount}', this)">
+                                    <div class="helper-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+                                    <div id="driver_license_${driverCount}_label" class="mt-2 small text-muted" style="display: none;"></div>
                                 </div>
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -375,6 +431,25 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.borderColor = '';
         });
     });
+    
+    // Update file label function (also used in dynamically added driver forms)
+    window.updateFileLabel = function(inputId, input) {
+        const labelDiv = document.getElementById(inputId + '_label');
+        if (input.files && input.files.length > 0) {
+            let labelText = `Selected: ${input.files[0].name}`;
+            if (input.files.length > 1) {
+                labelText = `Selected: ${input.files.length} files`;
+            }
+            if (labelDiv) {
+                labelDiv.textContent = labelText;
+                labelDiv.style.display = 'block';
+            }
+        } else {
+            if (labelDiv) {
+                labelDiv.style.display = 'none';
+            }
+        }
+    };
 });
 </script>
 @endpush

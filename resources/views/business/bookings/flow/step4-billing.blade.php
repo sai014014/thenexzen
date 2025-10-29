@@ -1,4 +1,4 @@
-@extends('business.layouts.booking-flow')
+@extends('business.layouts.app')
 
 @section('title', 'New Booking - Billing Information')
 @section('page-title', 'New Booking')

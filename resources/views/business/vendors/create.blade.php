@@ -58,6 +58,53 @@
     box-shadow: 0 0 0 0.2rem rgba(107, 106, 222, 0.25);
 }
 
+.file-upload-area {
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #6B6ADE;
+    background-color: #f0f0ff;
+}
+
+.file-upload-area.dragover {
+    border-color: #6B6ADE;
+    background-color: #f0f0ff;
+}
+
+.upload-icon {
+    font-size: 24px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.upload-text {
+    color: #6c757d;
+    font-size: 12px;
+    margin: 0;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 10px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
 .save-button {
     background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
     border: none;
@@ -96,12 +143,9 @@
                     @csrf
                     
                     <!-- Vendor Information -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="fas fa-building me-2"></i>Vendor Information
-                            </h6>
-                        </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Vendor Information</h3>
+                        <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="vendor_name" class="form-label">Vendor Name *</label>
                             <input type="text" class="form-control" id="vendor_name" name="vendor_name" value="{{ old('vendor_name') }}" required>
@@ -144,15 +188,13 @@
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
+                        </div>
                     </div>
 
                     <!-- Contact Information -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="fas fa-phone me-2"></i>Contact Information
-                            </h6>
-                        </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Contact Information</h3>
+                        <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="mobile_number" class="form-label">Mobile Number *</label>
                             <input type="tel" class="form-control" id="mobile_number" name="mobile_number" value="{{ old('mobile_number') }}" required>
@@ -174,15 +216,13 @@
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
+                        </div>
                     </div>
 
                     <!-- Address Information -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="fas fa-map-marker-alt me-2"></i>Address Information
-                            </h6>
-                        </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Address Information</h3>
+                        <div class="row">
                         <div class="col-12 mb-3">
                             <label for="office_address" class="form-label">Office Address *</label>
                             <textarea class="form-control" id="office_address" name="office_address" rows="3" required>{{ old('office_address') }}</textarea>
@@ -204,15 +244,13 @@
                                 <i class="fas fa-plus me-1"></i>Add Branch
                             </button>
                         </div>
+                        </div>
                     </div>
 
                     <!-- Vendor Payout Settings -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="fas fa-credit-card me-2"></i>Vendor Payout Settings
-                            </h6>
-                        </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Vendor Payout Settings</h3>
+                        <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="payout_method" class="form-label">Payout Method *</label>
                             <select class="form-select" id="payout_method" name="payout_method" required onchange="togglePayoutFields()">
@@ -233,16 +271,14 @@
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
+                        </div>
                     </div>
 
                     <!-- Bank Details (if Bank Transfer selected) -->
                     <div id="bankDetailsDiv" style="display: none;">
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h6 class="text-primary border-bottom pb-2 mb-3">
-                                    <i class="fas fa-university me-2"></i>Bank Details
-                                </h6>
-                            </div>
+                        <div class="form-section">
+                            <h3 class="section-title">Bank Details</h3>
+                            <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="bank_name" class="form-label">Bank Name *</label>
                                 <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{ old('bank_name') }}">
@@ -278,17 +314,15 @@
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- UPI Payment Details (if UPI Payment selected) -->
                     <div id="upiDetailsDiv" style="display: none;">
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <h6 class="text-primary border-bottom pb-2 mb-3">
-                                    <i class="fas fa-mobile-alt me-2"></i>UPI Payment Details
-                                </h6>
-                            </div>
+                        <div class="form-section">
+                            <h3 class="section-title">UPI Payment Details</h3>
+                            <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="upi_id" class="form-label">UPI ID *</label>
                                 <input type="text" class="form-control" id="upi_id" name="upi_id" value="{{ old('upi_id') }}" placeholder="example@upi">
@@ -296,16 +330,14 @@
                                     <div class="text-danger small">{{ $message }}</div>
                                 @enderror
                             </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Payout Frequency -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="fas fa-calendar-alt me-2"></i>Payout Frequency
-                            </h6>
-                        </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Payout Frequency</h3>
+                        <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="payout_frequency" class="form-label">Payout Frequency *</label>
                             <select class="form-select" id="payout_frequency" name="payout_frequency" required onchange="togglePayoutSchedule()">
@@ -350,21 +382,21 @@
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
+                        </div>
                     </div>
 
                     <!-- Commission Settings -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="fas fa-percentage me-2"></i>Commission Settings
-                            </h6>
-                        </div>
+                    <div class="form-section">
+                        <h3 class="section-title">Commission Settings</h3>
+                        <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="commission_type" class="form-label">Commission Type *</label>
                             <select class="form-select" id="commission_type" name="commission_type" required onchange="toggleCommissionFields()">
                                 <option value="">Select Commission Type</option>
-                                <option value="fixed_amount" {{ old('commission_type') == 'fixed_amount' ? 'selected' : '' }}>Fixed Amount</option>
+                                <option value="fixed_amount" {{ old('commission_type') == 'fixed_amount' ? 'selected' : '' }}>Fixed Amount Per Month</option>
                                 <option value="percentage_of_revenue" {{ old('commission_type') == 'percentage_of_revenue' ? 'selected' : '' }}>Percentage of Revenue</option>
+                                <option value="per_booking_per_day" {{ old('commission_type') == 'per_booking_per_day' ? 'selected' : '' }}>Per Booking Per Day</option>
+                                <option value="lease_to_rent" {{ old('commission_type') == 'lease_to_rent' ? 'selected' : '' }}>Lease-to-Rent</option>
                             </select>
                             @error('commission_type')
                                 <div class="text-danger small">{{ $message }}</div>
@@ -380,61 +412,111 @@
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lease Commitment (only for lease-to-rent) -->
+                    <div class="form-section" id="leaseCommitmentSection" style="display: none;">
+                        <h3 class="section-title">Lease Commitment</h3>
+                        <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="lease_commitment_months" class="form-label">Lease Commitment (Months) *</label>
+                            <select class="form-select" id="lease_commitment_months" name="lease_commitment_months">
+                                <option value="">Select Commitment Period</option>
+                                <option value="3" {{ old('lease_commitment_months') == '3' ? 'selected' : '' }}>3 Months</option>
+                                <option value="6" {{ old('lease_commitment_months') == '6' ? 'selected' : '' }}>6 Months</option>
+                                <option value="12" {{ old('lease_commitment_months') == '12' ? 'selected' : '' }}>12 Months</option>
+                                <option value="24" {{ old('lease_commitment_months') == '24' ? 'selected' : '' }}>24 Months</option>
+                            </select>
+                            @error('lease_commitment_months')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
 
                     <!-- Document Upload -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h6 class="text-primary border-bottom pb-2 mb-3">
-                                <i class="fas fa-file-upload me-2"></i>Document Upload
-                            </h6>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="vendor_agreement" class="form-label">Vendor Agreement Document</label>
-                            <input type="file" class="form-control" id="vendor_agreement" name="vendor_agreement" accept=".pdf,.jpg,.jpeg,.png">
-                            <div class="form-text">PDF, JPG, PNG files only (Max 10MB)</div>
-                            @error('vendor_agreement')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="gstin_certificate" class="form-label">GSTIN Certificate</label>
-                            <input type="file" class="form-control" id="gstin_certificate" name="gstin_certificate" accept=".pdf,.jpg,.jpeg,.png">
-                            <div class="form-text">PDF, JPG, PNG files only (Max 10MB)</div>
-                            @error('gstin_certificate')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="pan_card" class="form-label">PAN Card *</label>
-                            <input type="file" class="form-control" id="pan_card" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" required>
-                            <div class="form-text">PDF, JPG, PNG files only (Max 10MB)</div>
-                            @error('pan_card')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="additional_certificates" class="form-label">Additional Certificates</label>
-                            <input type="file" class="form-control" id="additional_certificates" name="additional_certificates[]" accept=".pdf,.jpg,.jpeg,.png" multiple>
-                            <div class="form-text">PDF, JPG, PNG files only (Max 10MB each)</div>
-                            @error('additional_certificates.*')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
+                    <div class="form-section">
+                        <h3 class="section-title">Document Upload</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="vendor_agreement" class="form-label">Vendor Agreement Document</label>
+                                    <div class="file-upload-area" onclick="document.getElementById('vendor_agreement').click()">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
+                                    </div>
+                                    <input type="file" class="form-control @error('vendor_agreement') is-invalid @enderror" id="vendor_agreement" name="vendor_agreement" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="updateFileLabel('vendor_agreement', this)">
+                                    <div class="helper-text">PDF, JPG, PNG files only (Max 10MB)</div>
+                                    @error('vendor_agreement')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                    <div id="vendor_agreement_label" class="mt-2 small text-muted" style="display: none;"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="gstin_certificate" class="form-label">GSTIN Certificate</label>
+                                    <div class="file-upload-area" onclick="document.getElementById('gstin_certificate').click()">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
+                                    </div>
+                                    <input type="file" class="form-control @error('gstin_certificate') is-invalid @enderror" id="gstin_certificate" name="gstin_certificate" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="updateFileLabel('gstin_certificate', this)">
+                                    <div class="helper-text">PDF, JPG, PNG files only (Max 10MB)</div>
+                                    @error('gstin_certificate')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                    <div id="gstin_certificate_label" class="mt-2 small text-muted" style="display: none;"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="pan_card" class="form-label required">PAN Card</label>
+                                    <div class="file-upload-area" onclick="document.getElementById('pan_card').click()">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
+                                    </div>
+                                    <input type="file" class="form-control @error('pan_card') is-invalid @enderror" id="pan_card" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" required style="display: none;" onchange="updateFileLabel('pan_card', this)">
+                                    <div class="helper-text">PDF, JPG, PNG files only (Max 10MB)</div>
+                                    @error('pan_card')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                    <div id="pan_card_label" class="mt-2 small text-muted" style="display: none;"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="additional_certificates" class="form-label">Additional Certificates</label>
+                                    <div class="file-upload-area" onclick="document.getElementById('additional_certificates').click()">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <p class="upload-text">Click to upload or drag and drop files here. Supported format PDF, JPG, PNG (Multiple files allowed)</p>
+                                    </div>
+                                    <input type="file" class="form-control @error('additional_certificates.*') is-invalid @enderror" id="additional_certificates" name="additional_certificates[]" accept=".pdf,.jpg,.jpeg,.png" multiple style="display: none;" onchange="updateFileLabel('additional_certificates', this)">
+                                    <div class="helper-text">PDF, JPG, PNG files only (Max 10MB each)</div>
+                                    @error('additional_certificates.*')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                    <div id="additional_certificates_label" class="mt-2 small text-muted" style="display: none;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Form Actions -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ route('business.vendors.index') }}" class="btn btn-secondary">
-                                    <i class="fas fa-times me-2"></i>Cancel
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-2"></i>Register Vendor
-                                </button>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ route('business.vendors.index') }}" class="btn btn-secondary cancel-button">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn save-button">
+                            <i class="fas fa-save me-2"></i>Register Vendor
+                        </button>
                     </div>
                 </form>
     </div>
@@ -487,11 +569,25 @@ function togglePayoutSchedule() {
 function toggleCommissionFields() {
     const commissionType = document.getElementById('commission_type').value;
     const commissionUnit = document.getElementById('commissionUnit');
+    const leaseCommitmentSection = document.getElementById('leaseCommitmentSection');
+    const leaseCommitmentMonths = document.getElementById('lease_commitment_months');
     
     if (commissionType === 'percentage_of_revenue') {
         commissionUnit.textContent = '%';
+        if (leaseCommitmentSection) leaseCommitmentSection.style.display = 'none';
+        if (leaseCommitmentMonths) leaseCommitmentMonths.required = false;
+    } else if (commissionType === 'per_booking_per_day') {
+        commissionUnit.textContent = '₹/day';
+        if (leaseCommitmentSection) leaseCommitmentSection.style.display = 'none';
+        if (leaseCommitmentMonths) leaseCommitmentMonths.required = false;
+    } else if (commissionType === 'lease_to_rent') {
+        commissionUnit.textContent = '₹';
+        if (leaseCommitmentSection) leaseCommitmentSection.style.display = 'block';
+        if (leaseCommitmentMonths) leaseCommitmentMonths.required = true;
     } else {
         commissionUnit.textContent = '₹';
+        if (leaseCommitmentSection) leaseCommitmentSection.style.display = 'none';
+        if (leaseCommitmentMonths) leaseCommitmentMonths.required = false;
     }
 }
 
@@ -512,6 +608,27 @@ function addBranch() {
 // Remove additional branch
 function removeBranch(button) {
     button.parentElement.remove();
+}
+
+// Update file label after selection
+function updateFileLabel(inputId, input) {
+    const labelDiv = document.getElementById(inputId + '_label');
+    if (input.files && input.files.length > 0) {
+        let labelText = '';
+        if (input.files.length === 1) {
+            labelText = `Selected: ${input.files[0].name}`;
+        } else {
+            labelText = `Selected: ${input.files.length} files`;
+        }
+        if (labelDiv) {
+            labelDiv.textContent = labelText;
+            labelDiv.style.display = 'block';
+        }
+    } else {
+        if (labelDiv) {
+            labelDiv.style.display = 'none';
+        }
+    }
 }
 
 // Initialize form on page load

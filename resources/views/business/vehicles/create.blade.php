@@ -306,6 +306,45 @@
         margin-bottom: 8px;
     }
 }
+
+
+/* Document upload progress */
+.upload-progress {
+    margin-top: 10px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    display: none;
+}
+
+.upload-progress.active {
+    display: block;
+}
+
+.upload-progress .progress-bar-container {
+    background: #e9ecef;
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.upload-progress .progress-bar-fill {
+    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.upload-progress .progress-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* Loading button state */
+.save-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
 </style>
 @endpush
 
@@ -319,10 +358,10 @@
                     
                     <!-- Error Display Section -->
                     <div id="errorDisplay" class="alert alert-danger" style="display: none;">
-                            <h6 class="alert-heading">
-                                <i class="fas fa-exclamation-triangle me-2"></i>Please fix the following errors:
+                        <h6 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Please fix the following errors:
                             </h6>
-                            <div id="errorList"></div>
+                        <div id="errorList"></div>
                     </div>
                     
                     <!-- Section 1: Vehicle Type & General Information -->
@@ -360,7 +399,7 @@
                             @error('vehicle_make')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            </div>
+                                </div>
                         </div>
 
                             <div class="col-md-3">
@@ -429,7 +468,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                                 </div>
-                            </div>
+                        </div>
                         </div>
 
                         <div class="row">
@@ -447,7 +486,7 @@
                             @error('vehicle_status')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                                </div>
+                        </div>
                         </div>
 
                             <div class="col-md-3">
@@ -474,7 +513,7 @@
                                 <div class="form-group">
                                     <label for="transmission_type" class="form-label required">Transmission Type</label>
                             <select class="form-select @error('transmission_type') is-invalid @enderror" 
-                                            id="transmission_type" 
+                                    id="transmission_type" 
                                             name="transmission_type" 
                                             required>
                                         <option value="">Select Transmission Type</option>
@@ -502,19 +541,21 @@
                         </div>
                     </div>
 
-                        <!-- Vehicle Type Specific Fields -->
-                        <div class="row" id="car-fields" style="display: none;">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="seating_capacity" class="form-label required">Seating Capacity</label>
-                                    <input type="number" 
-                                           class="form-control @error('seating_capacity') is-invalid @enderror" 
+                    <!-- Vehicle Type Specific Fields -->
+                    <div class="row" id="car-fields" style="display: none;">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="seating_capacity" class="form-label required">Seating Capacity</label>
+                                <select class="form-select @error('seating_capacity') is-invalid @enderror" 
                                         id="seating_capacity" 
-                                           name="seating_capacity" 
-                                           value="{{ old('seating_capacity') }}" 
-                                           min="1"
-                                           placeholder="">
-                                    <div class="helper-text">Number of seats (for cars)</div>
+                                       name="seating_capacity" 
+                                        required>
+                                    <option value="">Select Seating Capacity</option>
+                                    @for($i = 1; $i <= 20; $i++)
+                                        <option value="{{ $i }}" {{ old('seating_capacity') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <div class="helper-text"></div>
                                 @error('seating_capacity')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -522,18 +563,18 @@
                         </div>
                     </div>
 
-                        <div class="row" id="bike-scooter-fields" style="display: none;">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="engine_capacity_cc" class="form-label required">Engine Capacity (CC)</label>
+                    <div class="row" id="bike-scooter-fields" style="display: none;">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="engine_capacity_cc" class="form-label required">Engine Capacity (CC)</label>
                                 <input type="number" 
                                        class="form-control @error('engine_capacity_cc') is-invalid @enderror" 
                                        id="engine_capacity_cc" 
                                        name="engine_capacity_cc" 
                                        value="{{ old('engine_capacity_cc') }}" 
-                                           min="0"
-                                           placeholder="150">
-                                    <div class="helper-text">Engine cubic capacity in CC (for bikes and scooters)</div>
+                                       min="0"
+                                       placeholder="150">
+                                <div class="helper-text">Engine cubic capacity in CC (for bikes and scooters)</div>
                                 @error('engine_capacity_cc')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -542,68 +583,67 @@
                     </div>
 
                         <div class="row" id="heavy-vehicle-fields" style="display: none;">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="seating_capacity_heavy" class="form-label">Seating Capacity</label>
-                                    <input type="number" 
-                                           class="form-control @error('seating_capacity') is-invalid @enderror" 
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="seating_capacity_heavy" class="form-label">Seating Capacity</label>
+                                <select class="form-select @error('seating_capacity_heavy') is-invalid @enderror" 
                                         id="seating_capacity_heavy" 
-                                           name="seating_capacity" 
-                                           value="{{ old('seating_capacity') }}" 
-                                           min="1"
-                                           placeholder="5">
-                                    <div class="helper-text">Number of seats (for heavy vehicles)</div>
-                                @error('seating_capacity')
+                                        name="seating_capacity_heavy">
+                                    <option value="">Select Seating Capacity</option>
+                                    @for($i = 1; $i <= 100; $i++)
+                                        <option value="{{ $i }}" {{ old('seating_capacity_heavy') == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <div class="helper-text">Number of seats (for heavy vehicles)</div>
+                                @error('seating_capacity_heavy')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for="payload_capacity_tons" class="form-label">Payload Capacity (Tons)</label>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="payload_capacity_tons" class="form-label">Payload Capacity (Tons)</label>
                                 <input type="number" 
                                        class="form-control @error('payload_capacity_tons') is-invalid @enderror" 
                                        id="payload_capacity_tons" 
                                        name="payload_capacity_tons" 
                                        value="{{ old('payload_capacity_tons') }}" 
-                                           step="0.01"
+                                       step="0.01"
                                        min="0" 
-                                           placeholder="2.5">
-                                    <div class="helper-text">Weight capacity in tons (for heavy vehicles)</div>
+                                       placeholder="2.5">
+                                <div class="helper-text">Weight capacity in tons (for heavy vehicles)</div>
                                 @error('payload_capacity_tons')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                     </div>
-
+                        
                         <div class="row">
-                        <div class="col-12">
+                            <div class="col-12">
                                 <div class="form-group">
-                                    <label for="vehicle_images" class="form-label required">Upload Vehicle Images</label>
+                                    <label class="form-label">Upload Vehicle Images</label>
                                     <div class="file-upload-area" onclick="document.getElementById('vehicle_images').click()">
                                         <div class="upload-icon">
                                             <i class="fas fa-cloud-upload-alt"></i>
-                            </div>
-                                        <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG</p>
-                        </div>
+                                        </div>
+                                        <p class="upload-text">Click to upload or drag and drop the file here. Supported format JPG, PNG</p>
+                                    </div>
                                     <input type="file" 
                                            class="form-control @error('vehicle_images') is-invalid @enderror" 
                                            id="vehicle_images" 
                                            name="vehicle_images[]" 
-                                           accept="image/*"
+                                           accept="image/*" 
                                            multiple
-                                           style="display: none;"
-                                           onchange="previewMultipleImages(this)">
+                                           style="display: none;">
+                                    <input type="hidden" name="uploaded_image_ids" id="uploaded_image_ids" value="">
+                                    <div id="vehicleImagesContainer" class="d-flex flex-wrap gap-2 mt-2" style="display: none;"></div>
                                     @error('vehicle_images')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                                    <div class="helper-text">Upload multiple images of the vehicle (JPG, PNG, max 5MB each)</div>
-                                    <div id="imagePreviewContainer" class="image-preview-container" style="display: none;">
-                                        <!-- Image previews will be added here -->
-                            </div>
-                            </div>
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="helper-text">Upload clear, high-quality images of your vehicle from different angles</div>
                         </div>
+                    </div>
                         </div>
                     </div>
 
@@ -713,31 +753,31 @@
 
                             <div class="col-md-6 vendor-fields" style="display: none;">
                                 <div class="form-group">
-                                    <label for="vendor_name" class="form-label">Vendor Name</label>
+                            <label for="vendor_name" class="form-label">Vendor Name</label>
                                     <div class="vendor-dropdown-container">
                                         <div class="vendor-dropdown-wrapper">
                                 <input type="text" 
-                                                   class="form-control vendor-search-input @error('vendor_name') is-invalid @enderror"
-                                                   id="vendor_name"
-                                                   name="vendor_name"
+                                                   class="form-control vendor-search-input @error('vendor_name') is-invalid @enderror" 
+                                   id="vendor_name" 
+                                   name="vendor_name" 
                                                    value="{{ old('vendor_name') }}"
-                                                   placeholder="Search and select vendor"
-                                                   autocomplete="off"
+                                                   placeholder="Search and select vendor" 
+                                       autocomplete="off"
                                                    readonly>
                                             <div class="vendor-dropdown-arrow">
                                                 <i class="fas fa-chevron-down"></i>
-                                            </div>
-                                        </div>
+                                </div>
+                            </div>
                                         <div class="vendor-dropdown-options" style="display: none;">
                                             <div class="vendor-search-box">
                                                 <input type="text" 
                                                        class="form-control vendor-search-filter" 
-                                       placeholder="Type to search vendors..."
-                                       autocomplete="off">
-                                </div>
+                                                       placeholder="Type to search vendors..." 
+                                                       autocomplete="off">
+                                            </div>
                                             <div class="vendor-options-list">
                                                 <!-- Options will be populated dynamically -->
-                            </div>
+                                            </div>
                                             <div class="vendor-dropdown-footer">
                                                 <button type="button" class="btn btn-sm btn-outline-primary vendor-add-btn" onclick="openAddVendorModal()">
                                                     <i class="fas fa-plus me-1"></i>Add New Vendor
@@ -781,15 +821,15 @@
                                    name="commission_value" 
                                    value="{{ old('commission_value') }}" 
                                    step="0.01" 
-                                           min="0"
+                                   min="0"
                                            placeholder="Enter commission value">
                                     <div class="helper-text">Commission amount (₹) or percentage (%) for vendor-provided vehicles</div>
                             @error('commission_value')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                                </div>
                         </div>
                     </div>
-                        </div>
                     </div>
 
                     <!-- Section 4: Insurance and Legal Documents -->
@@ -851,7 +891,7 @@
                     <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="insurance_document" class="form-label required">Upload Registration Certificate</label>
+                                    <label for="insurance_document" class="form-label required">Upload Insurance Certificate</label>
                                     <div class="file-upload-area" onclick="document.getElementById('insurance_document').click()">
                                         <div class="upload-icon">
                                             <i class="fas fa-cloud-upload-alt"></i>
@@ -863,7 +903,15 @@
                                    id="insurance_document" 
                                    name="insurance_document" 
                                            accept=".pdf,.jpg,.jpeg,.png"
-                                           style="display: none;">
+                                       style="display: none;">
+                                <input type="hidden" name="insurance_document_path" id="insurance_document_path" value="">
+                                    <div id="insuranceFileName" class="mt-1 text-muted" style="font-size: 12px;"></div>
+                                <div class="upload-progress" id="insuranceProgress">
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill" id="insuranceProgressFill" style="width: 0%"></div>
+                                    </div>
+                                    <div class="progress-text"><span id="insuranceProgressText">0%</span></div>
+                                </div>
                             @error('insurance_document')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -884,7 +932,15 @@
                                    id="rc_document" 
                                    name="rc_document" 
                                            accept=".pdf,.jpg,.jpeg,.png"
-                                           style="display: none;">
+                                       style="display: none;">
+                                <input type="hidden" name="rc_document_path" id="rc_document_path" value="">
+                                    <div id="rcFileName" class="mt-1 text-muted" style="font-size: 12px;"></div>
+                                <div class="upload-progress" id="rcProgress">
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar-fill" id="rcProgressFill" style="width: 0%"></div>
+                                    </div>
+                                    <div class="progress-text"><span id="rcProgressText">0%</span></div>
+                                </div>
                             @error('rc_document')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -960,8 +1016,8 @@
                     </div>
 
                     <div class="row">
-                            <div class="col-12">
-                                <div class="form-group">
+                        <div class="col-12">
+                            <div class="form-group">
                             <label for="remarks_notes" class="form-label">Remarks/Notes</label>
                             <textarea class="form-control @error('remarks_notes') is-invalid @enderror" 
                                       id="remarks_notes" 
@@ -1010,8 +1066,8 @@
                         <select class="form-select" id="new_vendor_type" name="vendor_type" required>
                             <option value="">Select Type</option>
                             <option value="vehicle_provider" selected>Vehicle Provider</option>
-                            <option value="service_partner">Service Partner</option>
-                            <option value="other">Other</option>
+                                    <option value="service_partner">Service Partner</option>
+                                    <option value="other">Other</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -1040,7 +1096,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="saveNewVendor()">
                     <i class="fas fa-save me-1"></i>Save Vendor
-                </button>
+                    </button>
             </div>
         </div>
     </div>
@@ -1236,17 +1292,24 @@ document.addEventListener('DOMContentLoaded', function() {
     vendorNameInput = document.getElementById('vendor_name');
 
     function toggleVendorFields() {
-        const ownershipType = document.getElementById('ownership_type').value;
+        const ownershipType = document.getElementById('ownership_type')?.value;
+        if (!ownershipType) return;
+        
+        const vendorFieldsElements = document.querySelectorAll('.vendor-fields');
+        if (!vendorFieldsElements.length) return;
         
         if (ownershipType === 'vendor_provided') {
-            vendorFields.style.display = 'block';
+            vendorFieldsElements.forEach(field => field.style.display = 'block');
         } else {
-            vendorFields.style.display = 'none';
+            vendorFieldsElements.forEach(field => field.style.display = 'none');
         }
     }
 
     // Event listeners
-    document.getElementById('ownership_type').addEventListener('change', toggleVendorFields);
+    const ownershipTypeSelect = document.getElementById('ownership_type');
+    if (ownershipTypeSelect) {
+        ownershipTypeSelect.addEventListener('change', toggleVendorFields);
+    }
 
     // Initialize on page load
     toggleVendorFields();
@@ -1261,9 +1324,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (vendorDropdown) {
                     vendorDropdown.style.display = 'none';
                 }
-                return;
-            }
-            
+            return;
+        }
+
             vendorSearchTimeout = setTimeout(() => {
                 searchVendors(query);
             }, 300);
@@ -1287,11 +1350,27 @@ document.addEventListener('DOMContentLoaded', function() {
         const originalText = submitBtn.innerHTML;
         
         // Show loading state
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving Vehicle...';
         submitBtn.disabled = true;
         
         // Submit form via AJAX
         const formData = new FormData(this);
+        
+        // Ensure seating capacity is included if vehicle type is car
+        const vehicleType = formData.get('vehicle_type');
+        if (vehicleType === 'car') {
+            const seatingCapacitySelect = document.getElementById('seating_capacity');
+            if (seatingCapacitySelect) {
+                const selectedValue = seatingCapacitySelect.value;
+                if (selectedValue) {
+                    formData.set('seating_capacity', selectedValue);
+                }
+            }
+        }
+        
+        // Remove the old file input data
+        formData.delete('vehicle_images[]');
+        
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         
         fetch(this.action, {
@@ -1302,29 +1381,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+        .then(async (response) => {
+            if (response.ok) {
+                const data = await response.json();
+                if (!data.success) throw { status: 400, data };
                 showAlert('Vehicle registered successfully! Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = data.redirect_url || '{{ route("business.vehicles.index") }}';
                 }, 2000);
-            } else {
-                let errorMessage = data.message || 'Registration failed. Please try again.';
-                
-                // Handle validation errors
-                if (data.errors) {
-                    const errorList = Object.values(data.errors).flat().join('<br>');
-                    errorMessage = errorList;
-                }
-                
-                showAlert(errorMessage, 'danger');
-                resetSubmitButton(submitBtn, originalText);
+                return;
             }
+            let data;
+            try { data = await response.json(); } catch (_) { data = {}; }
+            throw { status: response.status, data };
         })
-        .catch(error => {
-            console.error('Error details:', error);
-            showAlert('An error occurred while registering the vehicle: ' + error.message, 'danger');
+        .catch(err => {
+            const errorDisplay = document.getElementById('errorDisplay');
+            const errorListDiv = document.getElementById('errorList');
+            if (errorDisplay && errorListDiv) {
+                let messages = [];
+                const labelMap = {
+                    vehicle_number: 'Registration Number',
+                    vehicle_type: 'Vehicle Type',
+                    vehicle_make: 'Vehicle Make',
+                    vehicle_model: 'Vehicle Model',
+                    insurance_provider: 'Insurance Provider',
+                    policy_number: 'Policy Number',
+                    insurance_expiry_date: 'Insurance Expiry Date',
+                    rc_document: 'Registration Certificate',
+                    insurance_document: 'Insurance Certificate'
+                };
+                if (err && err.data && err.data.errors) {
+                    Object.entries(err.data.errors).forEach(([field, arr]) => {
+                        const label = labelMap[field] || field.replace(/_/g, ' ');
+                        arr.forEach(msg => messages.push(`${label}: ${msg}`));
+                    });
+                } else if (err && err.data && err.data.message) {
+                    messages.push(err.data.message);
+                } else {
+                    messages.push('Registration failed. Please try again.');
+                }
+                errorListDiv.innerHTML = '<ul class="mb-0">' + messages.map(m => `<li>${m}</li>`).join('') + '</ul>';
+                errorDisplay.style.display = '';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showAlert('Registration failed. Please try again.', 'danger');
+            }
             resetSubmitButton(submitBtn, originalText);
         });
     });
@@ -1338,7 +1440,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Toggle vendor fields based on ownership type
 function toggleVendorFields() {
-    const ownershipType = document.getElementById('ownership_type').value;
+    const ownershipType = document.getElementById('ownership_type')?.value;
+    if (!ownershipType) return;
+    
     const vendorFields = document.querySelectorAll('.vendor-fields');
     const vendorNameInput = document.getElementById('vendor_name');
     const commissionType = document.getElementById('commission_type');
@@ -1412,6 +1516,15 @@ document.addEventListener('DOMContentLoaded', function() {
         vendorForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Validate required fields
+            const commissionTypeSelect = document.getElementById('quick_commission_type');
+            const commissionTypeValue = commissionTypeSelect.value;
+            
+            if (!commissionTypeValue || commissionTypeValue === '') {
+                showNotification('Please select a commission type', 'error');
+            return;
+        }
+
             const submitBtn = vendorForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             
@@ -1422,11 +1535,23 @@ document.addEventListener('DOMContentLoaded', function() {
             // Prepare form data
             const formData = new FormData(vendorForm);
             
+            // Map form values to backend expectations
+            const commissionRateValue = formData.get('commission_value');
+            
+            // Remove old values
+            formData.delete('commission_type');
+            formData.delete('commission_value');
+            
+            // Add correct field names and values
+            formData.append('commission_type', commissionTypeValue === 'fixed' ? 'fixed_amount' : 'percentage_of_revenue');
+            formData.append('commission_rate', commissionRateValue);
+            
             // Add CSRF token
             formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
             
             // Submit the form
-            fetch('{{ route("business.vendors.store") }}', {
+            // Use quick-store endpoint expecting minimal fields
+            fetch('{{ route("business.vendors.quick-store") }}', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1441,16 +1566,74 @@ document.addEventListener('DOMContentLoaded', function() {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('vendorQuickAddModal'));
                     modal.hide();
                     
-                    // Set the vendor name in the input
+                    // Auto-fill vendor details on main form
                     if (vendorInput) {
                         vendorInput.value = data.vendor.vendor_name;
                     }
+                    
+                    // Use setTimeout to ensure DOM is ready
+                    setTimeout(() => {
+                        const commissionTypeSelect = document.getElementById('commission_type');
+                        const commissionValueInput = document.getElementById('commission_value');
+                        
+                        if (commissionTypeSelect) {
+                            const mappedType = (data.vendor.commission_type === 'fixed_amount' ? 'fixed' : (data.vendor.commission_type === 'percentage_of_revenue' ? 'percentage' : (data.vendor.commission_type || '')));
+                            
+                            // Set the native select value first
+                            commissionTypeSelect.value = mappedType;
+                            
+                            // Trigger a change event to notify the custom dropdown
+                            const changeEvent = new Event('change', { bubbles: true });
+                            commissionTypeSelect.dispatchEvent(changeEvent);
+                            
+                            // Also trigger input event for better compatibility
+                            const inputEvent = new Event('input', { bubbles: true });
+                            commissionTypeSelect.dispatchEvent(inputEvent);
+                            
+                            // Find the custom dropdown wrapper and update it
+                            let customDropdownWrapper = null;
+                            let sibling = commissionTypeSelect.nextSibling;
+                            while (sibling) {
+                                if (sibling.classList && sibling.classList.contains('form-select-wrapper')) {
+                                    customDropdownWrapper = sibling;
+                                    break;
+                                }
+                                sibling = sibling.nextSibling;
+                            }
+                            
+                            if (customDropdownWrapper) {
+                                const selectedOption = commissionTypeSelect.options[commissionTypeSelect.selectedIndex];
+                                const displayElement = customDropdownWrapper.querySelector('.selected-text');
+                                const toggle = customDropdownWrapper.querySelector('.dropdown-toggle');
+                                
+                                if (displayElement && selectedOption) {
+                                    displayElement.textContent = selectedOption.textContent;
+                                    if (toggle) {
+                                        toggle.classList.add('has-selection');
+                                    }
+                                }
+                                
+                                // Update selected state in menu
+                                customDropdownWrapper.querySelectorAll('.dropdown-option').forEach(option => {
+                                    option.classList.remove('selected');
+                                    if (option.dataset.value === mappedType) {
+                                        option.classList.add('selected');
+                                    }
+                                });
+                            }
+                        }
+                        
+                        if (commissionValueInput) {
+                            commissionValueInput.value = data.vendor.commission_value || data.vendor.commission_rate || '';
+                        }
+                    }, 150); // Small delay to ensure custom dropdown is initialized
                     
                     // Show success message
                     showNotification('Vendor added successfully!', 'success');
                 } else {
                     // Show error message
-                    showNotification(data.message || 'Failed to add vendor', 'error');
+                    const msg = data.message || (data.errors ? Object.values(data.errors).flat().join('<br>') : 'Failed to add vendor');
+                    showNotification(msg, 'error');
                 }
             })
             .catch(error => {
@@ -1534,7 +1717,7 @@ document.addEventListener('DOMContentLoaded', function() {
         vendorSearchFilter.addEventListener('keydown', function(e) {
             switch(e.key) {
                 case 'ArrowDown':
-                    e.preventDefault();
+        e.preventDefault();
                     selectedIndex = Math.min(selectedIndex + 1, filteredVendors.length - 1);
                     updateSelection();
                     break;
@@ -1572,7 +1755,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function toggleDropdown() {
             if (vendorOptions.style.display === 'none' || vendorOptions.style.display === '') {
                 openDropdown();
-            } else {
+        } else {
                 closeDropdown();
             }
         }
@@ -1642,7 +1825,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             fetch('{{ route("business.vendors.search") }}', {
                 method: 'GET',
-                headers: {
+            headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -1654,7 +1837,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     vendorData = data.vendors.map(vendor => vendor.vendor_name);
                     filteredVendors = [...vendorData];
                     renderVendorOptions();
-        } else {
+            } else {
                     console.error('Failed to load vendors:', data.message);
                     vendorData = [];
                     filteredVendors = [];
@@ -1682,8 +1865,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        .then(data => {
+            if (data.success) {
                     filteredVendors = data.vendors.map(vendor => vendor.vendor_name);
                     selectedIndex = -1;
                     renderVendorOptions();
@@ -1691,9 +1874,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Failed to search vendors:', data.message);
                     filteredVendors = [];
                     renderVendorOptions();
-                }
-            })
-            .catch(error => {
+            }
+        })
+        .catch(error => {
                 console.error('Error searching vendors:', error);
                 filteredVendors = [];
                 renderVendorOptions();
@@ -1714,59 +1897,59 @@ document.addEventListener('DOMContentLoaded', function() {
                 const commissionValueInput = document.getElementById('commission_value');
                 
                 if (!commissionTypeSelect || !commissionValueInput) {
-                    return;
+            return;
+        }
+
+            // Show loading state
+            commissionTypeSelect.disabled = true;
+            commissionValueInput.disabled = true;
+            commissionValueInput.placeholder = 'Loading commission details...';
+            
+            fetch('{{ route("business.vendors.search") }}?search=' + encodeURIComponent(vendorName), {
+            method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
-                
-                // Show loading state
-                commissionTypeSelect.disabled = true;
-                commissionValueInput.disabled = true;
-                commissionValueInput.placeholder = 'Loading commission details...';
-                
-                fetch('{{ route("business.vendors.search") }}?search=' + encodeURIComponent(vendorName), {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.vendors.length > 0) {
-                        const vendor = data.vendors.find(v => v.vendor_name === vendorName);
-                        if (vendor) {
-                            // Map commission type from database to form values
-                            let commissionType = '';
-                            if (vendor.commission_type === 'fixed_amount') {
-                                commissionType = 'fixed';
-                            } else if (vendor.commission_type === 'percentage_of_revenue') {
-                                commissionType = 'percentage';
-                            }
-                            
-                            // Set commission type
-                            commissionTypeSelect.value = commissionType;
-                            
-                            // Set commission value
-                            commissionValueInput.value = vendor.commission_rate || '';
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.vendors.length > 0) {
+                    const vendor = data.vendors.find(v => v.vendor_name === vendorName);
+                    if (vendor) {
+                        // Map commission type from database to form values
+                        let commissionType = '';
+                        if (vendor.commission_type === 'fixed_amount') {
+                            commissionType = 'fixed';
+                        } else if (vendor.commission_type === 'percentage_of_revenue') {
+                            commissionType = 'percentage';
+                        }
+                        
+                        // Set commission type
+                        commissionTypeSelect.value = commissionType;
+                        
+                        // Set commission value
+                        commissionValueInput.value = vendor.commission_rate || '';
                             
                             // Refresh custom dropdowns to show the selected value
                             refreshCustomDropdowns();
-                            
-                            // Show success notification
-                            showNotification(`Commission details loaded for ${vendorName}`, 'success');
-                        }
+                        
+                        // Show success notification
+                        showNotification(`Commission details loaded for ${vendorName}`, 'success');
                     }
-                })
-                .catch(error => {
-                    console.error('Error fetching vendor commission details:', error);
-                    showNotification('Failed to load commission details', 'error');
-                })
-                .finally(() => {
-                    // Re-enable fields
-                    commissionTypeSelect.disabled = false;
-                    commissionValueInput.disabled = false;
-                    commissionValueInput.placeholder = 'Enter commission value';
-                });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching vendor commission details:', error);
+                showNotification('Failed to load commission details', 'error');
+            })
+            .finally(() => {
+                // Re-enable fields
+                commissionTypeSelect.disabled = false;
+                commissionValueInput.disabled = false;
+                commissionValueInput.placeholder = 'Enter commission value';
+            });
             }, 100); // Small delay to ensure fields are visible
         }
     }
@@ -1795,48 +1978,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label for="quick_vendor_type" class="form-label required">Vendor Type</label>
-                                <select class="form-select" id="quick_vendor_type" name="vendor_type" required>
-                                    <option value="">Select Type</option>
-                                    <option value="vehicle_provider">Vehicle Provider</option>
-                                    <option value="service_partner">Service Partner</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="quick_primary_contact" class="form-label required">Primary Contact Person</label>
-                                <input type="text" class="form-control" id="quick_primary_contact" name="primary_contact_person" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
                                 <label for="quick_mobile_number" class="form-label required">Mobile Number</label>
                                 <input type="text" class="form-control" id="quick_mobile_number" name="mobile_number" required>
                             </div>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="quick_email" class="form-label required">Email Address</label>
-                                <input type="email" class="form-control" id="quick_email" name="email_address" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group mb-3">
-                                <label for="quick_pan_number" class="form-label required">PAN Number</label>
-                                <input type="text" class="form-control" id="quick_pan_number" name="pan_number" maxlength="10" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-12">
                             <div class="form-group mb-3">
-                                <label for="quick_office_address" class="form-label required">Office Address</label>
+                                <label for="quick_office_address" class="form-label required">Address</label>
                                 <textarea class="form-control" id="quick_office_address" name="office_address" rows="2" required></textarea>
                             </div>
                         </div>
@@ -1845,17 +1995,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="col-md-6">
                             <div class="form-group mb-3">
                                 <label for="quick_commission_type" class="form-label required">Commission Type</label>
-                                <select class="form-select" id="quick_commission_type" name="commission_type" required>
+                                <select class="form-select" id="quick_commission_type" name="commission_type" required data-skip-custom-dropdown="true">
                                     <option value="">Select Type</option>
-                                    <option value="fixed_amount">Fixed Amount</option>
-                                    <option value="percentage_of_revenue">Percentage of Revenue</option>
+                                    <option value="fixed">Fixed Amount</option>
+                                    <option value="percentage">Percentage</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
-                                <label for="quick_commission_rate" class="form-label required">Commission Rate</label>
-                                <input type="number" class="form-control" id="quick_commission_rate" name="commission_rate" step="0.01" min="0" required>
+                                <label for="quick_commission_rate" class="form-label required">Commission Value</label>
+                                <input type="number" class="form-control" id="quick_commission_rate" name="commission_value" step="0.01" min="0" required>
                             </div>
                         </div>
                     </div>
@@ -1873,7 +2023,191 @@ document.addEventListener('DOMContentLoaded', function() {
 
 @push('scripts')
 <script>
+// Uploaded documents tracker
+let uploadedDocuments = {
+    rc: null,
+    insurance: null
+};
+
+// Vehicle images upload function
+function uploadVehicleImages(files) {
+    const container = document.getElementById('vehicleImagesContainer');
+    if (!container) return;
+    
+    // Track uploaded image IDs globally
+    if (!window.uploadedVehicleImageIds) {
+        window.uploadedVehicleImageIds = [];
+    }
+    
+    // Upload each file
+    Array.from(files).forEach((file, index) => {
+        // Create preview element immediately
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'position-relative';
+        previewDiv.style.cssText = 'width: 100px; height: 100px; border: 1px solid #ced4da; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #f8f9fa;';
+            
+            // Show loading state
+        previewDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>';
+            
+        container.appendChild(previewDiv);
+        container.style.display = 'flex';
+            
+        const formData = new FormData();
+        formData.append('image', file);
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
+        fetch('{{ route("business.vehicles.upload-image") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                window.uploadedVehicleImageIds.push({
+                    id: data.image_id,
+                    path: data.image_path,
+                    preview_url: data.preview_url
+                });
+                
+                // Update preview with actual image
+                previewDiv.innerHTML = `
+                    <img src="${data.preview_url}" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: 2px; right: 2px; padding: 2px 6px; font-size: 10px;" onclick="removeVehicleImage(${data.image_id}, this)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                // Update hidden input
+                document.getElementById('uploaded_image_ids').value = window.uploadedVehicleImageIds.map(img => img.id).join(',');
+                    } else {
+                alert('Failed to upload file: ' + data.message);
+                previewDiv.remove();
+                }
+            })
+            .catch(error => {
+            console.error('Error uploading file:', error);
+            alert('Failed to upload file: ' + file.name);
+            previewDiv.remove();
+            });
+        });
+    }
+
+// Remove vehicle image
+function removeVehicleImage(imageId, buttonElement) {
+    // Remove from tracking array
+    window.uploadedVehicleImageIds = window.uploadedVehicleImageIds.filter(img => img.id !== imageId);
+    
+    // Update hidden input
+    document.getElementById('uploaded_image_ids').value = window.uploadedVehicleImageIds.map(img => img.id).join(',');
+    
+    // Remove preview
+    buttonElement.closest('.position-relative').remove();
+    
+    // Check if container is empty
+    const container = document.getElementById('vehicleImagesContainer');
+    if (container && container.children.length === 0) {
+        container.style.display = 'none';
+    }
+}
+
+// Document upload functions
+function uploadDocument(file, type) {
+    const formData = new FormData();
+    formData.append('document', file);
+    formData.append('type', type);
+    formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+    
+    const progressContainer = document.getElementById(type + 'Progress');
+    const progressFill = document.getElementById(type + 'ProgressFill');
+    const progressText = document.getElementById(type + 'ProgressText');
+    
+    progressContainer.classList.add('active');
+    
+    const xhr = new XMLHttpRequest();
+    
+    xhr.upload.addEventListener('progress', function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = (e.loaded / e.total) * 100;
+            progressFill.style.width = percentComplete + '%';
+            progressText.textContent = Math.round(percentComplete) + '%';
+        }
+    });
+    
+    xhr.addEventListener('load', function() {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    uploadedDocuments[type] = response.document_path;
+                    
+                    // Set the hidden input field value
+                    const pathInput = document.getElementById(type + '_document_path');
+                    if (pathInput) {
+                        pathInput.value = response.document_path;
+                    }
+                    
+                    // Show filename feedback (non-intrusive)
+                    const nameEl = document.getElementById(type + 'FileName');
+                    if (nameEl) {
+                        nameEl.textContent = 'Selected file: ' + (file?.name || response.document_path.split('/').pop());
+                    }
+                    progressText.textContent = 'Upload complete!';
+    setTimeout(() => {
+                        progressContainer.classList.remove('active');
+                    }, 2000);
+                    // Reset the file input to allow re-uploading the same file if needed
+                    const inputEl = document.getElementById(type + '_document');
+                    if (inputEl) inputEl.value = '';
+                } else {
+                    alert('Upload failed: ' + response.message);
+                    progressContainer.classList.remove('active');
+                }
+            } catch (e) {
+                alert('Failed to parse response');
+                progressContainer.classList.remove('active');
+            }
+        } else {
+            alert('Upload failed with status: ' + xhr.status);
+            progressContainer.classList.remove('active');
+        }
+    });
+    
+    xhr.addEventListener('error', function() {
+        alert('An error occurred during upload');
+        progressContainer.classList.remove('active');
+    });
+    
+    xhr.open('POST', '{{ route("business.vehicles.upload-document") }}');
+    xhr.send(formData);
+}
+
+// Handle vehicle images file input
+document.getElementById('vehicle_images').addEventListener('change', function() {
+    if (this.files && this.files.length > 0) {
+        uploadVehicleImages(this.files);
+    }
+    // Allow selecting the same file again immediately
+    this.value = '';
+});
+
+// Handle document file inputs
+document.getElementById('rc_document').addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        uploadDocument(this.files[0], 'rc');
+    }
+});
+
+document.getElementById('insurance_document').addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        uploadDocument(this.files[0], 'insurance');
+    }
+});
+
 $(document).ready(function() {
+
     let vehicleMakes = [];
     let vehicleModels = [];
     let currentVehicleType = '';
@@ -1904,18 +2238,29 @@ $(document).ready(function() {
         $('#car-fields, #bike-scooter-fields, #heavy-vehicle-fields').hide();
         
         // Show relevant fields based on vehicle type
+        const carSeating = document.getElementById('seating_capacity');
+        const heavySeating = document.getElementById('seating_capacity_heavy');
+
         if (vehicleType === 'car') {
             $('#car-fields').show();
             $('#default-transmission-field').show();
+            if (carSeating) carSeating.required = true;
+            if (heavySeating) heavySeating.required = false;
         } else if (vehicleType === 'bike_scooter') {
             $('#bike-scooter-fields').show();
             $('#default-transmission-field').show();
+            if (carSeating) carSeating.required = false;
+            if (heavySeating) heavySeating.required = false;
         } else if (vehicleType === 'heavy_vehicle') {
             $('#heavy-vehicle-fields').show();
             $('#default-transmission-field').show();
+            if (carSeating) carSeating.required = false;
+            if (heavySeating) heavySeating.required = false; // server rule is nullable
         } else {
             // Hide transmission field if no vehicle type selected
             $('#default-transmission-field').hide();
+            if (carSeating) carSeating.required = false;
+            if (heavySeating) heavySeating.required = false;
         }
     }
 

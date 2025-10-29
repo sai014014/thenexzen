@@ -37,6 +37,10 @@ class CustomDropdown {
         // Create toggle button
         this.toggle = document.createElement('div');
         this.toggle.className = 'dropdown-toggle';
+        this.toggle.setAttribute('tabindex', '0');
+        this.toggle.setAttribute('role', 'combobox');
+        this.toggle.setAttribute('aria-expanded', 'false');
+        this.toggle.setAttribute('aria-haspopup', 'listbox');
         this.toggle.addEventListener('click', () => this.toggleDropdown());
         
         // Create selected text span
@@ -50,6 +54,12 @@ class CustomDropdown {
         // Create menu
         this.menu = document.createElement('div');
         this.menu.className = 'dropdown-menu';
+        this.menu.setAttribute('role', 'listbox');
+        this.menu.setAttribute('tabindex', '0');
+        
+        // Search functionality
+        this.searchTerm = '';
+        this.filteredOptions = [];
         
         // Assemble toggle
         this.toggle.appendChild(this.selectedText);
@@ -131,6 +141,17 @@ class CustomDropdown {
     }
     
     selectOption(value, text) {
+        // Clear search timeout
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+            this.searchTerm = '';
+        }
+        
+        // Show all options again
+        this.menu.querySelectorAll('.dropdown-option').forEach(option => {
+            option.style.display = '';
+        });
+        
         // Update selected text
         this.selectedText.textContent = text;
         
@@ -175,12 +196,56 @@ class CustomDropdown {
         });
         
         this.wrapper.classList.add('open');
+        this.toggle.setAttribute('aria-expanded', 'true');
         this.isOpen = true;
     }
     
     closeDropdown() {
         this.wrapper.classList.remove('open');
+        this.toggle.setAttribute('aria-expanded', 'false');
         this.isOpen = false;
+    }
+    
+    filterAndHighlightByTyping() {
+        if (!this.isOpen) {
+            this.openDropdown();
+        }
+        
+        // Reset search timeout if exists
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+        
+        // Filter options based on search term
+        const options = Array.from(this.menu.querySelectorAll('.dropdown-option'));
+        const searchLower = this.searchTerm.toLowerCase();
+        
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            if (searchLower && !text.includes(searchLower)) {
+                option.style.display = 'none';
+            } else {
+                option.style.display = '';
+                option.classList.remove('selected');
+            }
+        });
+        
+        // Highlight first visible option
+        const visibleOptions = options.filter(opt => opt.style.display !== 'none');
+        if (visibleOptions.length > 0) {
+            visibleOptions[0].classList.add('selected');
+            visibleOptions[0].scrollIntoView({ block: 'nearest' });
+        }
+        
+        // Clear search term after 3 seconds of inactivity
+        this.searchTimeout = setTimeout(() => {
+            this.searchTerm = '';
+            // Show all options again
+            options.forEach(option => {
+                option.style.display = '';
+                option.classList.remove('selected');
+            });
+        }, 10000);
     }
     
     addEventListeners() {
@@ -191,42 +256,102 @@ class CustomDropdown {
             }
         });
         
-        // Handle keyboard navigation
+        // Handle keyboard navigation on toggle button
         this.toggle.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                this.toggleDropdown();
+                if (this.isOpen) {
+                    // If open, select the highlighted option
+                    const options = Array.from(this.menu.querySelectorAll('.dropdown-option'));
+                    const visibleOptions = options.filter(opt => opt.style.display !== 'none');
+                    const selectedOpt = visibleOptions.find(opt => opt.classList.contains('selected'));
+                    
+                    if (selectedOpt) {
+                        this.selectOption(selectedOpt.dataset.value, selectedOpt.textContent);
+                    }
+                } else {
+                    // If closed, open the dropdown
+                    this.toggleDropdown();
+                }
             } else if (e.key === 'Escape') {
                 this.closeDropdown();
+            } else if (e.key === 'Tab') {
+                // Close dropdown when tabbing away
+                this.closeDropdown();
+            } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (!this.isOpen) {
+                    this.openDropdown();
+                }
+                // For arrow keys, navigate options immediately
+                const options = Array.from(this.menu.querySelectorAll('.dropdown-option'));
+                const visibleOptions = options.filter(opt => opt.style.display !== 'none');
+                
+                if (visibleOptions.length > 0) {
+                    const selectedOpt = visibleOptions.find(opt => opt.classList.contains('selected'));
+                    const currentIndex = selectedOpt ? visibleOptions.indexOf(selectedOpt) : -1;
+                    
+                    if (e.key === 'ArrowDown') {
+                        const nextIndex = (currentIndex + 1) % visibleOptions.length;
+                        const nextOption = visibleOptions[nextIndex];
+                        this.highlightOption(options.indexOf(nextOption));
+                        nextOption.scrollIntoView({ block: 'nearest' });
+                    } else if (e.key === 'ArrowUp') {
+                        const prevIndex = currentIndex <= 0 ? visibleOptions.length - 1 : currentIndex - 1;
+                        const prevOption = visibleOptions[prevIndex];
+                        this.highlightOption(options.indexOf(prevOption));
+                        prevOption.scrollIntoView({ block: 'nearest' });
+                    }
+                }
+            } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+                // Typing a letter - start search
+                e.preventDefault();
+                this.searchTerm += e.key;
+                this.filterAndHighlightByTyping();
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                this.searchTerm = this.searchTerm.slice(0, -1);
+                this.filterAndHighlightByTyping();
             }
         });
         
-        // Handle option keyboard navigation
-        this.menu.addEventListener('keydown', (e) => {
-            const options = Array.from(this.menu.querySelectorAll('.dropdown-option'));
-            const currentIndex = options.findIndex(option => option.classList.contains('selected'));
-            
-            switch (e.key) {
-                case 'ArrowDown':
-                    e.preventDefault();
-                    const nextIndex = (currentIndex + 1) % options.length;
-                    this.highlightOption(nextIndex);
-                    break;
-                case 'ArrowUp':
-                    e.preventDefault();
-                    const prevIndex = currentIndex <= 0 ? options.length - 1 : currentIndex - 1;
-                    this.highlightOption(prevIndex);
-                    break;
-                case 'Enter':
-                    e.preventDefault();
-                    if (currentIndex >= 0) {
-                        const option = options[currentIndex];
-                        this.selectOption(option.dataset.value, option.textContent);
+        // Add listener for active element to show focus
+        this.toggle.addEventListener('focus', () => {
+            this.toggle.classList.add('dropdown-toggle-focused');
+        });
+        
+        this.toggle.addEventListener('blur', (e) => {
+            // Don't blur when clicking on menu options
+            if (!this.wrapper.contains(e.relatedTarget)) {
+                this.toggle.classList.remove('dropdown-toggle-focused');
+                // Reset search term when closing
+                setTimeout(() => {
+                    if (!this.isOpen) {
+                        this.searchTerm = '';
                     }
-                    break;
-                case 'Escape':
-                    this.closeDropdown();
-                    break;
+                }, 100);
+            }
+        });
+        
+        // Handle option keyboard navigation (only for specific keys)
+        this.menu.addEventListener('keydown', (e) => {
+            // Only handle Enter and Escape in menu, let other keys go to toggle button
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.stopPropagation();
+                const options = Array.from(this.menu.querySelectorAll('.dropdown-option'));
+                const visibleOptions = options.filter(opt => opt.style.display !== 'none');
+                const selectedOpt = visibleOptions.find(opt => opt.classList.contains('selected'));
+                const currentIndex = selectedOpt ? visibleOptions.indexOf(selectedOpt) : -1;
+                
+                if (currentIndex >= 0 && visibleOptions[currentIndex]) {
+                    const option = visibleOptions[currentIndex];
+                    this.selectOption(option.dataset.value, option.textContent);
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                this.closeDropdown();
+                this.toggle.focus();
             }
         });
     }
@@ -314,6 +439,10 @@ function refreshCustomDropdowns() {
 function reinitializeCustomDropdowns() {
     const selectElements = document.querySelectorAll('.form-select:not([data-custom-dropdown-initialized])');
     selectElements.forEach(select => {
+        // Respect opt-out flag
+        if (select.dataset.skipCustomDropdown === 'true') {
+            return;
+        }
         new CustomDropdown(select);
         select.dataset.customDropdownInitialized = 'true';
     });

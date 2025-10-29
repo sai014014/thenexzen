@@ -1,14 +1,12 @@
-@extends('business.layouts.app')
+<?php $__env->startSection('title', 'Vehicle Management'); ?>
+<?php $__env->startSection('page-title', 'Vehicle Management'); ?>
 
-@section('title', 'Vehicle Management')
-@section('page-title', 'Vehicle Management')
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 
 
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <!-- Main Content -->
 
 <!-- Search, Filters and Add Vehicle Section -->
@@ -46,25 +44,25 @@
         </select>
     </div>
     <div class="col-md-2 text-end">
-        @php
+        <?php
             $businessAdmin = auth('business_admin')->user();
             $business = $businessAdmin ? $businessAdmin->business : null;
             $subscription = $business ? $business->subscriptions()->whereIn('status', ['active', 'trial'])->first() : null;
             $capacityStatus = $subscription ? $subscription->getVehicleCapacityStatus() : null;
-        @endphp
-        @if($capacityStatus && $capacityStatus['can_add'])
-            <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
+        ?>
+        <?php if($capacityStatus && $capacityStatus['can_add']): ?>
+            <a href="<?php echo e(route('business.vehicles.create')); ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>Add New Vehicle
             </a>
-        @elseif($capacityStatus && !$capacityStatus['can_add'])
+        <?php elseif($capacityStatus && !$capacityStatus['can_add']): ?>
             <button class="btn btn-primary" onclick="showVehicleLimitModal()">
                 <i class="fas fa-plus me-2"></i>Add New Vehicle
             </button>
-        @else
-            <a href="{{ route('business.vehicles.create') }}" class="btn btn-primary">
+        <?php else: ?>
+            <a href="<?php echo e(route('business.vehicles.create')); ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>Add New Vehicle
             </a>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
@@ -83,11 +81,11 @@
                     </tr>
                 </thead>
                 <tbody id="vehicleTableBody">
-                    @foreach($vehicles as $vehicle)
+                    <?php $__currentLoopData = $vehicles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehicle): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <tr>
                         <td class="vechicle_title">
                             <div class="d-flex align-items-center">
-                                @php
+                                <?php
                                     // Generate a consistent color based on vehicle ID
                                     $colors = ['#6B6ADE', '#FF6B6B', '#4ECDC4', '#FFE66D', '#FF8C94', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3', '#A8E6CF'];
                                     $colorIndex = $vehicle->id % count($colors);
@@ -96,23 +94,24 @@
                                     $brandIcon = 'images/vehicle-brands/' . strtolower(str_replace(' ', '-', $vehicle->vehicle_make)) . '.svg';
                                     $brandIconPath = public_path($brandIcon);
                                     $defaultIcon = 'images/vehicle-brands/default.svg';
-                                @endphp
-                                @if(file_exists($brandIconPath))
-                                    <img src="{{ asset($brandIcon) }}" alt="{{ $vehicle->vehicle_make }}" class="me-2" style="width: 30px; height: 30px;">
-                                @else
+                                ?>
+                                <?php if(file_exists($brandIconPath)): ?>
+                                    <img src="<?php echo e(asset($brandIcon)); ?>" alt="<?php echo e($vehicle->vehicle_make); ?>" class="me-2" style="width: 30px; height: 30px;">
+                                <?php else: ?>
                                     <div class="brand-icon-placeholder me-2 d-flex align-items-center justify-content-center vehicle-color-badge" 
-                                         style="width: 30px; height: 30px; background: {{ $vehicleColor }}; color: white; border-radius: 4px; font-size: 12px; font-weight: bold;">
-                                        {{ strtoupper(substr($vehicle->vehicle_make, 0, 2)) }}
+                                         style="width: 30px; height: 30px; background: <?php echo e($vehicleColor); ?>; color: white; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                                        <?php echo e(strtoupper(substr($vehicle->vehicle_make, 0, 2))); ?>
+
                                     </div>
-                                @endif
+                                <?php endif; ?>
                                 <div>
-                                    <div class="fw-bold">{{ $vehicle->vehicle_make }} {{ $vehicle->vehicle_model }}</div>
-                                    <small class="text-muted">{{ $vehicle->registration_number }}</small>
+                                    <div class="fw-bold"><?php echo e($vehicle->vehicle_make); ?> <?php echo e($vehicle->vehicle_model); ?></div>
+                                    <small class="text-muted"><?php echo e($vehicle->registration_number); ?></small>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            @php
+                            <?php
                                 $unitType = '';
                                 if($vehicle->vehicle_type === 'car') {
                                     $unitType = 'Car - ' . ucfirst($vehicle->transmission_type);
@@ -121,35 +120,37 @@
                                 } elseif($vehicle->vehicle_type === 'heavy_vehicle') {
                                     $unitType = 'Heavy Vehicle - ' . ucfirst($vehicle->transmission_type);
                                 }
-                            @endphp
-                            {{ $unitType }}
+                            ?>
+                            <?php echo e($unitType); ?>
+
                         </td>
-                        <td>{{ ucfirst($vehicle->fuel_type) }}</td>
+                        <td><?php echo e(ucfirst($vehicle->fuel_type)); ?></td>
                         <td>
-                            @if($vehicle->vehicle_type === 'car')
-                                {{ $vehicle->seating_capacity }} Seats
-                            @elseif($vehicle->vehicle_type === 'bike_scooter')
-                                {{ $vehicle->engine_capacity_cc }}cc Engine
-                            @elseif($vehicle->vehicle_type === 'heavy_vehicle')
-                                @if($vehicle->seating_capacity)
-                                    {{ $vehicle->seating_capacity }} Seats
-                                @elseif($vehicle->payload_capacity_tons)
-                                {{ $vehicle->payload_capacity_tons }} Tons
-                                @endif
-                            @endif
+                            <?php if($vehicle->vehicle_type === 'car'): ?>
+                                <?php echo e($vehicle->seating_capacity); ?> Seats
+                            <?php elseif($vehicle->vehicle_type === 'bike_scooter'): ?>
+                                <?php echo e($vehicle->engine_capacity_cc); ?>cc Engine
+                            <?php elseif($vehicle->vehicle_type === 'heavy_vehicle'): ?>
+                                <?php if($vehicle->seating_capacity): ?>
+                                    <?php echo e($vehicle->seating_capacity); ?> Seats
+                                <?php elseif($vehicle->payload_capacity_tons): ?>
+                                <?php echo e($vehicle->payload_capacity_tons); ?> Tons
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </td>
                         <td>
-                            ₹ {{ number_format($vehicle->rental_price_24h, 2) }}
+                            ₹ <?php echo e(number_format($vehicle->rental_price_24h, 2)); ?>
+
                             <i class="fas fa-info-circle text-muted ms-1 rental-info-icon" 
                                style="cursor: pointer;" 
-                               data-vehicle-id="{{ $vehicle->id }}"
-                               data-rental-price-24h="{{ $vehicle->rental_price_24h }}"
-                               data-km-limit="{{ $vehicle->km_limit_per_booking }}"
-                               data-extra-rental-price="{{ $vehicle->extra_rental_price_per_hour }}"
-                               data-extra-price-km="{{ $vehicle->extra_price_per_km }}"></i>
+                               data-vehicle-id="<?php echo e($vehicle->id); ?>"
+                               data-rental-price-24h="<?php echo e($vehicle->rental_price_24h); ?>"
+                               data-km-limit="<?php echo e($vehicle->km_limit_per_booking); ?>"
+                               data-extra-rental-price="<?php echo e($vehicle->extra_rental_price_per_hour); ?>"
+                               data-extra-price-km="<?php echo e($vehicle->extra_price_per_km); ?>"></i>
                         </td>
                         <td>
-                            @php
+                            <?php
                                 $displayStatus = 'Available';
                                 $badgeClass = 'success';
 
@@ -163,58 +164,59 @@
                                     $displayStatus = 'Booked';
                                     $badgeClass = 'warning';
                                 }
-                            @endphp
+                            ?>
                             <div>
-                                <span class="badge rounded-pill bg-{{ $badgeClass }} text-white fw-bold px-2 py-1">
-                                    {{ $displayStatus }}
+                                <span class="badge rounded-pill bg-<?php echo e($badgeClass); ?> text-white fw-bold px-2 py-1">
+                                    <?php echo e($displayStatus); ?>
+
                                 </span>
                             </div>
                         </td>
                         <td>
-                            <a href="{{ route('business.vehicles.show', $vehicle) }}" class="text-primary text-decoration-none" style="font-weight: 500;">View</a>
+                            <a href="<?php echo e(route('business.vehicles.show', $vehicle)); ?>" class="text-primary text-decoration-none" style="font-weight: 500;">View</a>
                         </td>
                     </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
         </div>
         
-        @if($vehicles->total() > 20)
+        <?php if($vehicles->total() > 20): ?>
         <!-- Simple Pagination - Only Previous/Next -->
         <div class="d-flex justify-content-center mt-3">
             <nav aria-label="Vehicle pagination">
                 <ul class="pagination">
-                    @if ($vehicles->onFirstPage())
+                    <?php if($vehicles->onFirstPage()): ?>
                         <li class="page-item disabled">
                             <span class="page-link">
                                 <i class="fas fa-chevron-left"></i> Previous
                             </span>
                         </li>
-                    @else
+                    <?php else: ?>
                         <li class="page-item">
-                            <a class="page-link" href="{{ $vehicles->previousPageUrl() }}">
+                            <a class="page-link" href="<?php echo e($vehicles->previousPageUrl()); ?>">
                                 <i class="fas fa-chevron-left"></i> Previous
                             </a>
                         </li>
-                    @endif
+                    <?php endif; ?>
 
-                    @if ($vehicles->hasMorePages())
+                    <?php if($vehicles->hasMorePages()): ?>
                         <li class="page-item">
-                            <a class="page-link" href="{{ $vehicles->nextPageUrl() }}">
+                            <a class="page-link" href="<?php echo e($vehicles->nextPageUrl()); ?>">
                                 Next <i class="fas fa-chevron-right"></i>
                             </a>
                         </li>
-                    @else
+                    <?php else: ?>
                         <li class="page-item disabled">
                             <span class="page-link">
                                 Next <i class="fas fa-chevron-right"></i>
                             </span>
                         </li>
-                    @endif
+                    <?php endif; ?>
                 </ul>
             </nav>
         </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
@@ -235,11 +237,12 @@
                     </div>
                     <h4 class="modal-title-text">Vehicle Capacity Limit Reached</h4>
                     <p class="modal-message">
-                        @if($capacityStatus)
-                            {{ $capacityStatus['message'] }}
-                        @else
+                        <?php if($capacityStatus): ?>
+                            <?php echo e($capacityStatus['message']); ?>
+
+                        <?php else: ?>
                             You have reached the maximum number of vehicles allowed for your subscription package.
-                        @endif
+                        <?php endif; ?>
                     </p>
                 </div>
                 <div class="modal-alert">
@@ -251,7 +254,7 @@
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-2"></i>Cancel
                 </button>
-                <a href="{{ route('business.subscription.index') }}" class="btn btn-primary">
+                <a href="<?php echo e(route('business.subscription.index')); ?>" class="btn btn-primary">
                     <i class="fas fa-arrow-up me-2"></i>Upgrade Package
                 </a>
             </div>
@@ -627,4 +630,5 @@
     transform: rotate(90deg);
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('business.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/business/vehicles/index.blade.php ENDPATH**/ ?>

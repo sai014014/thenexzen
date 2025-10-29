@@ -31,8 +31,7 @@ class VehicleController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('vehicle_make', 'like', "%{$search}%")
                   ->orWhere('vehicle_model', 'like', "%{$search}%")
-                  ->orWhere('vehicle_number', 'like', "%{$search}%")
-                  ->orWhere('rc_number', 'like', "%{$search}%");
+                  ->orWhere('vehicle_number', 'like', "%{$search}%");
             });
         }
 
@@ -132,22 +131,29 @@ class VehicleController extends Controller
             $data = $request->all();
             $data['business_id'] = $business->id;
 
-            // Handle file uploads
+            // Handle file uploads (old method - fallback)
             if ($request->hasFile('vehicle_image')) {
                 $data['vehicle_image_path'] = $this->uploadDocument($request->file('vehicle_image'), 'vehicle_images');
             }
 
-            if ($request->hasFile('insurance_document')) {
-                $data['insurance_document_path'] = $this->uploadDocument($request->file('insurance_document'), 'insurance');
+            // Handle RC and Insurance documents from live upload
+            if ($request->has('rc_document_path') && !empty($request->rc_document_path)) {
+                $data['rc_document_path'] = $request->rc_document_path;
+            } elseif ($request->hasFile('rc_document')) {
+                $data['rc_document_path'] = $this->uploadDocument($request->file('rc_document'), 'rc');
             }
 
-            if ($request->hasFile('rc_document')) {
-                $data['rc_document_path'] = $this->uploadDocument($request->file('rc_document'), 'rc');
+            if ($request->has('insurance_document_path') && !empty($request->insurance_document_path)) {
+                $data['insurance_document_path'] = $request->insurance_document_path;
+            } elseif ($request->hasFile('insurance_document')) {
+                $data['insurance_document_path'] = $this->uploadDocument($request->file('insurance_document'), 'insurance');
             }
 
             // Set transmission type based on vehicle type
             if ($data['vehicle_type'] === 'bike_scooter') {
-                $data['transmission_type'] = $data['bike_transmission_type'] ?? null;
+                // Accept either transmission_type (new) or bike_transmission_type (legacy)
+                $data['transmission_type'] = $data['transmission_type']
+                    ?? ($data['bike_transmission_type'] ?? null);
             }
             
             // Handle seating capacity for heavy vehicles
@@ -156,10 +162,35 @@ class VehicleController extends Controller
                 unset($data['seating_capacity_heavy']);
             }
 
+            // Map vehicle_number to rc_number for database
+            if (isset($data['vehicle_number'])) {
+                $data['rc_number'] = $data['vehicle_number'];
+            }
+
             $vehicle = Vehicle::create($data);
 
-            // Handle multiple vehicle images
-            if ($request->hasFile('vehicle_images')) {
+            // Handle multiple vehicle images from live upload
+            if ($request->has('uploaded_image_ids') && !empty($request->uploaded_image_ids)) {
+                $imageIds = explode(',', $request->uploaded_image_ids);
+                $imageIds = array_filter($imageIds);
+                
+                if (!empty($imageIds)) {
+                    // Update vehicle_id for uploaded images
+                    VehicleImage::whereIn('id', $imageIds)
+                        ->update([
+                            'vehicle_id' => $vehicle->id,
+                            'sort_order' => \DB::raw('id')
+                        ]);
+                    
+                    // Set first image as primary if none exists
+                    $hasPrimary = $vehicle->images()->where('is_primary', true)->exists();
+                    if (!$hasPrimary && count($imageIds) > 0) {
+                        VehicleImage::where('id', $imageIds[0])
+                            ->update(['is_primary' => true]);
+                    }
+                }
+            } elseif ($request->hasFile('vehicle_images')) {
+                // Fallback to old method if files are uploaded via form
                 $this->handleMultipleImageUploads($request->file('vehicle_images'), $vehicle);
             }
 
@@ -294,25 +325,47 @@ class VehicleController extends Controller
                 $data['vehicle_image_path'] = $this->uploadDocument($request->file('vehicle_image'), 'vehicle_images');
             }
 
-            if ($request->hasFile('insurance_document')) {
+            // Handle RC and Insurance documents from live upload
+            // Only update if a new document is uploaded
+            if ($request->filled('insurance_document_path') && !empty($request->insurance_document_path)) {
+                // Delete old file if exists and path is different
+                if ($vehicle->insurance_document_path && $vehicle->insurance_document_path !== $request->insurance_document_path) {
+                    Storage::disk('public')->delete($vehicle->insurance_document_path);
+                }
+                $data['insurance_document_path'] = $request->insurance_document_path;
+            } elseif ($request->hasFile('insurance_document')) {
                 // Delete old file if exists
                 if ($vehicle->insurance_document_path) {
                     Storage::disk('public')->delete($vehicle->insurance_document_path);
                 }
                 $data['insurance_document_path'] = $this->uploadDocument($request->file('insurance_document'), 'insurance');
+            } else {
+                // Keep existing document - don't update the path at all
+                unset($data['insurance_document_path']);
             }
 
-            if ($request->hasFile('rc_document')) {
+            // Handle RC documents from live upload
+            if ($request->filled('rc_document_path') && !empty($request->rc_document_path)) {
+                // Delete old file if exists and path is different
+                if ($vehicle->rc_document_path && $vehicle->rc_document_path !== $request->rc_document_path) {
+                    Storage::disk('public')->delete($vehicle->rc_document_path);
+                }
+                $data['rc_document_path'] = $request->rc_document_path;
+            } elseif ($request->hasFile('rc_document')) {
                 // Delete old file if exists
                 if ($vehicle->rc_document_path) {
                     Storage::disk('public')->delete($vehicle->rc_document_path);
                 }
                 $data['rc_document_path'] = $this->uploadDocument($request->file('rc_document'), 'rc');
+            } else {
+                // Keep existing document - don't update the path at all
+                unset($data['rc_document_path']);
             }
 
             // Set transmission type based on vehicle type
             if ($data['vehicle_type'] === 'bike_scooter') {
-                $data['transmission_type'] = $data['bike_transmission_type'] ?? null;
+                $data['transmission_type'] = $data['transmission_type']
+                    ?? ($data['bike_transmission_type'] ?? null);
             }
             
             // Handle seating capacity for heavy vehicles
@@ -323,7 +376,37 @@ class VehicleController extends Controller
 
             $vehicle->update($data);
 
-            // Handle multiple vehicle images
+            // Handle image deletions
+            if ($request->has('deleted_image_ids') && !empty($request->deleted_image_ids)) {
+                $deletedIds = explode(',', $request->deleted_image_ids);
+                foreach ($deletedIds as $imageId) {
+                    $image = VehicleImage::find($imageId);
+                    if ($image && $image->vehicle_id == $vehicle->id) {
+                        if ($image->image_path) {
+                            Storage::disk('public')->delete($image->image_path);
+                        }
+                        $image->delete();
+                    }
+                }
+            }
+
+            // Handle new uploaded images from live upload
+            if ($request->has('uploaded_image_ids') && !empty($request->uploaded_image_ids)) {
+                $uploadedIds = explode(',', $request->uploaded_image_ids);
+                foreach ($uploadedIds as $imageId) {
+                    $image = VehicleImage::find($imageId);
+                    if ($image && !$image->vehicle_id) {
+                        $image->vehicle_id = $vehicle->id;
+                        // Set as primary if no primary exists
+                        if (!$vehicle->images()->where('is_primary', true)->exists()) {
+                            $image->is_primary = true;
+                        }
+                        $image->save();
+                    }
+                }
+            }
+
+            // Handle multiple vehicle images from file input (legacy)
             if ($request->hasFile('vehicle_images')) {
                 $this->handleMultipleImageUploads($request->file('vehicle_images'), $vehicle);
             }
@@ -377,6 +460,14 @@ class VehicleController extends Controller
         }
         if ($vehicle->rc_document_path) {
             Storage::disk('public')->delete($vehicle->rc_document_path);
+        }
+
+        // Delete all vehicle images and their files
+        foreach ($vehicle->images as $image) {
+            if ($image->image_path) {
+                Storage::disk('public')->delete($image->image_path);
+            }
+            $image->delete();
         }
 
         $vehicle->delete();
@@ -534,6 +625,35 @@ class VehicleController extends Controller
     }
 
     /**
+     * View vehicle document inline (PDF/Image) in the browser
+     */
+    public function viewDocument(Vehicle $vehicle, $type)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        $business = $businessAdmin->business;
+
+        // Ensure the vehicle belongs to this business
+        if ($vehicle->business_id !== $business->id) {
+            abort(403, 'Unauthorized access to vehicle.');
+        }
+
+        $documentPath = $type === 'insurance' ? $vehicle->insurance_document_path : $vehicle->rc_document_path;
+
+        if (!$documentPath || !Storage::disk('public')->exists($documentPath)) {
+            abort(404, 'Document not found.');
+        }
+
+        $fullPath = Storage::disk('public')->path($documentPath);
+        $mime = mime_content_type($fullPath);
+
+        // Display inline
+        return response()->file($fullPath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"'
+        ]);
+    }
+
+    /**
      * Get validation rules based on vehicle type
      */
     private function getValidationRules(Request $request, $vehicleId = null)
@@ -543,6 +663,7 @@ class VehicleController extends Controller
             'vehicle_make' => 'required|string|max:100',
             'vehicle_model' => 'required|string|max:100',
             'vehicle_year' => 'required|integer|min:1900|max:' . date('Y'),
+            'vin_number' => 'required|string|max:50|unique:vehicles,vin_number,' . $vehicleId,
             'vehicle_number' => 'required|string|max:20|unique:vehicles,vehicle_number,' . $vehicleId,
             'vehicle_status' => 'required|in:active,inactive,under_maintenance',
             'fuel_type' => 'required|in:petrol,diesel,cng,electric,hybrid',
@@ -559,8 +680,11 @@ class VehicleController extends Controller
             'policy_number' => 'required|string|max:100',
             'insurance_expiry_date' => 'required|date|after_or_equal:today',
             'vehicle_image' => 'nullable|file|mimes:jpg,jpeg,png|max:5120',
+            // Multiple vehicle images (gallery)
+            'vehicle_images' => 'nullable|array',
+            'vehicle_images.*' => 'image|mimes:jpg,jpeg,png|max:5120',
+            // Allow PDF and image formats for insurance and RC documents
             'insurance_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
-            'rc_number' => 'required|string|max:100',
             'rc_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
             'last_service_date' => 'nullable|date',
             'last_service_meter_reading' => 'nullable|integer|min:0',
@@ -572,14 +696,15 @@ class VehicleController extends Controller
         // Add type-specific validation
         if ($request->vehicle_type === 'car') {
             $rules['seating_capacity'] = 'required|integer|min:1|max:50';
-            $rules['transmission_type'] = 'required|in:manual,automatic';
+            $rules['transmission_type'] = 'required|in:manual,automatic,hybrid';
         } elseif ($request->vehicle_type === 'bike_scooter') {
             $rules['engine_capacity_cc'] = 'required|integer|min:50|max:2000';
-            $rules['bike_transmission_type'] = 'required|in:gear,gearless';
+            // Accept transmission_type directly for bikes; keep legacy key for backward compatibility
+            $rules['transmission_type'] = 'required|in:gear,gearless';
         } elseif ($request->vehicle_type === 'heavy_vehicle') {
             $rules['seating_capacity_heavy'] = 'nullable|integer|min:1|max:100';
             $rules['payload_capacity_tons'] = 'nullable|numeric|min:0|max:100';
-            $rules['transmission_type'] = 'required|in:manual,automatic';
+            $rules['transmission_type'] = 'required|in:manual,automatic,hybrid';
         }
 
         return $rules;
@@ -591,7 +716,9 @@ class VehicleController extends Controller
     private function uploadDocument($file, $type)
     {
         $filename = $type . '_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('vehicle_documents', $filename, 'public');
+        // Store official documents (rc/insurance) under vehicle_documents; images under vehicle_images
+        $directory = in_array($type, ['rc', 'insurance']) ? 'vehicle_documents' : 'vehicle_images';
+        $path = $file->storeAs($directory, $filename, 'public');
         return $path;
     }
 
@@ -605,8 +732,14 @@ class VehicleController extends Controller
 
         foreach ($files as $index => $file) {
             if ($file->isValid()) {
+                // Defensive check: ensure only images are accepted here
+                $mime = $file->getMimeType();
+                if (!str_starts_with($mime, 'image/')) {
+                    // Skip non-image files (RC/PDF/etc.) from gallery upload
+                    continue;
+                }
                 $filename = 'vehicle_images_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-                $path = $file->storeAs('vehicle_documents', $filename, 'public');
+                $path = $file->storeAs('vehicle_images', $filename, 'public');
 
                 VehicleImage::create([
                     'vehicle_id' => $vehicle->id,
@@ -692,6 +825,123 @@ class VehicleController extends Controller
             return response()->json(['success' => true, 'message' => 'Primary image updated successfully']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to update primary image'], 500);
+        }
+    }
+
+    /**
+     * Upload vehicle image via AJAX (for live upload)
+     */
+    public function uploadVehicleImage(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        
+        if (!$businessAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required.'
+            ], 401);
+        }
+
+        try {
+            $request->validate([
+                'image' => 'required|image|mimes:jpg,jpeg,png|max:5120',
+            ]);
+
+            $file = $request->file('image');
+            
+            if (!$file->isValid()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid file.'
+                ], 422);
+            }
+
+            $filename = 'vehicle_images_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('vehicle_images', $filename, 'public');
+
+            // Create a temporary vehicle image record (without vehicle_id)
+            $vehicleImage = VehicleImage::create([
+                'vehicle_id' => null, // Will be linked when vehicle is created
+                'image_path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'is_primary' => false,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Image uploaded successfully.',
+                'image_id' => $vehicleImage->id,
+                'image_path' => $path,
+                'preview_url' => asset('storage/' . $path)
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while uploading image: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Upload RC or Insurance document via AJAX (for live upload)
+     */
+    public function uploadDocumentAjax(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        
+        if (!$businessAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required.'
+            ], 401);
+        }
+
+        try {
+            $request->validate([
+                'document' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'type' => 'required|in:rc,insurance',
+            ]);
+
+            $file = $request->file('document');
+            
+            if (!$file->isValid()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid file.'
+                ], 422);
+            }
+
+            $type = $request->type;
+            $filename = $type . '_' . time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            // Always store RC/Insurance under vehicle_documents
+            $path = $file->storeAs('vehicle_documents', $filename, 'public');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Document uploaded successfully.',
+                'document_path' => $path,
+                'preview_url' => asset('storage/' . $path),
+                'type' => $type
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while uploading document: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

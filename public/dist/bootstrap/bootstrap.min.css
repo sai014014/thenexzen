@@ -5358,6 +5358,7 @@ fieldset:disabled .btn {
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin:auto;
   color: var(--bs-modal-color);
   pointer-events: auto;
   background-color: var(--bs-modal-bg);

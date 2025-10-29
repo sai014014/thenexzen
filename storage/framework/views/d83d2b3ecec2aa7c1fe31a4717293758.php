@@ -1,9 +1,7 @@
-@extends('business.layouts.app')
+<?php $__env->startSection('title', 'Edit Vehicle - ' . $business->business_name); ?>
+<?php $__env->startSection('page-title', 'Edit Vehicle'); ?>
 
-@section('title', 'Edit Vehicle - ' . $business->business_name)
-@section('page-title', 'Edit Vehicle')
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
 /* Vehicle Add Page Specific Styles */
 .vehicle-add-container {
@@ -346,16 +344,16 @@
     cursor: not-allowed;
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="vehicle-add-container">
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <form method="POST" action="{{ route('business.vehicles.update', $vehicle) }}" enctype="multipart/form-data" id="vehicleForm">
-                    @csrf
-                    @method('PUT')
+                <form method="POST" action="<?php echo e(route('business.vehicles.update', $vehicle)); ?>" enctype="multipart/form-data" id="vehicleForm">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
                     
                     <!-- Error Display Section -->
                     <div id="errorDisplay" class="alert alert-danger" style="display: none;">
@@ -373,49 +371,91 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="vehicle_type" class="form-label required">Vehicle Type</label>
-                            <select class="form-select @error('vehicle_type') is-invalid @enderror" 
+                            <select class="form-select <?php $__errorArgs = ['vehicle_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="vehicle_type" 
                                     name="vehicle_type" 
                                     required>
                                 <option value="">Select Vehicle Type</option>
-                                <option value="car" {{ old('vehicle_type', $vehicle->vehicle_type) == 'car' ? 'selected' : '' }}>Car</option>
-                                <option value="bike_scooter" {{ old('vehicle_type', $vehicle->vehicle_type) == 'bike_scooter' ? 'selected' : '' }}>Bike/Scooter</option>
-                                <option value="heavy_vehicle" {{ old('vehicle_type', $vehicle->vehicle_type) == 'heavy_vehicle' ? 'selected' : '' }}>Heavy Vehicle</option>
+                                <option value="car" <?php echo e(old('vehicle_type', $vehicle->vehicle_type) == 'car' ? 'selected' : ''); ?>>Car</option>
+                                <option value="bike_scooter" <?php echo e(old('vehicle_type', $vehicle->vehicle_type) == 'bike_scooter' ? 'selected' : ''); ?>>Bike/Scooter</option>
+                                <option value="heavy_vehicle" <?php echo e(old('vehicle_type', $vehicle->vehicle_type) == 'heavy_vehicle' ? 'selected' : ''); ?>>Heavy Vehicle</option>
                             </select>
-                            @error('vehicle_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['vehicle_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
 
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="vehicle_make" class="form-label required">Vehicle Make</label>
-                            <select class="form-select @error('vehicle_make') is-invalid @enderror" 
+                            <select class="form-select <?php $__errorArgs = ['vehicle_make'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="vehicle_make" 
                                     name="vehicle_make" 
                                     required>
                                 <option value="">Select Vehicle Make</option>
                             </select>
-                            @error('vehicle_make')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['vehicle_make'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="vehicle_model" class="form-label required">Vehicle Model</label>
-                            <select class="form-select @error('vehicle_model') is-invalid @enderror" 
+                            <select class="form-select <?php $__errorArgs = ['vehicle_model'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="vehicle_model" 
                                     name="vehicle_model" 
                                     required 
                                     disabled>
                                 <option value="">Select Vehicle Model</option>
                             </select>
-                            @error('vehicle_model')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['vehicle_model'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -423,17 +463,31 @@
                                 <div class="form-group">
                                     <label for="vehicle_year" class="form-label required">Vehicle Year</label>
                                     <input type="number" 
-                                           class="form-control @error('vehicle_year') is-invalid @enderror" 
+                                           class="form-control <?php $__errorArgs = ['vehicle_year'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="vehicle_year" 
                                     name="vehicle_year" 
-                                           value="{{ old('vehicle_year', $vehicle->vehicle_year) }}" 
+                                           value="<?php echo e(old('vehicle_year', $vehicle->vehicle_year)); ?>" 
                                            min="1990" 
-                                           max="{{ date('Y') + 1 }}"
+                                           max="<?php echo e(date('Y') + 1); ?>"
                                            placeholder="Enter Year"
                                     required>
-                            @error('vehicle_year')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['vehicle_year'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
                     </div>
@@ -443,15 +497,29 @@
                                 <div class="form-group">
                                     <label for="vin_number" class="form-label required">Vehicle Identification Number (VIN/Chassis Number)</label>
                                     <input type="text" 
-                                           class="form-control @error('vin_number') is-invalid @enderror" 
+                                           class="form-control <?php $__errorArgs = ['vin_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                            id="vin_number" 
                                            name="vin_number" 
-                                           value="{{ old('vin_number', $vehicle->vin_number) }}" 
+                                           value="<?php echo e(old('vin_number', $vehicle->vin_number)); ?>" 
                                            placeholder="Enter VIN/Chassis Number"
                                            required>
-                                    @error('vin_number')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['vin_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
 
@@ -459,15 +527,29 @@
                                 <div class="form-group">
                                     <label for="vehicle_number" class="form-label required">Registration Number</label>
                             <input type="text" 
-                                   class="form-control @error('vehicle_number') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['vehicle_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="vehicle_number" 
                                    name="vehicle_number" 
-                                   value="{{ old('vehicle_number', $vehicle->vehicle_number) }}" 
+                                   value="<?php echo e(old('vehicle_number', $vehicle->vehicle_number)); ?>" 
                                            placeholder="Enter Registration Number"
                                    required>
-                            @error('vehicle_number')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['vehicle_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
                         </div>
@@ -476,53 +558,95 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="vehicle_status" class="form-label required">Vehicle Status</label>
-                            <select class="form-select @error('vehicle_status') is-invalid @enderror" 
+                            <select class="form-select <?php $__errorArgs = ['vehicle_status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="vehicle_status" 
                                     name="vehicle_status" 
                                     required>
-                                <option value="active" {{ old('vehicle_status', $vehicle->vehicle_status) == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ old('vehicle_status', $vehicle->vehicle_status) == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                <option value="under_maintenance" {{ old('vehicle_status', $vehicle->vehicle_status) == 'under_maintenance' ? 'selected' : '' }}>Under Maintenance</option>
+                                <option value="active" <?php echo e(old('vehicle_status', $vehicle->vehicle_status) == 'active' ? 'selected' : ''); ?>>Active</option>
+                                <option value="inactive" <?php echo e(old('vehicle_status', $vehicle->vehicle_status) == 'inactive' ? 'selected' : ''); ?>>Inactive</option>
+                                <option value="under_maintenance" <?php echo e(old('vehicle_status', $vehicle->vehicle_status) == 'under_maintenance' ? 'selected' : ''); ?>>Under Maintenance</option>
                             </select>
-                            @error('vehicle_status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['vehicle_status'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                         </div>
 
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="fuel_type" class="form-label required">Fuel Type</label>
-                            <select class="form-select @error('fuel_type') is-invalid @enderror" 
+                            <select class="form-select <?php $__errorArgs = ['fuel_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="fuel_type" 
                                     name="fuel_type" 
                                     required>
                                 <option value="">Select Fuel Type</option>
-                                <option value="petrol" {{ old('fuel_type', $vehicle->fuel_type) == 'petrol' ? 'selected' : '' }}>Petrol</option>
-                                <option value="diesel" {{ old('fuel_type', $vehicle->fuel_type) == 'diesel' ? 'selected' : '' }}>Diesel</option>
-                                <option value="cng" {{ old('fuel_type', $vehicle->fuel_type) == 'cng' ? 'selected' : '' }}>CNG</option>
-                                <option value="electric" {{ old('fuel_type', $vehicle->fuel_type) == 'electric' ? 'selected' : '' }}>Electric</option>
-                                <option value="hybrid" {{ old('fuel_type', $vehicle->fuel_type) == 'hybrid' ? 'selected' : '' }}>Hybrid</option>
+                                <option value="petrol" <?php echo e(old('fuel_type', $vehicle->fuel_type) == 'petrol' ? 'selected' : ''); ?>>Petrol</option>
+                                <option value="diesel" <?php echo e(old('fuel_type', $vehicle->fuel_type) == 'diesel' ? 'selected' : ''); ?>>Diesel</option>
+                                <option value="cng" <?php echo e(old('fuel_type', $vehicle->fuel_type) == 'cng' ? 'selected' : ''); ?>>CNG</option>
+                                <option value="electric" <?php echo e(old('fuel_type', $vehicle->fuel_type) == 'electric' ? 'selected' : ''); ?>>Electric</option>
+                                <option value="hybrid" <?php echo e(old('fuel_type', $vehicle->fuel_type) == 'hybrid' ? 'selected' : ''); ?>>Hybrid</option>
                             </select>
-                            @error('fuel_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['fuel_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
 
                             <div class="col-md-3" id="default-transmission-field" style="display: none;">
                                 <div class="form-group">
                                     <label for="transmission_type" class="form-label required">Transmission Type</label>
-                            <select class="form-select @error('transmission_type') is-invalid @enderror" 
+                            <select class="form-select <?php $__errorArgs = ['transmission_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="transmission_type" 
                                             name="transmission_type" 
                                             required>
                                         <option value="">Select Transmission Type</option>
                                         <!-- Options will be populated by JavaScript based on vehicle type -->
                             </select>
-                            @error('transmission_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['transmission_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -530,14 +654,28 @@
                                 <div class="form-group">
                                     <label for="mileage" class="form-label">Mileage</label>
                                     <input type="text" 
-                                   class="form-control @error('mileage') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['mileage'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="mileage" 
                                    name="mileage" 
-                                   value="{{ old('mileage', $vehicle->mileage) }}" 
+                                   value="<?php echo e(old('mileage', $vehicle->mileage)); ?>" 
                                            placeholder="">
-                            @error('mileage')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['mileage'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                         </div>
                     </div>
@@ -547,19 +685,33 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="seating_capacity" class="form-label required">Seating Capacity</label>
-                                <select class="form-select @error('seating_capacity') is-invalid @enderror" 
+                                <select class="form-select <?php $__errorArgs = ['seating_capacity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                         id="seating_capacity" 
                                        name="seating_capacity" 
                                         required>
                                     <option value="">Select Seating Capacity</option>
-                                    @for($i = 1; $i <= 20; $i++)
-                                        <option value="{{ $i }}" {{ old('seating_capacity', $vehicle->seating_capacity) == $i ? 'selected' : '' }}>{{ $i }}</option>
-                                    @endfor
+                                    <?php for($i = 1; $i <= 20; $i++): ?>
+                                        <option value="<?php echo e($i); ?>" <?php echo e(old('seating_capacity', $vehicle->seating_capacity) == $i ? 'selected' : ''); ?>><?php echo e($i); ?></option>
+                                    <?php endfor; ?>
                                 </select>
                                 <div class="helper-text">Number of seats (for cars)</div>
-                                @error('seating_capacity')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['seating_capacity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                     </div>
@@ -569,16 +721,30 @@
                             <div class="form-group">
                                 <label for="engine_capacity_cc" class="form-label required">Engine Capacity (CC)</label>
                                 <input type="number" 
-                                       class="form-control @error('engine_capacity_cc') is-invalid @enderror" 
+                                       class="form-control <?php $__errorArgs = ['engine_capacity_cc'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                        id="engine_capacity_cc" 
                                        name="engine_capacity_cc" 
-                                       value="{{ old('engine_capacity_cc', $vehicle->engine_capacity_cc) }}" 
+                                       value="<?php echo e(old('engine_capacity_cc', $vehicle->engine_capacity_cc)); ?>" 
                                        min="0"
                                        placeholder="150">
                                 <div class="helper-text">Engine cubic capacity in CC (for bikes and scooters)</div>
-                                @error('engine_capacity_cc')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['engine_capacity_cc'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                     </div>
@@ -587,35 +753,63 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="seating_capacity_heavy" class="form-label">Seating Capacity</label>
-                                <select class="form-select @error('seating_capacity_heavy') is-invalid @enderror" 
+                                <select class="form-select <?php $__errorArgs = ['seating_capacity_heavy'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                         id="seating_capacity_heavy" 
                                         name="seating_capacity_heavy">
                                     <option value="">Select Seating Capacity</option>
-                                    @for($i = 1; $i <= 100; $i++)
-                                        <option value="{{ $i }}" {{ old('seating_capacity_heavy', $vehicle->seating_capacity_heavy) == $i ? 'selected' : '' }}>{{ $i }}</option>
-                                    @endfor
+                                    <?php for($i = 1; $i <= 100; $i++): ?>
+                                        <option value="<?php echo e($i); ?>" <?php echo e(old('seating_capacity_heavy', $vehicle->seating_capacity_heavy) == $i ? 'selected' : ''); ?>><?php echo e($i); ?></option>
+                                    <?php endfor; ?>
                                 </select>
                                 <div class="helper-text">Number of seats (for heavy vehicles)</div>
-                                @error('seating_capacity_heavy')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['seating_capacity_heavy'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label for="payload_capacity_tons" class="form-label">Payload Capacity (Tons)</label>
                                 <input type="number" 
-                                       class="form-control @error('payload_capacity_tons') is-invalid @enderror" 
+                                       class="form-control <?php $__errorArgs = ['payload_capacity_tons'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                        id="payload_capacity_tons" 
                                        name="payload_capacity_tons" 
-                                       value="{{ old('payload_capacity_tons', $vehicle->payload_capacity_tons) }}" 
+                                       value="<?php echo e(old('payload_capacity_tons', $vehicle->payload_capacity_tons)); ?>" 
                                        step="0.01"
                                        min="0" 
                                        placeholder="2.5">
                                 <div class="helper-text">Weight capacity in tons (for heavy vehicles)</div>
-                                @error('payload_capacity_tons')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <?php $__errorArgs = ['payload_capacity_tons'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                     </div>
@@ -625,24 +819,24 @@
                                 <div class="form-group">
                                     <label class="form-label">Upload Vehicle Images</label>
                                     
-                                    @if(isset($vehicle->images) && $vehicle->images->count() > 0)
+                                    <?php if(isset($vehicle->images) && $vehicle->images->count() > 0): ?>
                                     <div class="existing-images mb-3">
                                         <p class="text-muted mb-2"><strong>Existing Images:</strong></p>
                                         <div class="d-flex flex-wrap gap-2">
-                                            @foreach($vehicle->images as $image)
-                                            <div class="position-relative existing-image-item" data-image-id="{{ $image->id }}" style="width: 100px; height: 100px; border: 2px solid #ced4da; border-radius: 8px; overflow: hidden;">
-                                                <img src="{{ asset('storage/' . $image->image_path) }}" alt="Vehicle Image" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='{{ asset('images/car.png') }}';">
-                                                <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: 2px; right: 2px; padding: 2px 6px; font-size: 10px;" onclick="removeExistingImage({{ $image->id }}, this)">
+                                            <?php $__currentLoopData = $vehicle->images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <div class="position-relative existing-image-item" data-image-id="<?php echo e($image->id); ?>" style="width: 100px; height: 100px; border: 2px solid #ced4da; border-radius: 8px; overflow: hidden;">
+                                                <img src="<?php echo e(asset('storage/' . $image->image_path)); ?>" alt="Vehicle Image" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='<?php echo e(asset('images/car.png')); ?>';">
+                                                <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: 2px; right: 2px; padding: 2px 6px; font-size: 10px;" onclick="removeExistingImage(<?php echo e($image->id); ?>, this)">
                                                     <i class="fas fa-times"></i>
                                                 </button>
-                                                @if($image->is_primary)
+                                                <?php if($image->is_primary): ?>
                                                 <span class="badge bg-success position-absolute" style="bottom: 2px; left: 2px; font-size: 8px;">Primary</span>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </div>
                                     </div>
-                                    @endif
+                                    <?php endif; ?>
                                     
                                     <div class="file-upload-area" onclick="document.getElementById('vehicle_images').click()">
                                         <div class="upload-icon">
@@ -651,7 +845,14 @@
                                         <p class="upload-text">Click to upload or drag and drop the file here. Supported format JPG, PNG</p>
                                     </div>
                                     <input type="file" 
-                                           class="form-control @error('vehicle_images') is-invalid @enderror" 
+                                           class="form-control <?php $__errorArgs = ['vehicle_images'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                            id="vehicle_images" 
                                            name="vehicle_images[]" 
                                            accept="image/*" 
@@ -660,9 +861,16 @@
                                     <input type="hidden" name="uploaded_image_ids" id="uploaded_image_ids" value="">
                                     <input type="hidden" name="deleted_image_ids" id="deleted_image_ids" value="">
                                     <div id="vehicleImagesContainer" class="d-flex flex-wrap gap-2 mt-2" style="display: none;"></div>
-                                    @error('vehicle_images')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['vehicle_images'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     <div class="helper-text">Upload clear, high-quality images of your vehicle from different angles</div>
                         </div>
                     </div>
@@ -678,17 +886,31 @@
                                 <div class="form-group">
                                     <label for="rental_price_24h" class="form-label required">Rental Price for 24 Hours (Base Price)</label>
                             <input type="number" 
-                                   class="form-control @error('rental_price_24h') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['rental_price_24h'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="rental_price_24h" 
                                    name="rental_price_24h" 
-                                   value="{{ old('rental_price_24h', $vehicle->rental_price_24h) }}" 
+                                   value="<?php echo e(old('rental_price_24h', $vehicle->rental_price_24h)); ?>" 
                                    step="0.01" 
                                            min="0"
                                            placeholder="Enter Amount">
                                     <div class="helper-text">The default price for renting the vehicle for a 24-hour period</div>
-                            @error('rental_price_24h')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['rental_price_24h'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -696,16 +918,30 @@
                                 <div class="form-group">
                                     <label for="km_limit_per_booking" class="form-label required">Kilometre Limit per Booking (Base Limit)</label>
                             <input type="number" 
-                                   class="form-control @error('km_limit_per_booking') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['km_limit_per_booking'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="km_limit_per_booking" 
                                    name="km_limit_per_booking" 
-                                   value="{{ old('km_limit_per_booking', $vehicle->km_limit_per_booking) }}" 
+                                   value="<?php echo e(old('km_limit_per_booking', $vehicle->km_limit_per_booking)); ?>" 
                                            min="0"
                                            placeholder="0">
                                     <div class="helper-text">The maximum number of kilometres included in the base price for a single booking (usually for 24 hours).</div>
-                            @error('km_limit_per_booking')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['km_limit_per_booking'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -715,17 +951,31 @@
                                 <div class="form-group">
                                     <label for="extra_rental_price_per_hour" class="form-label required">Extra Rental Price per Hour (if extended)</label>
                             <input type="number" 
-                                   class="form-control @error('extra_rental_price_per_hour') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['extra_rental_price_per_hour'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="extra_rental_price_per_hour" 
                                    name="extra_rental_price_per_hour" 
-                                   value="{{ old('extra_rental_price_per_hour', $vehicle->extra_rental_price_per_hour) }}" 
+                                   value="<?php echo e(old('extra_rental_price_per_hour', $vehicle->extra_rental_price_per_hour)); ?>" 
                                    step="0.01" 
                                            min="0"
                                            placeholder="Enter Amount">
                                     <div class="helper-text">The additional charge if the vehicle is kept beyond the booking period (beyond 24 hours or the specified rental time).</div>
-                            @error('extra_rental_price_per_hour')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['extra_rental_price_per_hour'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -733,17 +983,31 @@
                                 <div class="form-group">
                                     <label for="extra_price_per_km" class="form-label required">Extra Price per Kilometre (after base km limit)</label>
                             <input type="number" 
-                                   class="form-control @error('extra_price_per_km') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['extra_price_per_km'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="extra_price_per_km" 
                                    name="extra_price_per_km" 
-                                   value="{{ old('extra_price_per_km', $vehicle->extra_price_per_km) }}" 
+                                   value="<?php echo e(old('extra_price_per_km', $vehicle->extra_price_per_km)); ?>" 
                                    step="0.01" 
                                            min="0"
                                            placeholder="Enter Amount">
                                     <div class="helper-text">The additional charge if the customer drives beyond the kilometer limit set for the booking.</div>
-                            @error('extra_price_per_km')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['extra_price_per_km'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
                         </div>
@@ -757,19 +1021,33 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="ownership_type" class="form-label required">Ownership Type</label>
-                            <select class="form-select @error('ownership_type') is-invalid @enderror" 
+                            <select class="form-select <?php $__errorArgs = ['ownership_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="ownership_type" 
                                     name="ownership_type" 
                                             required
                                             onchange="toggleVendorFields()">
                                 <option value="">Select Ownership Type</option>
-                                <option value="owned" {{ old('ownership_type', $vehicle->ownership_type) == 'owned' ? 'selected' : '' }}>Owned</option>
-                                <option value="leased" {{ old('ownership_type', $vehicle->ownership_type) == 'leased' ? 'selected' : '' }}>Leased</option>
-                                <option value="vendor_provided" {{ old('ownership_type', $vehicle->ownership_type) == 'vendor_provided' ? 'selected' : '' }}>Vendor Provided</option>
+                                <option value="owned" <?php echo e(old('ownership_type', $vehicle->ownership_type) == 'owned' ? 'selected' : ''); ?>>Owned</option>
+                                <option value="leased" <?php echo e(old('ownership_type', $vehicle->ownership_type) == 'leased' ? 'selected' : ''); ?>>Leased</option>
+                                <option value="vendor_provided" <?php echo e(old('ownership_type', $vehicle->ownership_type) == 'vendor_provided' ? 'selected' : ''); ?>>Vendor Provided</option>
                             </select>
-                            @error('ownership_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['ownership_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -779,10 +1057,17 @@
                                     <div class="vendor-dropdown-container">
                                         <div class="vendor-dropdown-wrapper">
                                 <input type="text" 
-                                                   class="form-control vendor-search-input @error('vendor_name') is-invalid @enderror" 
+                                                   class="form-control vendor-search-input <?php $__errorArgs = ['vendor_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="vendor_name" 
                                    name="vendor_name" 
-                                                   value="{{ old('vendor_name', $vehicle->vendor_name) }}"
+                                                   value="<?php echo e(old('vendor_name', $vehicle->vendor_name)); ?>"
                                                    placeholder="Search and select vendor" 
                                        autocomplete="off"
                                                    readonly>
@@ -808,9 +1093,16 @@
                                         </div>
                                     </div>
                                     <div class="helper-text">Required for vendor-provided vehicles</div>
-                            @error('vendor_name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['vendor_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -820,11 +1112,18 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                             <label for="commission_type" class="form-label">Commission Type</label>
-                            <select class="form-select @error('commission_type') is-invalid @enderror" 
+                            <select class="form-select <?php $__errorArgs = ['commission_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                     id="commission_type" 
                                     name="commission_type">
                                         <option value="">Select Commission Type</option>
-                                        @php
+                                        <?php
                                             $commissionValue = '';
                                             if($vehicle->commission_type) {
                                                 if($vehicle->commission_type == 'fixed_amount' || $vehicle->commission_type == 'fixed') {
@@ -833,14 +1132,21 @@
                                                     $commissionValue = 'percentage';
                                                 }
                                             }
-                                        @endphp
-                                        <option value="fixed" {{ old('commission_type', $commissionValue) == 'fixed' ? 'selected' : '' }}>Fixed Amount</option>
-                                        <option value="percentage" {{ old('commission_type', $commissionValue) == 'percentage' ? 'selected' : '' }}>Percentage</option>
+                                        ?>
+                                        <option value="fixed" <?php echo e(old('commission_type', $commissionValue) == 'fixed' ? 'selected' : ''); ?>>Fixed Amount</option>
+                                        <option value="percentage" <?php echo e(old('commission_type', $commissionValue) == 'percentage' ? 'selected' : ''); ?>>Percentage</option>
                             </select>
                                     <div class="helper-text">Required for vendor-provided vehicles</div>
-                            @error('commission_type')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['commission_type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -848,17 +1154,31 @@
                                 <div class="form-group">
                             <label for="commission_value" class="form-label">Commission Value</label>
                             <input type="number" 
-                                   class="form-control @error('commission_value') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['commission_value'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="commission_value" 
                                    name="commission_value" 
-                                   value="{{ old('commission_value', $vehicle->commission_rate ?? $vehicle->commission_value) }}" 
+                                   value="<?php echo e(old('commission_value', $vehicle->commission_rate ?? $vehicle->commission_value)); ?>" 
                                    step="0.01" 
                                    min="0"
                                            placeholder="Enter commission value">
                                     <div class="helper-text">Commission amount (₹) or percentage (%) for vendor-provided vehicles</div>
-                            @error('commission_value')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['commission_value'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
                     </div>
@@ -873,15 +1193,29 @@
                                 <div class="form-group">
                                     <label for="insurance_provider" class="form-label required">Insurance Provider</label>
                             <input type="text" 
-                                   class="form-control @error('insurance_provider') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['insurance_provider'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="insurance_provider" 
                                    name="insurance_provider" 
-                                   value="{{ old('insurance_provider', $vehicle->insurance_provider) }}" 
+                                   value="<?php echo e(old('insurance_provider', $vehicle->insurance_provider)); ?>" 
                                            placeholder=""
                                    required>
-                            @error('insurance_provider')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['insurance_provider'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -889,15 +1223,29 @@
                                 <div class="form-group">
                                     <label for="policy_number" class="form-label required">Policy Number</label>
                             <input type="text" 
-                                   class="form-control @error('policy_number') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['policy_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="policy_number" 
                                    name="policy_number" 
-                                   value="{{ old('policy_number', $vehicle->policy_number) }}" 
+                                   value="<?php echo e(old('policy_number', $vehicle->policy_number)); ?>" 
                                            placeholder=""
                                    required>
-                            @error('policy_number')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['policy_number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -907,15 +1255,29 @@
                                 <div class="form-group">
                                     <label for="insurance_expiry_date" class="form-label required">Insurance Expiry Date</label>
                             <input type="date" 
-                                   class="form-control @error('insurance_expiry_date') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['insurance_expiry_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="insurance_expiry_date" 
                                    name="insurance_expiry_date" 
-                                   value="{{ old('insurance_expiry_date', $vehicle->insurance_expiry_date ? Carbon\Carbon::parse($vehicle->insurance_expiry_date)->format('Y-m-d') : '') }}" 
-                                   min="{{ date('Y-m-d') }}" 
+                                   value="<?php echo e(old('insurance_expiry_date', $vehicle->insurance_expiry_date ? Carbon\Carbon::parse($vehicle->insurance_expiry_date)->format('Y-m-d') : '')); ?>" 
+                                   min="<?php echo e(date('Y-m-d')); ?>" 
                                    required>
-                            @error('insurance_expiry_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['insurance_expiry_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
                     </div>
@@ -925,13 +1287,13 @@
                                 <div class="form-group">
                                     <label for="insurance_document" class="form-label required">Upload Insurance Certificate</label>
                                     
-                                    @if($vehicle->insurance_document_path)
+                                    <?php if($vehicle->insurance_document_path): ?>
                                     <div class="mb-2">
-                                        <a href="{{ route('business.vehicles.view-document', [$vehicle, 'insurance']) }}" target="_blank" class="btn btn-sm btn-info">
+                                        <a href="<?php echo e(route('business.vehicles.view-document', [$vehicle, 'insurance'])); ?>" target="_blank" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye me-1"></i>View Current Insurance Document
                                         </a>
                                     </div>
-                                    @endif
+                                    <?php endif; ?>
                                     
                                     <div class="file-upload-area" onclick="document.getElementById('insurance_document').click()">
                                         <div class="upload-icon">
@@ -940,12 +1302,19 @@
                                         <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG</p>
                                     </div>
                             <input type="file" 
-                                   class="form-control @error('insurance_document') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['insurance_document'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="insurance_document" 
                                    name="insurance_document" 
                                            accept=".pdf,.jpg,.jpeg,.png"
                                        style="display: none;">
-                                <input type="hidden" name="insurance_document_path" id="insurance_document_path" value="{{ $vehicle->insurance_document_path ?? '' }}">
+                                <input type="hidden" name="insurance_document_path" id="insurance_document_path" value="<?php echo e($vehicle->insurance_document_path ?? ''); ?>">
                                     <div id="insuranceFileName" class="mt-1 text-muted" style="font-size: 12px;"></div>
                                 <div class="upload-progress" id="insuranceProgress">
                                     <div class="progress-bar-container">
@@ -953,9 +1322,16 @@
                                     </div>
                                     <div class="progress-text"><span id="insuranceProgressText">0%</span></div>
                                 </div>
-                            @error('insurance_document')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['insurance_document'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -963,13 +1339,13 @@
                                 <div class="form-group">
                                     <label for="rc_document" class="form-label required">Upload Registration Certificate</label>
                                     
-                                    @if($vehicle->rc_document_path)
+                                    <?php if($vehicle->rc_document_path): ?>
                                     <div class="mb-2">
-                                        <a href="{{ route('business.vehicles.view-document', [$vehicle, 'rc']) }}" target="_blank" class="btn btn-sm btn-info">
+                                        <a href="<?php echo e(route('business.vehicles.view-document', [$vehicle, 'rc'])); ?>" target="_blank" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye me-1"></i>View Current RC Document
                                         </a>
                                     </div>
-                                    @endif
+                                    <?php endif; ?>
                                     
                                     <div class="file-upload-area" onclick="document.getElementById('rc_document').click()">
                                         <div class="upload-icon">
@@ -978,12 +1354,19 @@
                                         <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG</p>
                                     </div>
                             <input type="file" 
-                                   class="form-control @error('rc_document') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['rc_document'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="rc_document" 
                                    name="rc_document" 
                                            accept=".pdf,.jpg,.jpeg,.png"
                                        style="display: none;">
-                                <input type="hidden" name="rc_document_path" id="rc_document_path" value="{{ $vehicle->rc_document_path ?? '' }}">
+                                <input type="hidden" name="rc_document_path" id="rc_document_path" value="<?php echo e($vehicle->rc_document_path ?? ''); ?>">
                                     <div id="rcFileName" class="mt-1 text-muted" style="font-size: 12px;"></div>
                                 <div class="upload-progress" id="rcProgress">
                                     <div class="progress-bar-container">
@@ -991,9 +1374,16 @@
                                     </div>
                                     <div class="progress-text"><span id="rcProgressText">0%</span></div>
                                 </div>
-                            @error('rc_document')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['rc_document'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </div>
                         </div>
@@ -1008,13 +1398,27 @@
                                 <div class="form-group">
                             <label for="last_service_date" class="form-label">Last Service Date</label>
                             <input type="date" 
-                                   class="form-control @error('last_service_date') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['last_service_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="last_service_date" 
                                    name="last_service_date" 
-                                   value="{{ old('last_service_date', $vehicle->last_service_date) }}">
-                            @error('last_service_date')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                   value="<?php echo e(old('last_service_date', $vehicle->last_service_date)); ?>">
+                            <?php $__errorArgs = ['last_service_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -1022,15 +1426,29 @@
                                 <div class="form-group">
                                     <label for="last_service_meter_reading" class="form-label">Meter Reading (KMs)</label>
                             <input type="number" 
-                                   class="form-control @error('last_service_meter_reading') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['last_service_meter_reading'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="last_service_meter_reading" 
                                    name="last_service_meter_reading" 
-                                   value="{{ old('last_service_meter_reading', $vehicle->last_service_meter_reading) }}" 
+                                   value="<?php echo e(old('last_service_meter_reading', $vehicle->last_service_meter_reading)); ?>" 
                                            min="0"
                                            placeholder="0">
-                            @error('last_service_meter_reading')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['last_service_meter_reading'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -1038,13 +1456,27 @@
                                 <div class="form-group">
                             <label for="next_service_due" class="form-label">Next Service Due</label>
                             <input type="date" 
-                                   class="form-control @error('next_service_due') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['next_service_due'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="next_service_due" 
                                    name="next_service_due" 
-                                   value="{{ old('next_service_due', $vehicle->next_service_due) }}">
-                            @error('next_service_due')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                   value="<?php echo e(old('next_service_due', $vehicle->next_service_due)); ?>">
+                            <?php $__errorArgs = ['next_service_due'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                         </div>
 
@@ -1052,15 +1484,29 @@
                                 <div class="form-group">
                                     <label for="next_service_meter_reading" class="form-label">Meter Reading (KMs)</label>
                             <input type="number" 
-                                   class="form-control @error('next_service_meter_reading') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['next_service_meter_reading'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="next_service_meter_reading" 
                                    name="next_service_meter_reading" 
-                                   value="{{ old('next_service_meter_reading', $vehicle->next_service_meter_reading) }}" 
+                                   value="<?php echo e(old('next_service_meter_reading', $vehicle->next_service_meter_reading)); ?>" 
                                            min="0"
                                            placeholder="0">
-                            @error('next_service_meter_reading')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['next_service_meter_reading'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                         </div>
                     </div>
@@ -1069,14 +1515,28 @@
                         <div class="col-12">
                             <div class="form-group">
                             <label for="remarks_notes" class="form-label">Remarks/Notes</label>
-                            <textarea class="form-control @error('remarks_notes') is-invalid @enderror" 
+                            <textarea class="form-control <?php $__errorArgs = ['remarks_notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                       id="remarks_notes" 
                                       name="remarks_notes" 
                                       rows="3" 
-                                              placeholder="Input your notes">{{ old('remarks_notes') }}</textarea>
-                            @error('remarks_notes')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                              placeholder="Input your notes"><?php echo e(old('remarks_notes')); ?></textarea>
+                            <?php $__errorArgs = ['remarks_notes'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
                         </div>
@@ -1084,7 +1544,7 @@
 
                     <!-- Form Actions -->
                     <div class="d-flex justify-content-end gap-2 mb-4">
-                        <a href="{{ route('business.vehicles.index') }}" class="cancel-button">
+                        <a href="<?php echo e(route('business.vehicles.index')); ?>" class="cancel-button">
                             Cancel
                         </a>
                         <button type="submit" class="save-button">
@@ -1192,7 +1652,7 @@ function searchVendors(query) {
         return;
     }
     
-    const url = `{{ url("/business/vendors/search") }}?q=${encodeURIComponent(query)}`;
+    const url = `<?php echo e(url("/business/vendors/search")); ?>?q=${encodeURIComponent(query)}`;
     
     fetch(url, {
         method: 'GET',
@@ -1285,7 +1745,7 @@ function saveNewVendor() {
     formData.set('email_address', 'test' + timestamp + '@vendor.com');
     formData.set('pan_number', 'ABCDE' + (timestamp % 10000));
     
-    fetch('{{ url("/business/vendors") }}', {
+    fetch('<?php echo e(url("/business/vendors")); ?>', {
         method: 'POST',
         body: formData,
         headers: {
@@ -1437,7 +1897,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!data.success) throw { status: 400, data };
                 showAlert('Vehicle registered successfully! Redirecting...', 'success');
                 setTimeout(() => {
-                    window.location.href = data.redirect_url || '{{ route("business.vehicles.index") }}';
+                    window.location.href = data.redirect_url || '<?php echo e(route("business.vehicles.index")); ?>';
                 }, 2000);
                 return;
             }
@@ -1601,7 +2061,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Submit the form
             // Use quick-store endpoint expecting minimal fields
-            fetch('{{ route("business.vendors.quick-store") }}', {
+            fetch('<?php echo e(route("business.vendors.quick-store")); ?>', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -1873,7 +2333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function loadVendors() {
             renderVendorOptions(true); // Show loading state
             
-            fetch('{{ route("business.vendors.search") }}', {
+            fetch('<?php echo e(route("business.vendors.search")); ?>', {
                 method: 'GET',
             headers: {
                     'Accept': 'application/json',
@@ -1906,7 +2366,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function searchVendors(searchTerm) {
             renderVendorOptions(true); // Show loading state
             
-            fetch('{{ route("business.vendors.search") }}?search=' + encodeURIComponent(searchTerm), {
+            fetch('<?php echo e(route("business.vendors.search")); ?>?search=' + encodeURIComponent(searchTerm), {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -1955,7 +2415,7 @@ document.addEventListener('DOMContentLoaded', function() {
             commissionValueInput.disabled = true;
             commissionValueInput.placeholder = 'Loading commission details...';
             
-            fetch('{{ route("business.vendors.search") }}?search=' + encodeURIComponent(vendorName), {
+            fetch('<?php echo e(route("business.vendors.search")); ?>?search=' + encodeURIComponent(vendorName), {
             method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -2005,7 +2465,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
 
 <!-- Vendor Quick Add Modal -->
 <div class="modal fade" id="vendorQuickAddModal" tabindex="-1" aria-labelledby="vendorQuickAddModalLabel" aria-hidden="true">
@@ -2071,7 +2531,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 // Uploaded documents tracker
 let uploadedDocuments = {
@@ -2106,7 +2566,7 @@ function uploadVehicleImages(files) {
         formData.append('image', file);
             formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
             
-        fetch('{{ route("business.vehicles.upload-image") }}', {
+        fetch('<?php echo e(route("business.vehicles.upload-image")); ?>', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -2248,7 +2708,7 @@ function uploadDocument(file, type) {
         progressContainer.classList.remove('active');
     });
     
-    xhr.open('POST', '{{ route("business.vehicles.upload-document") }}');
+    xhr.open('POST', '<?php echo e(route("business.vehicles.upload-document")); ?>');
     xhr.send(formData);
 }
 
@@ -2337,7 +2797,7 @@ $(document).ready(function() {
     populateTransmissionOptions();
     
     // Set commission type on page load
-    const commissionValue = '{{ $commissionValue ?? "" }}';
+    const commissionValue = '<?php echo e($commissionValue ?? ""); ?>';
     if (commissionValue) {
         $('#commission_type').val(commissionValue);
         // Update custom dropdown display
@@ -2361,7 +2821,7 @@ $(document).ready(function() {
         const mainTransmission = $('#transmission_type');
         
         // Store current value before clearing
-        const currentValue = mainTransmission.val() || '{{ $vehicle->transmission_type ?? "" }}';
+        const currentValue = mainTransmission.val() || '<?php echo e($vehicle->transmission_type ?? ""); ?>';
         
         // Clear existing options
         mainTransmission.empty().append('<option value="">Select Transmission Type</option>');
@@ -2404,7 +2864,7 @@ $(document).ready(function() {
         $('#vehicle_model').empty().append('<option value="">Select Vehicle Model</option>').prop('disabled', true);
 
         $.ajax({
-            url: '{{ route('business.api.vehicle-makes') }}',
+            url: '<?php echo e(route('business.api.vehicle-makes')); ?>',
             method: 'GET',
             data: { type: currentVehicleType },
             success: function(response) {
@@ -2416,7 +2876,7 @@ $(document).ready(function() {
                 });
                 
                 // Set the current vehicle's make if available
-                const currentMake = '{{ $vehicle->vehicle_make ?? "" }}';
+                const currentMake = '<?php echo e($vehicle->vehicle_make ?? ""); ?>';
                 if (currentMake) {
                     $('#vehicle_make').val(currentMake).trigger('change');
                 }
@@ -2441,7 +2901,7 @@ $(document).ready(function() {
         $('#vehicle_model').prop('disabled', false);
 
         $.ajax({
-            url: '{{ route('business.api.vehicle-models') }}',
+            url: '<?php echo e(route('business.api.vehicle-models')); ?>',
             method: 'GET',
             data: { make_name: makeName },
             success: function(response) {
@@ -2453,7 +2913,7 @@ $(document).ready(function() {
                 });
                 
                 // Set the current vehicle's model if available
-                const currentModel = '{{ $vehicle->vehicle_model ?? "" }}';
+                const currentModel = '<?php echo e($vehicle->vehicle_model ?? ""); ?>';
                 if (currentModel) {
                     $('#vehicle_model').val(currentModel);
                 }
@@ -2475,4 +2935,5 @@ $(document).ready(function() {
     }
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('business.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/business/vehicles/edit.blade.php ENDPATH**/ ?>

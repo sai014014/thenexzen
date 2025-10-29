@@ -1,9 +1,7 @@
-@extends('business.layouts.app')
+<?php $__env->startSection('title', 'Vehicle Details - ' . $vehicle->vehicle_make . ' ' . $vehicle->vehicle_model); ?>
+<?php $__env->startSection('page-title', 'Vehicle Details'); ?>
 
-@section('title', 'Vehicle Details - ' . $vehicle->vehicle_make . ' ' . $vehicle->vehicle_model)
-@section('page-title', 'Vehicle Details')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <!-- Vehicle Card Section -->
     <div class="row mb-4">
@@ -15,9 +13,9 @@
                 <div>
                             <div class="d-flex align-items-center mb-1">
                                 <div class="status-dot bg-success me-2"></div>
-                                <span class="text-muted small">{{ $vehicle->vehicle_make }}</span>
+                                <span class="text-muted small"><?php echo e($vehicle->vehicle_make); ?></span>
                 </div>
-                            <h2 class="mb-0 fw-bold">{{ $vehicle->vehicle_model }}</h2>
+                            <h2 class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_model); ?></h2>
             </div>
                             </div>
                     
@@ -29,18 +27,18 @@
                             <div class="dropdown custom-status-dropdown">
                                 <button class="btn btn-outline-secondary dropdown-toggle status-dropdown-btn" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="true">
                                     <span class="status-display-text">
-                                        @if($vehicle->vehicle_status === 'active')
+                                        <?php if($vehicle->vehicle_status === 'active'): ?>
                                             <i class="fas fa-check-circle text-success me-1"></i>Active
-                                        @elseif($vehicle->vehicle_status === 'inactive')
+                                        <?php elseif($vehicle->vehicle_status === 'inactive'): ?>
                                             <i class="fas fa-times-circle text-danger me-1"></i>Inactive
-                                         @if($vehicle->unavailable_until)
-                                                <span class="text-muted ms-2">Until: {{ \Carbon\Carbon::parse($vehicle->unavailable_until)->format('M d, Y') }}</span>
-                                         @endif
-                                        @elseif($vehicle->vehicle_status === 'under_maintenance')
+                                         <?php if($vehicle->unavailable_until): ?>
+                                                <span class="text-muted ms-2">Until: <?php echo e(\Carbon\Carbon::parse($vehicle->unavailable_until)->format('M d, Y')); ?></span>
+                                         <?php endif; ?>
+                                        <?php elseif($vehicle->vehicle_status === 'under_maintenance'): ?>
                                             <i class="fas fa-tools text-warning me-1"></i>Under Maintenance
-                                        @else
+                                        <?php else: ?>
                                             <i class="fas fa-question-circle text-secondary me-1"></i>Unknown
-                                 @endif
+                                 <?php endif; ?>
                                     </span>
                                     <i class="fas fa-chevron-down ms-2 chevron-icon"></i>
                                 </button>
@@ -71,7 +69,7 @@
                                             <div id="inactiveOptions" class="mt-3" style="display: none;">
                                                 <div class="mb-3">
                                                     <label class="form-label small">Set until date</label>
-                                                    <input type="date" class="form-control form-control-sm" id="inactiveUntilDate" min="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                                    <input type="date" class="form-control form-control-sm" id="inactiveUntilDate" min="<?php echo e(date('Y-m-d', strtotime('+1 day'))); ?>">
                         </div>
 
                                                 <div class="form-check mb-3">
@@ -107,13 +105,13 @@
                     </div>
 
                             
-                            <a href="{{ route('business.vehicles.edit', $vehicle) }}" class="btn btn-link text-primary text-decoration-none px-2">
+                            <a href="<?php echo e(route('business.vehicles.edit', $vehicle)); ?>" class="btn btn-link text-primary text-decoration-none px-2">
                                 Modify
                             </a>
-                            <button class="btn btn-link text-danger text-decoration-none px-2" onclick="confirmDelete({{ $vehicle->id }})">
+                            <button class="btn btn-link text-danger text-decoration-none px-2" onclick="confirmDelete(<?php echo e($vehicle->id); ?>)">
                                 Delete
                             </button>
-                            <a href="{{ route('business.bookings.create', ['vehicle_id' => $vehicle->id]) }}" class="btn btn-primary px-4 py-2 rounded">
+                            <a href="<?php echo e(route('business.bookings.create', ['vehicle_id' => $vehicle->id])); ?>" class="btn btn-primary px-4 py-2 rounded">
                                 Book
                             </a>
                         </div>
@@ -132,65 +130,65 @@
                    
             </div>
                 <div class="card-body p-0">
-                    @if($vehicle->images && $vehicle->images->count() > 0)
+                    <?php if($vehicle->images && $vehicle->images->count() > 0): ?>
                         <div class="row g-0">
                             <div class="col-8">
                                 <div class="main-image-container" style="height: 400px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
-                                    @php
+                                    <?php
                                         $primaryImage = $vehicle->primaryImage ?? $vehicle->firstImage;
-                                    @endphp
-                                    @if($primaryImage)
-                                        <img src="{{ asset('storage/' . $primaryImage->image_path) }}" 
-                                             alt="{{ $vehicle->vehicle_make }} {{ $vehicle->vehicle_model }}" 
+                                    ?>
+                                    <?php if($primaryImage): ?>
+                                        <img src="<?php echo e(asset('storage/' . $primaryImage->image_path)); ?>" 
+                                             alt="<?php echo e($vehicle->vehicle_make); ?> <?php echo e($vehicle->vehicle_model); ?>" 
                                              class="img-fluid" 
                                              style="max-height: 100%; max-width: 100%; object-fit: cover;"
                                              id="mainImage">
-                                    @else
+                                    <?php else: ?>
                                         <div class="text-center text-muted">
-                                            <i class="fas fa-{{ $vehicle->vehicle_type === 'car' ? 'car' : ($vehicle->vehicle_type === 'bike_scooter' ? 'motorcycle' : 'truck') }} fa-5x mb-3"></i>
+                                            <i class="fas fa-<?php echo e($vehicle->vehicle_type === 'car' ? 'car' : ($vehicle->vehicle_type === 'bike_scooter' ? 'motorcycle' : 'truck')); ?> fa-5x mb-3"></i>
                                             <p>No Image Available</p>
                     </div>
-                    @endif
+                    <?php endif; ?>
                     </div>
                         </div>
                             <div class="col-4">
                                 <div class="thumbnail-container p-3" style="height: 400px; overflow-y: auto;">
-                                    @foreach($vehicle->images as $index => $image)
-                                        @php
+                                    <?php $__currentLoopData = $vehicle->images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
                                             $isImage = str_starts_with($image->mime_type ?? '', 'image/');
-                                        @endphp
-                                        <div class="thumbnail-item mb-2 {{ $index === 0 ? 'active' : '' }}" 
-                                             @if($isImage)
-                                                 onclick="changeMainImage(this, '{{ asset('storage/' . $image->image_path) }}')"
-                                                 data-image-src="{{ asset('storage/' . $image->image_path) }}"
-                                             @endif>
-                                            @if($isImage)
-                                                <img src="{{ asset('storage/' . $image->image_path) }}" 
-                                                     alt="Thumbnail {{ $index + 1 }}" 
+                                        ?>
+                                        <div class="thumbnail-item mb-2 <?php echo e($index === 0 ? 'active' : ''); ?>" 
+                                             <?php if($isImage): ?>
+                                                 onclick="changeMainImage(this, '<?php echo e(asset('storage/' . $image->image_path)); ?>')"
+                                                 data-image-src="<?php echo e(asset('storage/' . $image->image_path)); ?>"
+                                             <?php endif; ?>>
+                                            <?php if($isImage): ?>
+                                                <img src="<?php echo e(asset('storage/' . $image->image_path)); ?>" 
+                                                     alt="Thumbnail <?php echo e($index + 1); ?>" 
                                                      class="img-fluid rounded" 
-                                                     style="width: 100%; height: 60px; object-fit: cover; border: 2px solid {{ $index === 0 ? '#6f42c1' : 'transparent' }};">
-                                            @else
+                                                     style="width: 100%; height: 60px; object-fit: cover; border: 2px solid <?php echo e($index === 0 ? '#6f42c1' : 'transparent'); ?>;">
+                                            <?php else: ?>
                                                 <div class="d-flex align-items-center justify-content-center border rounded" style="width: 100%; height: 60px;">
                                                     <i class="fas fa-file text-muted me-2"></i>
                                                     <small class="text-muted">File</small>
                                                 </div>
-                                            @endif
-                                            @if($image->is_primary)
+                                            <?php endif; ?>
+                                            <?php if($image->is_primary): ?>
                                                 <div class="position-absolute top-0 start-0">
                                                     <span class="badge bg-success" style="font-size: 0.7em;">Primary</span>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
                             </div>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="text-center text-muted p-5">
-                            <i class="fas fa-{{ $vehicle->vehicle_type === 'car' ? 'car' : ($vehicle->vehicle_type === 'bike_scooter' ? 'motorcycle' : 'truck') }} fa-5x mb-3"></i>
+                            <i class="fas fa-<?php echo e($vehicle->vehicle_type === 'car' ? 'car' : ($vehicle->vehicle_type === 'bike_scooter' ? 'motorcycle' : 'truck')); ?> fa-5x mb-3"></i>
                             <p>No Images Available</p>
         </div>
-        @endif
+        <?php endif; ?>
             </div>
         </div>
 
@@ -207,34 +205,34 @@
                         <!-- Insurance Document -->
                         <div class="col-6 col-md-4 mb-3 text-center">
                             <div class="document-item">
-                                @if($vehicle->insurance_document_path)
-                                    <a href="{{ route('business.vehicles.view-document', ['vehicle' => $vehicle->id, 'type' => 'insurance']) }}" target="_blank" class="text-decoration-none">
+                                <?php if($vehicle->insurance_document_path): ?>
+                                    <a href="<?php echo e(route('business.vehicles.view-document', ['vehicle' => $vehicle->id, 'type' => 'insurance'])); ?>" target="_blank" class="text-decoration-none">
                                         <i class="fas fa-file-pdf fa-3x text-danger mb-2"></i>
                                         <p class="mb-0 small text-primary">Insurance</p>
                                         <small class="text-muted">Click to view</small>
                                     </a>
-                                @else
+                                <?php else: ?>
                                     <i class="fas fa-file-pdf fa-3x text-muted mb-2"></i>
                                     <p class="mb-0 small text-muted">Insurance</p>
                                     <small class="text-muted">Not uploaded</small>
-                                @endif
+                                <?php endif; ?>
                     </div>
                     </div>
                         
                         <!-- RC Document -->
                         <div class="col-6 col-md-4 mb-3 text-center">
                             <div class="document-item">
-                                @if($vehicle->rc_document_path)
-                                    <a href="{{ route('business.vehicles.view-document', ['vehicle' => $vehicle->id, 'type' => 'rc']) }}" target="_blank" class="text-decoration-none">
+                                <?php if($vehicle->rc_document_path): ?>
+                                    <a href="<?php echo e(route('business.vehicles.view-document', ['vehicle' => $vehicle->id, 'type' => 'rc'])); ?>" target="_blank" class="text-decoration-none">
                                         <i class="fas fa-file-image fa-3x text-success mb-2"></i>
                                         <p class="mb-0 small text-primary">RC Document</p>
                                         <small class="text-muted">Click to view</small>
                                     </a>
-                                @else
+                                <?php else: ?>
                                     <i class="fas fa-file-image fa-3x text-muted mb-2"></i>
                                     <p class="mb-0 small text-muted">RC Document</p>
                                     <small class="text-muted">Not uploaded</small>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 </div>
 
@@ -263,72 +261,72 @@
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Vehicle Type</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->vehicle_type_display }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_type_display); ?></p>
                     </div>
                     </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Vehicle Make</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->vehicle_make }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_make); ?></p>
                     </div>
                 </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Vehicle Model</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->vehicle_model }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_model); ?></p>
                     </div>
                 </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Vehicle Year</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->vehicle_year }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_year); ?></p>
                     </div>
                     </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">VIN / Chasis Number</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->vin_number ?? 'N/A' }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vin_number ?? 'N/A'); ?></p>
                 </div>
             </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Vehicle Number</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->vehicle_number }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vehicle_number); ?></p>
         </div>
             </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Vehicle Status</label>
                                 <div class="mb-0">
-                                    <span class="badge bg-{{ $vehicle->status_badge_class }}">{{ $vehicle->status_display }}</span>
-                                    @if($vehicle->vehicle_status === 'inactive' && $vehicle->unavailable_until)
-                                        <br><small class="text-muted mt-1 d-block">Inactive Until: {{ \Carbon\Carbon::parse($vehicle->unavailable_until)->format('M d, Y') }}</small>
-                    @endif
+                                    <span class="badge bg-<?php echo e($vehicle->status_badge_class); ?>"><?php echo e($vehicle->status_display); ?></span>
+                                    <?php if($vehicle->vehicle_status === 'inactive' && $vehicle->unavailable_until): ?>
+                                        <br><small class="text-muted mt-1 d-block">Inactive Until: <?php echo e(\Carbon\Carbon::parse($vehicle->unavailable_until)->format('M d, Y')); ?></small>
+                    <?php endif; ?>
                     </div>
                     </div>
                     </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Fuel Type</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->fuel_type_display }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->fuel_type_display); ?></p>
                 </div>
             </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Transmission Type</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->transmission_type_display }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->transmission_type_display); ?></p>
         </div>
             </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Seating Capacity</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->seating_capacity ?? 'N/A' }} Seats</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->seating_capacity ?? 'N/A'); ?> Seats</p>
             </div>
         </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Mileage</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->mileage ?? 'N/A' }} KM/HR</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->mileage ?? 'N/A'); ?> KM/HR</p>
             </div>
         </div>
                 </div>
@@ -347,7 +345,7 @@
                                 <label class="form-label small text-muted mb-1">
                                     <i class="fas fa-info-circle me-1"></i>Rental Price for 24 hrs
                          </label>
-                                <p class="mb-0 fw-bold text-primary">₹{{ number_format($vehicle->rental_price_24h ?? 0, 2) }}</p>
+                                <p class="mb-0 fw-bold text-primary">₹<?php echo e(number_format($vehicle->rental_price_24h ?? 0, 2)); ?></p>
                      </div>
                      </div>
                         <div class="col-6 mb-3">
@@ -355,7 +353,7 @@
                                 <label class="form-label small text-muted mb-1">
                                     <i class="fas fa-info-circle me-1"></i>Kilometer Limit per Booking
                                 </label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->km_limit_per_booking ?? 'N/A' }}KM</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->km_limit_per_booking ?? 'N/A'); ?>KM</p>
                  </div>
                                 </div>
                         <div class="col-6 mb-3">
@@ -363,7 +361,7 @@
                                 <label class="form-label small text-muted mb-1">
                                     <i class="fas fa-info-circle me-1"></i>Extra Rental Price per Hour
                                 </label>
-                                <p class="mb-0 fw-bold">₹{{ number_format($vehicle->extra_rental_price_per_hour ?? 0, 2) }}</p>
+                                <p class="mb-0 fw-bold">₹<?php echo e(number_format($vehicle->extra_rental_price_per_hour ?? 0, 2)); ?></p>
                             </div>
                 </div>
                         <div class="col-6 mb-3">
@@ -371,7 +369,7 @@
                                 <label class="form-label small text-muted mb-1">
                                     <i class="fas fa-info-circle me-1"></i>Extra Price per Kilometre
                                 </label>
-                                <p class="mb-0 fw-bold">₹{{ number_format($vehicle->extra_price_per_km ?? 0, 2) }}</p>
+                                <p class="mb-0 fw-bold">₹<?php echo e(number_format($vehicle->extra_price_per_km ?? 0, 2)); ?></p>
                     </div>
                     </div>
             </div>
@@ -388,29 +386,30 @@
                     <div class="col-6 mb-3">
                         <div class="info-item">
                             <label class="form-label small text-muted mb-1">Insurance Provider</label>
-                            <p class="mb-0 fw-bold">{{ $vehicle->insurance_provider ?? 'N/A' }}</p>
+                            <p class="mb-0 fw-bold"><?php echo e($vehicle->insurance_provider ?? 'N/A'); ?></p>
                         </div>
                     </div>
                     <div class="col-6 mb-3">
                         <div class="info-item">
                             <label class="form-label small text-muted mb-1">Policy Number</label>
-                            <p class="mb-0 fw-bold">{{ $vehicle->policy_number ?? 'N/A' }}</p>
+                            <p class="mb-0 fw-bold"><?php echo e($vehicle->policy_number ?? 'N/A'); ?></p>
                         </div>
                     </div>
                     <div class="col-6 mb-3">
                         <div class="info-item">
                             <label class="form-label small text-muted mb-1">Expiry Date</label>
                             <div class="mb-0 fw-bold">
-                                @if($vehicle->insurance_expiry_date)
-                                    {{ $vehicle->insurance_expiry_date->format('d/m/Y') }}
-                                    @if($vehicle->insurance_expiry_date->isPast())
+                                <?php if($vehicle->insurance_expiry_date): ?>
+                                    <?php echo e($vehicle->insurance_expiry_date->format('d/m/Y')); ?>
+
+                                    <?php if($vehicle->insurance_expiry_date->isPast()): ?>
                                         <span class="badge bg-danger ms-2">Expired</span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="badge bg-success ms-2">Valid</span>
-                                    @endif
-                                @else
+                                    <?php endif; ?>
+                                <?php else: ?>
                                     N/A
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -430,71 +429,72 @@
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Ownership Type</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->ownership_type_display }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->ownership_type_display); ?></p>
                     </div>
                 </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Vendor Name</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->vendor_name ?? 'N/A' }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->vendor_name ?? 'N/A'); ?></p>
             </div>
         </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Last Service Date</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->last_service_date ? $vehicle->last_service_date->format('d/m/Y') : 'N/A' }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->last_service_date ? $vehicle->last_service_date->format('d/m/Y') : 'N/A'); ?></p>
                             </div>
                 </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Meter Reading at Service Time</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->last_service_meter_reading ? number_format($vehicle->last_service_meter_reading) . ' Kilometers' : 'N/A' }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->last_service_meter_reading ? number_format($vehicle->last_service_meter_reading) . ' Kilometers' : 'N/A'); ?></p>
                     </div>
                     </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Next Service Date</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->next_service_due ? $vehicle->next_service_due->format('d/m/Y') : 'N/A' }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->next_service_due ? $vehicle->next_service_due->format('d/m/Y') : 'N/A'); ?></p>
             </div>
         </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Meter Reading for Next Service</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->next_service_meter_reading ? number_format($vehicle->next_service_meter_reading) . ' Kilometers' : 'N/A' }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->next_service_meter_reading ? number_format($vehicle->next_service_meter_reading) . ' Kilometers' : 'N/A'); ?></p>
             </div>
                     </div>
-                        @if($vehicle->ownership_type === 'vendor_provided')
+                        <?php if($vehicle->ownership_type === 'vendor_provided'): ?>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Commission Type</label>
-                                <p class="mb-0 fw-bold">{{ $vehicle->commission_type ? ucfirst(str_replace('_', ' ', $vehicle->commission_type)) : 'N/A' }}</p>
+                                <p class="mb-0 fw-bold"><?php echo e($vehicle->commission_type ? ucfirst(str_replace('_', ' ', $vehicle->commission_type)) : 'N/A'); ?></p>
                             </div>
                         </div>
                         <div class="col-6 mb-3">
                             <div class="info-item">
                                 <label class="form-label small text-muted mb-1">Commission Value</label>
                                 <p class="mb-0 fw-bold">
-                                    @if($vehicle->commission_type === 'percentage' && $vehicle->commission_value !== null)
-                                        {{ rtrim(rtrim(number_format($vehicle->commission_value, 2), '0'), '.') }}%
-                                    @elseif($vehicle->commission_type === 'fixed' && $vehicle->commission_value !== null)
-                                        ₹{{ number_format($vehicle->commission_value, 2) }}
-                                    @else
+                                    <?php if($vehicle->commission_type === 'percentage' && $vehicle->commission_value !== null): ?>
+                                        <?php echo e(rtrim(rtrim(number_format($vehicle->commission_value, 2), '0'), '.')); ?>%
+                                    <?php elseif($vehicle->commission_type === 'fixed' && $vehicle->commission_value !== null): ?>
+                                        ₹<?php echo e(number_format($vehicle->commission_value, 2)); ?>
+
+                                    <?php else: ?>
                                         N/A
-                                    @endif
+                                    <?php endif; ?>
                                 </p>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                 </div>
 
-                    @if($vehicle->remarks_notes)
+                    <?php if($vehicle->remarks_notes): ?>
                     <div class="mt-3">
                         <label class="form-label small text-muted mb-1">Remarks / Notes</label>
                         <div class="border rounded p-3 bg-light">
-                            <p class="mb-0">{{ $vehicle->remarks_notes }}</p>
+                            <p class="mb-0"><?php echo e($vehicle->remarks_notes); ?></p>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -937,8 +937,8 @@
                     <i class="fas fa-times me-2"></i>Cancel
                 </button>
                 <form id="deleteForm" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="btn btn-danger">
                         <i class="fas fa-trash me-2"></i>Delete Vehicle
                     </button>
@@ -1069,7 +1069,7 @@ function updateStatus(status, additionalData = null) {
     
     console.log('Sending status update:', requestBody);
     
-    fetch(`{{ route('business.vehicles.toggle-availability', $vehicle) }}`, {
+    fetch(`<?php echo e(route('business.vehicles.toggle-availability', $vehicle)); ?>`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -1189,7 +1189,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function confirmDelete(vehicleId) {
     const form = document.getElementById('deleteForm');
     // Use Laravel route helper to generate correct URL
-    form.action = '{{ route("business.vehicles.destroy", ":id") }}'.replace(':id', vehicleId);
+    form.action = '<?php echo e(route("business.vehicles.destroy", ":id")); ?>'.replace(':id', vehicleId);
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
 }
@@ -1222,4 +1222,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('business.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp 8.2\htdocs\nexzen\resources\views/business/vehicles/show.blade.php ENDPATH**/ ?>

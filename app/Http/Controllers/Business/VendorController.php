@@ -153,7 +153,7 @@ class VendorController extends Controller
             $validatedData['business_id'] = $business->id;
             $vendor = Vendor::create($validatedData);
 
-            if ($request->ajax()) {
+            if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Vendor registered successfully!',
@@ -163,7 +163,9 @@ class VendorController extends Controller
                         'mobile_number' => $vendor->mobile_number,
                         'vendor_type' => $vendor->vendor_type,
                         'gstin' => $vendor->gstin,
-                        'pan_number' => $vendor->pan_number
+                        'pan_number' => $vendor->pan_number,
+                        'commission_type' => $vendor->commission_type,
+                        'commission_rate' => $vendor->commission_rate
                     ]
                 ]);
             }
@@ -171,7 +173,7 @@ class VendorController extends Controller
             return redirect()->route('business.vendors.show', $vendor)
                 ->with('success', 'Vendor registered successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            if ($request->ajax()) {
+            if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Validation failed',
@@ -182,7 +184,7 @@ class VendorController extends Controller
                 ->withErrors($e->errors())
                 ->withInput();
         } catch (\Exception $e) {
-            if ($request->ajax()) {
+            if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'An error occurred while registering the vendor: ' . $e->getMessage()
@@ -191,6 +193,71 @@ class VendorController extends Controller
             return redirect()->back()
                 ->with('error', 'An error occurred while registering the vendor. Please try again.')
                 ->withInput();
+        }
+    }
+
+    /**
+     * Quick store a vendor with minimal fields for the vehicle quick-add flow.
+     */
+    public function quickStore(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        
+        if (!$businessAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required.'
+            ], 401);
+        }
+        
+        $business = $businessAdmin->business;
+        
+        try {
+            $validated = $request->validate([
+                'vendor_name' => 'required|string|max:255',
+                'mobile_number' => 'required|string|max:15', // quick-add: allow existing numbers
+                'office_address' => 'required|string',
+                'commission_type' => 'required|in:fixed_amount,percentage_of_revenue',
+                'commission_rate' => 'required|numeric|min:0',
+            ]);
+            
+            // Defaults for required columns not provided by quick-add
+            $defaults = [
+                'vendor_type' => 'vehicle_provider',
+                'primary_contact_person' => $validated['vendor_name'],
+                'email_address' => $request->input('email_address') ?: ('vendor+' . now()->timestamp . '@temp.local'),
+                'pan_number' => $request->input('pan_number') ?: ('TEMP' . strtoupper(substr(md5(uniqid('', true)), 0, 6))),
+                'payout_method' => 'other',
+                'other_payout_method' => 'Quick Add',
+                'status' => 'active',
+            ];
+            
+            $data = array_merge($validated, $defaults);
+            $data['business_id'] = $business->id;
+            
+            $vendor = Vendor::create($data);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Vendor added successfully',
+                'vendor' => [
+                    'id' => $vendor->id,
+                    'vendor_name' => $vendor->vendor_name,
+                    'commission_type' => $vendor->commission_type,
+                    'commission_rate' => $vendor->commission_rate,
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to add vendor: ' . $e->getMessage(),
+            ], 500);
         }
     }
 

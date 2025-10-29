@@ -172,6 +172,7 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::resource('vehicles', \App\Http\Controllers\Business\VehicleController::class);
         Route::post('/vehicles/{vehicle}/toggle-availability', [\App\Http\Controllers\Business\VehicleController::class, 'toggleAvailability'])->name('vehicles.toggle-availability');
         Route::get('/vehicles/{vehicle}/download/{type}', [\App\Http\Controllers\Business\VehicleController::class, 'downloadDocument'])->name('vehicles.download-document');
+        Route::get('/vehicles/{vehicle}/view/{type}', [\App\Http\Controllers\Business\VehicleController::class, 'viewDocument'])->name('vehicles.view-document');
         
         // Vehicle Creation Routes with Capacity Check
         Route::middleware('check.vehicle.capacity')->group(function () {
@@ -182,6 +183,10 @@ Route::prefix('business')->name('business.')->group(function () {
         // Vehicle Image Management Routes
         Route::delete('/vehicles/{vehicleId}/images/{imageId}', [\App\Http\Controllers\Business\VehicleController::class, 'deleteImage'])->name('vehicles.images.delete');
         Route::post('/vehicles/{vehicleId}/images/{imageId}/set-primary', [\App\Http\Controllers\Business\VehicleController::class, 'setPrimaryImage'])->name('vehicles.images.set-primary');
+        
+        // Vehicle Upload Routes (for live uploads)
+        Route::post('/vehicles/upload-image', [\App\Http\Controllers\Business\VehicleController::class, 'uploadVehicleImage'])->name('vehicles.upload-image');
+        Route::post('/vehicles/upload-document', [\App\Http\Controllers\Business\VehicleController::class, 'uploadDocumentAjax'])->name('vehicles.upload-document');
         
         // Notifications Management Routes
         Route::resource('notifications', \App\Http\Controllers\Business\NotificationsController::class);
@@ -200,6 +205,8 @@ Route::prefix('business')->name('business.')->group(function () {
         
         // Vendor Management Routes
         Route::get('/vendors/search', [\App\Http\Controllers\Business\VendorController::class, 'search'])->name('vendors.search');
+        // Quick add vendor (minimal fields) - JSON endpoint
+        Route::post('/vendors/quick-add', [\App\Http\Controllers\Business\VendorController::class, 'quickStore'])->name('vendors.quick-store');
         Route::resource('vendors', \App\Http\Controllers\Business\VendorController::class);
         Route::get('/vendors/{vendor}/download/{type}', [\App\Http\Controllers\Business\VendorController::class, 'downloadDocument'])->name('vendors.download-document');
         

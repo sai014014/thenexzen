@@ -253,10 +253,17 @@
                             <a href="{{ route('business.vendors.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Back to Vendor List
                             </a>
-                            <div>
+                            <div class="d-flex gap-2">
                                 <a href="{{ route('business.vendors.edit', $vendor) }}" class="btn btn-warning">
                                     <i class="fas fa-edit me-2"></i>Edit Vendor
                                 </a>
+                                <form id="delete-vendor-form" action="{{ route('business.vendors.destroy', $vendor) }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                        <i class="fas fa-trash me-2"></i>Delete Vendor
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -266,4 +273,14 @@
     </div>
 </div>
 </div>
+
+@push('scripts')
+<script>
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete this vendor? This action cannot be undone.')) {
+        document.getElementById('delete-vendor-form').submit();
+    }
+}
+</script>
+@endpush
 @endsection

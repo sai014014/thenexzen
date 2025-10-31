@@ -87,7 +87,26 @@ class ReportsController extends Controller
             return $this->exportCustomerReport($customerData);
         }
 
-        return view('business.reports.customer', compact('customerData'));
+        // AJAX live filtering support
+        if ($request->ajax()) {
+            $tbodyHtml = view('business.reports.partials.customer_table_rows', [
+                'customerData' => $customerData,
+            ])->render();
+
+            $totalRevenue = number_format($customerData->sum('net_bill'), 2);
+            $count = $customerData->count();
+
+            return response()->json([
+                'tbody' => $tbodyHtml,
+                'count' => $count,
+                'totalRevenue' => $totalRevenue,
+            ]);
+        }
+
+        return view('business.reports.customer', [
+            'customerData' => $customerData,
+            'business' => $business,
+        ]);
     }
 
     /**
@@ -149,7 +168,28 @@ class ReportsController extends Controller
             return $this->exportVehicleReport($vehicleData);
         }
 
-        return view('business.reports.vehicle', compact('vehicleData'));
+        // AJAX live filtering support
+        if ($request->ajax()) {
+            $tbodyHtml = view('business.reports.partials.vehicle_table_rows', [
+                'vehicleData' => $vehicleData,
+            ])->render();
+
+            $totals = [
+                'count' => $vehicleData->count(),
+                'totalRevenue' => number_format($vehicleData->sum('net_revenue'), 2),
+            ];
+
+            return response()->json([
+                'tbody' => $tbodyHtml,
+                'count' => $totals['count'],
+                'totalRevenue' => $totals['totalRevenue'],
+            ]);
+        }
+
+        return view('business.reports.vehicle', [
+            'vehicleData' => $vehicleData,
+            'business' => $business,
+        ]);
     }
 
     /**
@@ -227,7 +267,30 @@ class ReportsController extends Controller
             return $this->exportVendorReport($vendorData);
         }
 
-        return view('business.reports.vendor', compact('vendorData'));
+        // AJAX live filtering support
+        if ($request->ajax()) {
+            $tbodyHtml = view('business.reports.partials.vendor_table_rows', [
+                'vendorData' => $vendorData,
+            ])->render();
+
+            $totals = [
+                'count' => $vendorData->count(),
+                'totalRevenue' => number_format($vendorData->sum('net_revenue'), 2),
+                'totalCommission' => number_format($vendorData->sum('total_commission'), 2),
+            ];
+
+            return response()->json([
+                'tbody' => $tbodyHtml,
+                'count' => $totals['count'],
+                'totalRevenue' => $totals['totalRevenue'],
+                'totalCommission' => $totals['totalCommission'],
+            ]);
+        }
+
+        return view('business.reports.vendor', [
+            'vendorData' => $vendorData,
+            'business' => $business,
+        ]);
     }
 
     /**
@@ -308,7 +371,33 @@ class ReportsController extends Controller
             return $this->exportBookingReport($bookingData, $totals);
         }
 
-        return view('business.reports.booking', compact('bookingData', 'totals'));
+        // AJAX live filtering support
+        if ($request->ajax()) {
+            $tbodyHtml = view('business.reports.partials.booking_table_rows', [
+                'bookingData' => $bookingData,
+            ])->render();
+
+            return response()->json([
+                'tbody' => $tbodyHtml,
+                'count' => count($bookingData),
+                'totals' => [
+                    'completed_bookings' => $totals['completed_bookings'],
+                    'vehicles_booked' => $totals['vehicles_booked'],
+                    'unique_customers' => $totals['unique_customers'],
+                    'returning_customers' => $totals['returning_customers'],
+                    'cancelled_bookings' => $totals['cancelled_bookings'],
+                    'cancellation_rate' => $totals['cancellation_rate'],
+                    'total_revenue' => number_format($totals['total_revenue'], 2),
+                    'average_booking_value' => number_format($totals['average_booking_value'], 2),
+                ],
+            ]);
+        }
+
+        return view('business.reports.booking', [
+            'bookingData' => $bookingData,
+            'totals' => $totals,
+            'business' => $business,
+        ]);
     }
 
     /**

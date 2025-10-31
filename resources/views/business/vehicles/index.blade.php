@@ -72,13 +72,34 @@
         <div class="table-responsive">
             <table id="vehicleTable" class="table table-striped table-bordered">
                 <thead>
+                    @php
+                        $currentSort = request('sort');
+                        $currentDir = strtolower(request('dir', 'asc')) === 'desc' ? 'desc' : 'asc';
+                        $nextDir = $currentDir === 'asc' ? 'desc' : 'asc';
+                        $sortLink = function ($key, $label) use ($currentSort, $currentDir, $nextDir) {
+                            $params = array_merge(request()->query(), [
+                                'sort' => $key,
+                                'dir' => $currentSort === $key ? $nextDir : 'asc',
+                            ]);
+                            // Always show a sort icon; neutral when not active
+                            $icon = '↕';
+                            if ($currentSort === $key) {
+                                $icon = $currentDir === 'asc' ? '▲' : '▼';
+                            }
+                            $url = request()->url() . '?' . http_build_query($params);
+                            $activeClass = $currentSort === $key ? 'text-primary fw-semibold' : 'text-muted';
+                            $iconStyle = 'font-size:11px;';
+                            if ($currentSort !== $key) { $iconStyle .= 'opacity:0.6;'; }
+                            return '<a href="' . e($url) . '" class="text-decoration-none">' . e($label) . ' <span class="ms-1 ' . $activeClass . '" style="' . $iconStyle . '">' . e($icon) . '</span></a>';
+                        };
+                    @endphp
                     <tr>
-                        <th class="vechicle_title">Vehicle</th>
-                        <th>Unit Type</th>
-                        <th>Fuel</th>
-                        <th>Capacity</th>
-                        <th>Price</th>
-                        <th>Status</th>
+                        <th class="vechicle_title">{!! $sortLink('vehicle', 'Vehicle') !!}</th>
+                        <th>{!! $sortLink('unit_type', 'Unit Type') !!}</th>
+                        <th>{!! $sortLink('fuel', 'Fuel') !!}</th>
+                        <th>{!! $sortLink('capacity', 'Capacity') !!}</th>
+                        <th>{!! $sortLink('price', 'Price') !!}</th>
+                        <th>{!! $sortLink('status', 'Status') !!}</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -129,12 +150,12 @@
                             @if($vehicle->vehicle_type === 'car')
                                 {{ $vehicle->seating_capacity }} Seats
                             @elseif($vehicle->vehicle_type === 'bike_scooter')
-                                {{ $vehicle->engine_capacity_cc }}cc Engine
+                                {{ $vehicle->seating_capacity ? $vehicle->seating_capacity . ' Seats' : 'N/A' }}
                             @elseif($vehicle->vehicle_type === 'heavy_vehicle')
                                 @if($vehicle->seating_capacity)
                                     {{ $vehicle->seating_capacity }} Seats
                                 @elseif($vehicle->payload_capacity_tons)
-                                {{ $vehicle->payload_capacity_tons }} Tons
+                                    {{ $vehicle->payload_capacity_tons }} Tons
                                 @endif
                             @endif
                         </td>

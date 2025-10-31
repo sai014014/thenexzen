@@ -9,10 +9,32 @@
 
 @section('content')
 <div class="content-wrapper">
+    <!-- Draft Alert Banner -->
+    @if(isset($hasDraft) && $hasDraft)
+    <div class="alert alert-info alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+        <i class="fas fa-save me-2 fs-5"></i>
+        <div class="flex-grow-1">
+            <strong>You have a saved booking draft!</strong> Continue where you left off or start a new booking.
+        </div>
+        <div class="d-flex gap-2 ms-3">
+            <a href="{{ route('business.bookings.flow.create') }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-edit me-1"></i>Continue Draft
+            </a>
+            <form action="{{ route('business.bookings.flow.clear_draft') }}" method="POST" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete your saved draft?')">
+                    <i class="fas fa-trash me-1"></i>Delete Draft
+                </button>
+            </form>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+
     <!-- Booking Action Buttons -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="btn-group">
-            <a href="{{ route('business.bookings.create') }}" class="btn btn-primary">
+            <a href="{{ route('business.bookings.flow.create') }}" class="btn btn-primary">
                 <i class="fas fa-magic me-2"></i>5-Step Flow
             </a>
             <a href="{{ route('business.bookings.quick-create') }}" class="btn btn-outline-primary">

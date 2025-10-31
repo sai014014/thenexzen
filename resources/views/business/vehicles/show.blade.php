@@ -137,7 +137,7 @@
                             <div class="col-8">
                                 <div class="main-image-container" style="height: 400px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
                                     @php
-                                        $primaryImage = $vehicle->primaryImage ?? $vehicle->firstImage;
+                                        $primaryImage = $vehicle->firstImage;
                                     @endphp
                                     @if($primaryImage)
                                         <img src="{{ asset('storage/' . $primaryImage->image_path) }}" 
@@ -175,11 +175,7 @@
                                                     <small class="text-muted">File</small>
                                                 </div>
                                             @endif
-                                            @if($image->is_primary)
-                                                <div class="position-absolute top-0 start-0">
-                                                    <span class="badge bg-success" style="font-size: 0.7em;">Primary</span>
-                    </div>
-                    @endif
+                                            
                 </div>
                                     @endforeach
             </div>

@@ -4,7 +4,7 @@
 @section('page-title', 'Customer Details')
 
 @section('content')
-<div class="content-wrapper">
+<div class="container-fluid">
     <!-- Customer Header Section -->
     <div class="customer-header-card">
         <div class="d-flex justify-content-between align-items-center">
@@ -288,7 +288,7 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Driver Name</th>

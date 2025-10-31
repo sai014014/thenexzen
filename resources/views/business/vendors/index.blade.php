@@ -4,7 +4,6 @@
 @section('page-title', 'Vendor Management')
 
 @section('content')
-<div class="content-wrapper">
                 <!-- Search, Filters and Add Vendor Section -->
                 <div class="row mb-3 align-items-end filter-row">
                     <div class="col-md-4">
@@ -43,15 +42,34 @@
                 </div>
 
 <!-- Vendor List Table -->
-<div class="table-responsive">
+<div class="filter-section">
+    <div class="table-responsive">
     <table id="vendorTable" class="table table-striped table-bordered">
         <thead>
+            @php
+                $currentSort = request('sort_by', 'created_at');
+                $currentDir = strtolower(request('sort_direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+                $nextDir = $currentDir === 'asc' ? 'desc' : 'asc';
+                $sortLink = function ($key, $label) use ($currentSort, $currentDir, $nextDir) {
+                    $params = array_merge(request()->query(), [
+                        'sort_by' => $key,
+                        'sort_direction' => $currentSort === $key ? $nextDir : 'asc',
+                    ]);
+                    $icon = '↕';
+                    if ($currentSort === $key) { $icon = $currentDir === 'asc' ? '▲' : '▼'; }
+                    $url = request()->url() . '?' . http_build_query($params);
+                    $activeClass = $currentSort === $key ? 'text-primary fw-semibold' : 'text-muted';
+                    $iconStyle = 'font-size:11px;';
+                    if ($currentSort !== $key) { $iconStyle .= 'opacity:0.6;'; }
+                    return '<a href="' . e($url) . '" class="text-decoration-none">' . e($label) . ' <span class="ms-1 ' . $activeClass . '" style="' . $iconStyle . '">' . e($icon) . '</span></a>';
+                };
+            @endphp
             <tr>
-                <th class="vendor_title">Vendor</th>
-                <th>Type</th>
-                <th>Contact</th>
-                <th>GSTIN/PAN</th>
-                <th>Registration Date</th>
+                <th class="vendor_title">{!! $sortLink('vendor_name', 'Vendor') !!}</th>
+                <th>{!! $sortLink('vendor_type', 'Type') !!}</th>
+                <th>{!! $sortLink('mobile_number', 'Contact') !!}</th>
+                <th>{!! $sortLink('email_address', 'Email') !!}</th>
+                <th>{!! $sortLink('created_at', 'Registration Date') !!}</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -71,29 +89,18 @@
                         </div>
                         <div>
                             <div class="fw-bold">{{ $vendor->vendor_name }}</div>
-                            <small class="text-muted">{{ $vendor->mobile_number }}</small>
                         </div>
                     </div>
                 </td>
                 <td>
-                    <span class="badge bg-{{ $vendor->vendor_type === 'vehicle_provider' ? 'primary' : ($vendor->vendor_type === 'service_partner' ? 'success' : 'secondary') }}">
-                        {{ $vendor->vendor_type_label }}
-                    </span>
+                    <span class="text-dark">{{ $vendor->vendor_type_label }}</span>
                 </td>
                 <td>
                     <div>
-                        <i class="fas fa-phone me-1"></i>{{ $vendor->mobile_number }}
-                        @if($vendor->alternate_contact_number)
-                            <br><small class="text-muted">{{ $vendor->alternate_contact_number }}</small>
-                        @endif
+                      {{ $vendor->mobile_number }}
                     </div>
                 </td>
-                <td>
-                    @if($vendor->gstin)
-                        <div><strong>GSTIN:</strong> {{ $vendor->masked_gstin }}</div>
-                    @endif
-                    <div><strong>PAN:</strong> {{ $vendor->masked_pan_number }}</div>
-                </td>
+                <td>{{ $vendor->email_address }}</td>
                 <td>{{ $vendor->created_at->format('M d, Y') }}</td>
                 <td>
                     <a href="{{ route('business.vendors.show', $vendor) }}" class="text-primary text-decoration-none" style="font-weight: 500;">View</a>
@@ -106,7 +113,7 @@
             @endforelse
         </tbody>
     </table>
-</div>
+    </div>
 </div>
 
 <!-- Delete Confirmation Modal -->

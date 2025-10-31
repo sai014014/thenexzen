@@ -193,15 +193,51 @@ class CustomDropdown {
         // Close all other dropdowns
         document.querySelectorAll('.form-select-wrapper.open').forEach(dropdown => {
             dropdown.classList.remove('open');
+            dropdown.classList.remove('drop-up');
         });
-        
+
+        // Reset any previous dynamic styles/classes
+        this.wrapper.classList.remove('drop-up');
+        this.menu.style.maxHeight = '';
+
+        // Temporarily show to measure natural height
         this.wrapper.classList.add('open');
+        this.menu.style.display = 'block';
+
+        // Calculate available space
+        const toggleRect = this.toggle.getBoundingClientRect();
+        const menuNaturalHeight = Math.min(this.menu.scrollHeight, 400); // cap like CSS default
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const spaceBelow = viewportHeight - toggleRect.bottom - 8; // 8px buffer
+        const spaceAbove = toggleRect.top - 8; // 8px buffer
+
+        // Decide direction: flip up if not enough space below but enough above
+        if (spaceBelow < Math.min(menuNaturalHeight, 400) && spaceAbove > spaceBelow) {
+            this.wrapper.classList.add('drop-up');
+            // Constrain height to available space above
+            const maxUpHeight = Math.max(0, Math.min(menuNaturalHeight, spaceAbove - 4));
+            this.menu.style.maxHeight = maxUpHeight + 'px';
+        } else {
+            // Constrain height to available space below if needed
+            const maxDownHeight = Math.max(0, Math.min(menuNaturalHeight, spaceBelow - 4));
+            if (spaceBelow < menuNaturalHeight) {
+                this.menu.style.maxHeight = maxDownHeight + 'px';
+            }
+        }
+
+        // After measuring, return visibility control to CSS
+        this.menu.style.display = '';
+
+        // Restore ARIA/state
         this.toggle.setAttribute('aria-expanded', 'true');
         this.isOpen = true;
     }
     
     closeDropdown() {
         this.wrapper.classList.remove('open');
+        this.wrapper.classList.remove('drop-up');
+        this.menu.style.maxHeight = '';
+        this.menu.style.display = '';
         this.toggle.setAttribute('aria-expanded', 'false');
         this.isOpen = false;
     }
@@ -417,9 +453,7 @@ function initializeCustomDropdowns() {
 
 // Function to refresh existing dropdowns after dynamic content is updated
 function refreshCustomDropdowns() {
-    console.log('Refreshing custom dropdowns...');
     const selectElements = document.querySelectorAll('.form-select[data-custom-dropdown-initialized]');
-    console.log('Found', selectElements.length, 'initialized dropdowns');
     
     selectElements.forEach(select => {
         // Find the wrapper and refresh its options
@@ -428,7 +462,6 @@ function refreshCustomDropdowns() {
             // Get the custom dropdown instance from the wrapper
             const customDropdown = wrapper.customDropdownInstance;
             if (customDropdown) {
-                console.log('Refreshing dropdown for:', select.id || select.name);
                 customDropdown.refreshOptions();
             }
         }

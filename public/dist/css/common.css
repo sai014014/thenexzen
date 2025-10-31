@@ -117,6 +117,66 @@ p {
   background-color: #6B6ADE;
   border-color: #6B6ADE;
 }
+
+/* Unified action buttons (vehicles/vendors forms) */
+.nxz-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.nxz-btn-primary {
+  background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+  border: none;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.nxz-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107,106,222,0.35);
+}
+.nxz-btn-primary:disabled { opacity: .7; cursor: not-allowed; }
+
+.nxz-btn-secondary {
+  background: #fff;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.nxz-btn-secondary:hover { background: #6c757d; color: #fff; }
+
+/* Shared section containers and titles (forms) */
+.form-section {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 18px 18px 8px;
+  margin-bottom: 18px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Link styles used inside form headers or helpers */
+.nxz-link {
+  color: #6B6ADE;
+  text-decoration: none;
+}
+.nxz-link:hover { text-decoration: underline; }
 .head_left {
   display: flex;
   flex-direction: column;
@@ -712,14 +772,14 @@ p {
 /* Default main content for all pages except vehicle/vendor/customer table pages */
 .main-content {
   margin-top: 80px !important; /* Add space for fixed header */
-  margin-left: 276px; /* Aligned with header h1, accounting for padding */
+  margin-left: 265px; /* Aligned with header h1, accounting for padding */
   padding: 20px; /* Add proper padding for content */
   overflow-x: auto; /* Allow horizontal scrolling when needed */
   background: #f8f9fa;
   min-height: calc(100vh - 80px); /* Adjust min-height to account for header *//* Prevent content from exceeding viewport */
   box-sizing: border-box; /* Include padding in width calculation */
   zoom: 0.9; /* Match dashboard zoom */
-  position: relative;
+  position: relative;  
   width: calc(100% - 276px); /* Fit window minus sidebar */
 }
 
@@ -1107,7 +1167,8 @@ p {
 /* Handle very wide content */
 .main-content * {
   max-width: 100%; /* Prevent any child element from exceeding container width */
-  box-sizing: border-box; /* Include padding/borders in width calculations */
+  box-sizing: border-box;
+  border: none; /* Include padding/borders in width calculations */
 }
 
 /* Ensure tables and wide content are scrollable */
@@ -1189,6 +1250,25 @@ p {
   position: relative;
   display: none; /* Hide the original select */
 }
+.card{
+ 
+  background-color: transparent;  
+  background-clip: border-box;
+  border: none;
+  border-radius: var(--bs-card-border-radius);
+
+}
+
+.card-header {background:transparent; }
+/* Reports common utilities */
+.btn-pill { border-radius: 999px; padding-left: 16px; padding-right: 16px; }
+.report-table { border: 1px solid rgba(17,24,39,.08); border-radius: 12px; overflow: hidden; }
+.report-table thead th { background: #fff; color: #111827; font-weight: 600; border:none; }
+.report-table td, .report-table th { padding: 14px 16px; vertical-align: middle; }
+.report-table tbody tr + tr td { border-top-color: rgba(17,24,39,.06); }
+.no-bottom-borders > :not(caption) > * > * { border-bottom-width: 0 !important; }
+.no-bottom-borders tbody td { border-bottom: 0 !important; }
+.no-bottom-borders thead th { background: #F1F4F9 !important; border-bottom: 0 !important; }
 
 /* Custom dropdown wrapper */
 .form-select-wrapper {
@@ -1255,6 +1335,15 @@ p {
 
 .form-select-wrapper.open .dropdown-menu {
   display: block;
+}
+
+/* Flip upwards when wrapper has drop-up */
+.form-select-wrapper.drop-up .dropdown-menu {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .form-select-wrapper .dropdown-option {
@@ -1781,6 +1870,7 @@ tbody tr {
   border: none;
   cursor: pointer;
   text-decoration:none;
+  text-wrap: nowrap;
   border-radius: 5px;
   transition: all 0.3s ease;
 }
@@ -2310,16 +2400,16 @@ label {
     padding: 20px 24px;
 }
 
-.content-wrapper .table-responsive {
+.content-wrapper .card .table-responsive {
     background: transparent;
 }
 
-.content-wrapper .table {
+.content-wrapper .card .table {
     border: none !important;
     background: white;
 }
 
-.content-wrapper .table thead th {
+.content-wrapper .card .table thead th {
     background: #f1f4f9 !important;
     border: none;
     font-weight: 600;
@@ -2327,13 +2417,13 @@ label {
     padding: 12px 15px;
 }
 
-.content-wrapper .table tbody td {
+.content-wrapper .card .table tbody td {
     border: none !important;
     border-bottom: 1px solid #e9ecef !important;
     padding: 12px 15px;
 }
 
-.content-wrapper .table tbody tr:hover {
+.content-wrapper .card .table tbody tr:hover {
     background-color: #f8f9fa;
 }
 
@@ -2603,3 +2693,29 @@ label {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(107, 106, 222, 0.3);
 }
+
+/* Booking Flow UI polish */
+.booking-flow .progress-steps { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.booking-flow .progress-steps .step { color:#6b7280; font-weight:500; }
+.booking-flow .progress-steps .step.active { color:#6B6ADE; font-weight:600; }
+.booking-flow .progress-steps .dot { width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#e9e9ff; color:#6B6ADE; font-weight:700; }
+
+.vehicle-card { border:1px solid rgba(17,24,39,.08); border-radius:12px; transition: box-shadow .2s ease, transform .06s ease; background:#fff; }
+.vehicle-card:hover { box-shadow: 0 8px 20px rgba(17,24,39,.08); transform: translateY(-1px); }
+.vehicle-card .card-body { padding:16px 18px; }
+
+/* Right summary sticky */
+@media (min-width: 992px){
+  .booking-flow .col-lg-4 > .card { position: sticky; top: 96px; }
+}
+
+/* Inputs alignment */
+.booking-flow .form-control, .booking-flow .form-select { height: 40px; font-size:14px; }
+.booking-flow .btn-pill { height: 40px; }
+
+/* Filters row spacing */
+#step-2 .d-flex.align-items-center.gap-2 .form-select { min-width: 150px; }
+#step-2 .nxz-link { color:#6B6ADE; font-weight:600; }
+
+/* Modal compact spacing */
+.modal .form-control.form-control-sm { height: 36px; }

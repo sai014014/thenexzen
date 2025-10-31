@@ -166,7 +166,7 @@ class BusinessController extends Controller
                 $businessAdmins = $business->businessAdmins;
                 foreach ($businessAdmins as $admin) {
                     try {
-                        $admin->notify(new BusinessStatusChanged($oldStatus, $newStatus));
+                    $admin->notify(new BusinessStatusChanged($oldStatus, $newStatus));
                     } catch (\Exception $notifyError) {
                         // Log notification error but don't fail the status update
                         \Log::warning('Failed to send notification to business admin', [

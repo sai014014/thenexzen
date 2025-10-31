@@ -56,7 +56,11 @@ class BookingController extends Controller
 
         $bookings = $query->paginate(15)->withQueryString();
 
-        return view('business.bookings.index', compact('bookings', 'status', 'business', 'businessAdmin'));
+        // Check for draft booking
+        $draft = session()->get('booking.flow', []);
+        $hasDraft = !empty($draft) && (isset($draft['step_1']) || isset($draft['step_2']) || isset($draft['step_3']) || isset($draft['step_4']) || isset($draft['step_5']));
+
+        return view('business.bookings.index', compact('bookings', 'status', 'business', 'businessAdmin', 'hasDraft'));
     }
 
     /**
@@ -73,6 +77,434 @@ class BookingController extends Controller
         $business = $businessAdmin->business;
 
         return view('business.bookings.flow.create', compact('business', 'businessAdmin'));
+    }
+
+    // Single-page flow entry
+    public function createFlow(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        if (!$businessAdmin) {
+            return redirect()->route('business.login')->with('error', 'Please log in to continue.');
+        }
+
+        $business = $businessAdmin->business;
+        // Get locations for dropdowns (using business address + city, can be extended)
+        $locations = [
+            $business->address . ', ' . $business->city,
+            'Garage',
+            'Nagole agency parking',
+        ];
+
+        // Draft state from session
+        $draft = session()->get('booking.flow', []);
+        $draftStep = 1; // Default to step 1
+        
+        if (!empty($draft)) {
+            // Find highest completed step in draft
+            $steps = [];
+            foreach ($draft as $key => $val) {
+                if (preg_match('/^step_(\d)$/', $key, $m)) {
+                    $steps[] = (int)$m[1];
+                }
+            }
+            if (!empty($steps)) {
+                $draftStep = max($steps);
+            }
+        }
+
+        return view('business.bookings.flow.create', compact('business', 'locations', 'draft', 'draftStep'));
+    }
+
+    // Save step payload to session / draft
+    public function saveFlowStep(Request $request)
+    {
+        $payload = $request->all();
+        $flow = session()->get('booking.flow', []);
+        
+        if (($payload['step'] ?? null) === 'draft') {
+            session()->put('booking.flow', $flow);
+            return response()->json(['status' => 'ok']);
+        }
+        
+        $step = (int)($payload['step'] ?? 0);
+        if ($step >= 1 && $step <= 5) {
+            // Merge with existing step data to preserve all fields
+            $existingStepData = $flow['step_'.$step] ?? [];
+            $flow['step_'.$step] = array_merge($existingStepData, $payload);
+            
+            // Remove the 'step' key from the stored data (it's just for routing)
+            unset($flow['step_'.$step]['step']);
+        }
+        
+        session()->put('booking.flow', $flow);
+        return response()->json(['status' => 'ok', 'saved' => true]);
+    }
+
+    // Clear draft from session
+    public function clearFlowDraft(Request $request)
+    {
+        session()->forget('booking.flow');
+        return response()->json(['status' => 'ok']);
+    }
+
+    // Vehicles list (AJAX) - Get available vehicles for date range
+    public function listFlowVehicles(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        if (!$businessAdmin) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $business = $businessAdmin->business;
+        
+        // Validate datetime formats (accept datetime-local format)
+        $pickupDatetime = $request->input('pickup_datetime');
+        $dropoffDatetime = $request->input('dropoff_datetime');
+        
+        if (!$pickupDatetime || !$dropoffDatetime) {
+            return response()->json(['error' => 'Pickup and dropoff datetimes are required'], 400);
+        }
+
+        try {
+            $startDateTime = Carbon::parse($pickupDatetime);
+            $endDateTime = Carbon::parse($dropoffDatetime);
+            
+            if ($endDateTime <= $startDateTime) {
+                return response()->json(['error' => 'Drop-off datetime must be after pickup datetime'], 400);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Invalid datetime format'], 400);
+        }
+
+        // Validate other parameters
+        $request->validate([
+            'transmission' => 'nullable|string',
+            'seats' => 'nullable|integer',
+            'fuel' => 'nullable|string',
+            'sort' => 'nullable|in:price_asc,price_desc',
+        ]);
+
+        $vehicles = Booking::getAvailableVehicles($business->id, $startDateTime, $endDateTime);
+
+        // Apply filters
+        if ($request->transmission) {
+            $vehicles = $vehicles->where('transmission_type', $request->transmission);
+        }
+        if ($request->seats) {
+            $vehicles = $vehicles->where('seating_capacity', $request->seats);
+        }
+        if ($request->fuel) {
+            $vehicles = $vehicles->where('fuel_type', $request->fuel);
+        }
+
+        // Map to display format
+        $vehicles = $vehicles->map(function ($v) {
+            $firstImage = $v->images()->first();
+            return [
+                'id' => $v->id,
+                'name' => $v->vehicle_make . ' ' . $v->vehicle_model,
+                'registration' => $v->vehicle_number,
+                'transmission' => ucfirst($v->transmission_type ?? 'N/A'),
+                'seats' => $v->seating_capacity ?? 'N/A',
+                'fuel' => ucfirst($v->fuel_type ?? 'N/A'),
+                'price_per_day' => $v->rental_price_24h ?? 0,
+                'image' => $firstImage ? asset('storage/' . $firstImage->image_path) : asset('images/vehicle-brands/default.svg'),
+            ];
+        });
+
+        // Sort
+        if ($request->sort === 'price_asc') {
+            $vehicles = $vehicles->sortBy('price_per_day')->values();
+        } elseif ($request->sort === 'price_desc') {
+            $vehicles = $vehicles->sortByDesc('price_per_day')->values();
+        }
+
+        $html = '';
+        foreach ($vehicles as $v) {
+            $html .= view('business.bookings.flow.partials.vehicle_card', ['vehicle' => $v])->render();
+        }
+        return response($html);
+    }
+
+    // Billing summary compute (AJAX)
+    public function billingSummary(Request $request)
+    {
+        $rent = (float)$request->input('rent_24h', 0);
+        $additionalCharges = json_decode($request->input('additional_charges', '[]'), true) ?? [];
+        $discountAmount = (float)$request->input('discount_amount', 0);
+        $discountType = $request->input('discount_type', 'amount'); // 'amount' or 'percentage'
+        $advance = (float)$request->input('advance_payment', 0);
+        $pickupDatetime = $request->input('pickup_datetime');
+        $dropoffDatetime = $request->input('dropoff_datetime');
+        
+        // Calculate days from dates
+        $days = 1;
+        if ($pickupDatetime && $dropoffDatetime) {
+            try {
+                $start = Carbon::parse($pickupDatetime);
+                $end = Carbon::parse($dropoffDatetime);
+                $hours = $start->diffInHours($end);
+                $days = max(1, ceil($hours / 24)); // Minimum 1 day
+            } catch (\Exception $e) {
+                $days = 1;
+            }
+        }
+        
+        // Calculate base rental
+        $baseRental = $rent * $days;
+        
+        // Sum additional charges
+        $totalAdditional = 0;
+        foreach ($additionalCharges as $charge) {
+            $totalAdditional += (float)($charge['amount'] ?? 0);
+        }
+        
+        // Calculate subtotal
+        $subTotal = $baseRental + $totalAdditional;
+        
+        // Calculate discount
+        $discountValue = 0;
+        if ($discountType === 'percentage') {
+            $discountValue = $subTotal * ($discountAmount / 100);
+        } else {
+            $discountValue = $discountAmount;
+        }
+        $discountValue = min($discountValue, $subTotal); // Can't discount more than subtotal
+        
+        // Calculate final amount
+        $totalAfterDiscount = $subTotal - $discountValue;
+        $amountDue = max(0, $totalAfterDiscount - $advance);
+        
+        return response()->json([
+            'baseRental' => number_format($baseRental, 2),
+            'days' => $days,
+            'additionalCharges' => number_format($totalAdditional, 2),
+            'subTotal' => number_format($subTotal, 2),
+            'discount' => number_format($discountValue, 2),
+            'advance' => number_format($advance, 2),
+            'totalAfterDiscount' => number_format($totalAfterDiscount, 2),
+            'amountDue' => number_format($amountDue, 2),
+        ]);
+    }
+
+    // Store booking from flow (AJAX)
+    public function storeFromFlow(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        
+        if (!$businessAdmin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required. Please log in again.'
+            ], 401);
+        }
+        
+        $business = $businessAdmin->business;
+        
+        try {
+            // Check if booking is already being processed (prevent duplicate submissions)
+            $processingKey = 'booking.flow.processing';
+            if (session()->has($processingKey)) {
+                // Check if booking was recently created (within last 5 seconds)
+                $processingTime = session()->get($processingKey);
+                if (now()->diffInSeconds($processingTime) < 5) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Booking is already being processed. Please wait...'
+                    ], 429); // Too Many Requests
+                }
+            }
+            
+            // Set processing flag
+            session()->put($processingKey, now());
+            
+            // Get draft data from session
+            $flow = session()->get('booking.flow', []);
+            
+            // Check if booking was already created (prevent duplicate from same session data)
+            $bookingHash = md5(json_encode([
+                $flow['step_1'] ?? [],
+                $flow['step_2'] ?? [],
+                $flow['step_3'] ?? [],
+                $flow['step_4'] ?? []
+            ]));
+            
+            $lastBookingHash = session()->get('booking.flow.last_hash');
+            if ($lastBookingHash === $bookingHash) {
+                // Same booking data, check if it was recently created
+                $lastBookingTime = session()->get('booking.flow.last_created');
+                if ($lastBookingTime && now()->diffInSeconds($lastBookingTime) < 10) {
+                    session()->forget($processingKey);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This booking was already created. Please refresh the page.'
+                    ], 400);
+                }
+            }
+            
+            // Validate required data is present
+            $step1 = $flow['step_1'] ?? [];
+            $step2 = $flow['step_2'] ?? [];
+            $step3 = $flow['step_3'] ?? [];
+            $step4 = $flow['step_4'] ?? [];
+            
+            if (empty($step1['pickup_datetime']) || empty($step1['dropoff_datetime'])) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pickup and dropoff dates are required.'
+                ], 400);
+            }
+            
+            if (empty($step2['vehicle_id'])) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please select a vehicle.'
+                ], 400);
+            }
+            
+            if (empty($step3['customer_id'])) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please select a customer.'
+                ], 400);
+            }
+            
+            // Parse dates
+            $startDateTime = Carbon::parse($step1['pickup_datetime']);
+            $endDateTime = Carbon::parse($step1['dropoff_datetime']);
+            
+            // Validate customer belongs to business
+            $customer = Customer::where('id', $step3['customer_id'])
+                ->where('business_id', $business->id)
+                ->first();
+            
+            if (!$customer) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid customer selected.'
+                ], 400);
+            }
+            
+            // Validate vehicle belongs to business
+            $vehicle = Vehicle::where('id', $step2['vehicle_id'])
+                ->where('business_id', $business->id)
+                ->first();
+            
+            if (!$vehicle) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid vehicle selected.'
+                ], 400);
+            }
+            
+            // Check vehicle availability
+            if (!Booking::isVehicleAvailable($vehicle->id, $startDateTime, $endDateTime)) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Selected vehicle is not available for the chosen time period.'
+                ], 400);
+            }
+            
+            // Check for duplicate booking created in last 10 seconds (same vehicle, customer, dates)
+            $recentDuplicate = Booking::where('business_id', $business->id)
+                ->where('vehicle_id', $step2['vehicle_id'])
+                ->where('customer_id', $step3['customer_id'])
+                ->where('start_date_time', $startDateTime)
+                ->where('end_date_time', $endDateTime)
+                ->where('created_at', '>=', now()->subSeconds(10))
+                ->first();
+            
+            if ($recentDuplicate) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A similar booking was just created. Please refresh the page.',
+                    'booking_id' => $recentDuplicate->id,
+                    'redirect_url' => route('business.bookings.show', $recentDuplicate)
+                ], 409); // Conflict
+            }
+            
+            // Calculate pricing from Step 4 data
+            $rent24h = (float)($step4['rent_24h'] ?? $vehicle->rental_price_24h ?? 1000);
+            $hours = $startDateTime->diffInHours($endDateTime);
+            $days = max(1, ceil($hours / 24));
+            $baseRental = $rent24h * $days;
+            
+            // Additional charges
+            $additionalCharges = $step4['additional_charges'] ?? [];
+            $totalAdditional = 0;
+            if (is_array($additionalCharges)) {
+                foreach ($additionalCharges as $charge) {
+                    $totalAdditional += (float)($charge['amount'] ?? 0);
+                }
+            }
+            
+            // Discount
+            $discountAmount = (float)($step4['discount_amount'] ?? 0);
+            $discountType = $step4['discount_type'] ?? 'amount';
+            $discountValue = 0;
+            $subTotal = $baseRental + $totalAdditional;
+            if ($discountType === 'percentage') {
+                $discountValue = $subTotal * ($discountAmount / 100);
+            } else {
+                $discountValue = $discountAmount;
+            }
+            $discountValue = min($discountValue, $subTotal);
+            
+            // Final amounts
+            $totalAmount = $subTotal - $discountValue;
+            $advanceAmount = (float)($step4['advance_payment'] ?? $step4['advance_amount'] ?? 0);
+            $amountDue = max(0, $totalAmount - $advanceAmount);
+            
+            // Create booking
+            $booking = Booking::create([
+                'business_id' => $business->id,
+                'customer_id' => $step3['customer_id'],
+                'vehicle_id' => $step2['vehicle_id'],
+                'booking_number' => Booking::generateBookingNumber(),
+                'start_date_time' => $startDateTime,
+                'end_date_time' => $endDateTime,
+                'pickup_location' => $step1['pickup_location'] ?? null,
+                'dropoff_location' => $step1['dropoff_location'] ?? null,
+                'base_rental_price' => $baseRental,
+                'extra_charges' => $totalAdditional,
+                'discount_amount' => $discountValue,
+                'total_amount' => $totalAmount,
+                'advance_amount' => $advanceAmount,
+                'advance_payment_method' => $step4['payment_method'] ?? null,
+                'amount_due' => $amountDue,
+                'status' => 'upcoming',
+            ]);
+            
+            // Save hash and timestamp to prevent duplicates
+            session()->put('booking.flow.last_hash', $bookingHash);
+            session()->put('booking.flow.last_created', now());
+            
+            // Clear draft session and processing flag
+            session()->forget('booking.flow');
+            session()->forget($processingKey);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking created successfully!',
+                'booking_id' => $booking->id,
+                'redirect_url' => route('business.bookings.show', $booking)
+            ]);
+            
+        } catch (\Exception $e) {
+            session()->forget('booking.flow.processing');
+            \Log::error('Error creating booking from flow: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to create booking: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -774,15 +1206,47 @@ class BookingController extends Controller
         $request->validate([
             'final_amount_paid' => 'required|numeric|min:0',
             'completion_notes' => 'nullable|string|max:1000',
+            'actual_return_datetime' => 'nullable|date',
+            'additional_charges' => 'nullable|string', // JSON array
         ]);
 
-        // Update amount paid
+        // Optionally adjust end date and totals if actual return differs
+        if ($request->filled('actual_return_datetime')) {
+            try {
+                $actualEnd = Carbon::parse($request->actual_return_datetime);
+                $booking->end_date_time = $actualEnd;
+
+                // Recompute totals based on days
+                $basePerDay = (float)($booking->base_rental_price ?? 0);
+                $hours = $booking->start_date_time ? $booking->start_date_time->diffInHours($actualEnd) : 0;
+                $days = max(1, (int)ceil($hours / 24));
+
+                $existingExtras = (float)($booking->extra_charges ?? 0);
+                $newExtras = 0.0;
+                if ($request->filled('additional_charges')) {
+                    $charges = json_decode($request->additional_charges, true);
+                    if (is_array($charges)) {
+                        foreach ($charges as $c) {
+                            $newExtras += (float)($c['amount'] ?? 0);
+                        }
+                    }
+                }
+
+                $booking->extra_charges = $existingExtras + $newExtras;
+                $booking->total_amount = ($basePerDay * $days) + $booking->extra_charges;
+                $booking->updateAmountDue();
+            } catch (\Exception $e) {
+                // ignore parse errors; proceed with current values
+            }
+        }
+
+        // Apply final payment
         $booking->amount_paid = $booking->amount_paid + $request->final_amount_paid;
         $booking->updateAmountDue();
 
         // Add completion notes
         if ($request->completion_notes) {
-            $booking->notes = ($booking->notes ? $booking->notes . "\n\n" : '') . 
+            $booking->notes = ($booking->notes ? $booking->notes . "\n\n" : '') .
                              "Completion Notes: " . $request->completion_notes;
             $booking->save();
         }
@@ -940,25 +1404,68 @@ class BookingController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $query = $request->get('q');
+        $query = trim($request->get('q', ''));
+        $business = $businessAdmin->business;
         
+        $customersQuery = $business->customers()->where('status', 'active');
+        
+        // If query is empty or less than 2 characters, return all active customers (limited)
         if (strlen($query) < 2) {
-            return response()->json(['customers' => []]);
+            $customers = $customersQuery
+                ->select('id', 'full_name', 'company_name', 'mobile_number', 'email_address')
+                ->orderBy('full_name')
+                ->orderBy('company_name')
+                ->limit(50)
+                ->get();
+        } else {
+            // Case-insensitive search across multiple fields
+            $searchQuery = strtolower($query);
+            $customers = $customersQuery
+                ->where(function ($q) use ($searchQuery) {
+                    $q->whereRaw('LOWER(full_name) LIKE ?', ["%{$searchQuery}%"])
+                      ->orWhereRaw('LOWER(company_name) LIKE ?', ["%{$searchQuery}%"])
+                      ->orWhereRaw('LOWER(mobile_number) LIKE ?', ["%{$searchQuery}%"])
+                      ->orWhereRaw('LOWER(email_address) LIKE ?', ["%{$searchQuery}%"]);
+                })
+                ->select('id', 'full_name', 'company_name', 'mobile_number', 'email_address')
+                ->orderByRaw('CASE 
+                    WHEN LOWER(full_name) LIKE ? THEN 1 
+                    WHEN LOWER(company_name) LIKE ? THEN 2 
+                    ELSE 3 
+                END', ["{$searchQuery}%", "{$searchQuery}%"])
+                ->limit(50)
+                ->get();
+        }
+
+        return response()->json(['customers' => $customers]);
+    }
+
+    /**
+     * Get vehicle details for billing (API endpoint)
+     */
+    public function getVehicleForBilling(Request $request, $vehicleId)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        
+        if (!$businessAdmin) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $business = $businessAdmin->business;
-        $customers = $business->customers()
-            ->where('status', 'active')
-            ->where(function ($q) use ($query) {
-                $q->where('full_name', 'like', "%{$query}%")
-                  ->orWhere('company_name', 'like', "%{$query}%")
-                  ->orWhere('mobile_number', 'like', "%{$query}%")
-                  ->orWhere('email', 'like', "%{$query}%");
-            })
-            ->select('id', 'full_name', 'company_name', 'mobile_number', 'email')
-            ->limit(10)
-            ->get();
+        $vehicle = \App\Models\Vehicle::where('business_id', $business->id)
+            ->where('id', $vehicleId)
+            ->first();
 
-        return response()->json(['customers' => $customers]);
+        if (!$vehicle) {
+            return response()->json(['error' => 'Vehicle not found'], 404);
+        }
+
+        return response()->json([
+            'id' => $vehicle->id,
+            'rental_price_24h' => $vehicle->rental_price_24h ?? 0,
+            'km_limit_per_booking' => $vehicle->km_limit_per_booking ?? 0,
+            'extra_rental_price_per_hour' => $vehicle->extra_rental_price_per_hour ?? 0,
+            'extra_price_per_km' => $vehicle->extra_price_per_km ?? 0,
+        ]);
     }
 }

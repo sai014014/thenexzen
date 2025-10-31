@@ -105,21 +105,7 @@
     margin-bottom: 20px;
 }
 
-.save-button {
-    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
-    border: none;
-    color: white;
-    padding: 12px 32px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.save-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(107, 106, 222, 0.4);
-}
+/* Buttons use common `nxz-btn-primary` and `nxz-btn-secondary` in common.css */
 
 .back-button {
     padding: 12px 24px;
@@ -127,6 +113,13 @@
     font-weight: 500;
     font-size: 14px;
 }
+</style>
+@endpush
+
+@push('styles')
+<style>
+.form-actions { padding: 12px 0; }
+.form-actions .btn { min-width: 160px; }
 </style>
 @endpush
 
@@ -168,26 +161,19 @@
                         <div class="col-md-6 mb-3">
                             <label for="gstin" class="form-label">GSTIN</label>
                             <input type="text" class="form-control" id="gstin" name="gstin" value="{{ old('gstin') }}" maxlength="15">
-                            <div class="form-text">15-digit GST Identification Number</div>
+                            
                             @error('gstin')
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="pan_number" class="form-label">PAN Number *</label>
-                            <input type="text" class="form-control" id="pan_number" name="pan_number" value="{{ old('pan_number') }}" maxlength="10" required>
-                            <div class="form-text">10-digit PAN number</div>
+                            <label for="pan_number" class="form-label">PAN Number</label>
+                            <input type="text" class="form-control" id="pan_number" name="pan_number" value="{{ old('pan_number') }}" maxlength="10" style="text-transform: uppercase;">
                             @error('pan_number')
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="primary_contact_person" class="form-label">Primary Contact Person *</label>
-                            <input type="text" class="form-control" id="primary_contact_person" name="primary_contact_person" value="{{ old('primary_contact_person') }}" required>
-                            @error('primary_contact_person')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        
                         </div>
                     </div>
 
@@ -216,13 +202,13 @@
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="primary_contact_person" class="form-label">Primary Contact Person *</label>
+                            <input type="text" class="form-control" id="primary_contact_person" name="primary_contact_person" value="{{ old('primary_contact_person') }}" required>
+                            @error('primary_contact_person')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
-                    </div>
-
-                    <!-- Address Information -->
-                    <div class="form-section">
-                        <h3 class="section-title">Address Information</h3>
-                        <div class="row">
                         <div class="col-12 mb-3">
                             <label for="office_address" class="form-label">Office Address *</label>
                             <textarea class="form-control" id="office_address" name="office_address" rows="3" required>{{ old('office_address') }}</textarea>
@@ -246,6 +232,8 @@
                         </div>
                         </div>
                     </div>
+
+                    
 
                     <!-- Vendor Payout Settings -->
                     <div class="form-section">
@@ -272,72 +260,58 @@
                             @enderror
                         </div>
                         </div>
-                    </div>
-
-                    <!-- Bank Details (if Bank Transfer selected) -->
-                    <div id="bankDetailsDiv" style="display: none;">
-                        <div class="form-section">
-                            <h3 class="section-title">Bank Details</h3>
+                        <!-- Inline bank/UPI details directly under payout method -->
+                        <div id="bankDetailsDiv" style="display: none;">
                             <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="bank_name" class="form-label">Bank Name *</label>
-                                <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{ old('bank_name') }}">
-                                @error('bank_name')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="account_holder_name" class="form-label">Account Holder Name *</label>
-                                <input type="text" class="form-control" id="account_holder_name" name="account_holder_name" value="{{ old('account_holder_name') }}">
-                                @error('account_holder_name')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="account_number" class="form-label">Account Number *</label>
-                                <input type="text" class="form-control" id="account_number" name="account_number" value="{{ old('account_number') }}">
-                                @error('account_number')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="ifsc_code" class="form-label">IFSC Code *</label>
-                                <input type="text" class="form-control" id="ifsc_code" name="ifsc_code" value="{{ old('ifsc_code') }}" maxlength="11">
-                                @error('ifsc_code')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="bank_branch_name" class="form-label">Bank Branch Name</label>
-                                <input type="text" class="form-control" id="bank_branch_name" name="bank_branch_name" value="{{ old('bank_branch_name') }}">
-                                @error('bank_branch_name')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="bank_name" class="form-label">Bank Name *</label>
+                                    <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{ old('bank_name') }}">
+                                    @error('bank_name')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="account_holder_name" class="form-label">Account Holder Name *</label>
+                                    <input type="text" class="form-control" id="account_holder_name" name="account_holder_name" value="{{ old('account_holder_name') }}">
+                                    @error('account_holder_name')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="account_number" class="form-label">Account Number *</label>
+                                    <input type="text" class="form-control" id="account_number" name="account_number" value="{{ old('account_number') }}">
+                                    @error('account_number')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="ifsc_code" class="form-label">IFSC Code *</label>
+                                    <input type="text" class="form-control" id="ifsc_code" name="ifsc_code" value="{{ old('ifsc_code') }}" maxlength="11">
+                                    @error('ifsc_code')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="bank_branch_name" class="form-label">Bank Branch Name</label>
+                                    <input type="text" class="form-control" id="bank_branch_name" name="bank_branch_name" value="{{ old('bank_branch_name') }}">
+                                    @error('bank_branch_name')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- UPI Payment Details (if UPI Payment selected) -->
-                    <div id="upiDetailsDiv" style="display: none;">
-                        <div class="form-section">
-                            <h3 class="section-title">UPI Payment Details</h3>
+                        <div id="upiDetailsDiv" style="display: none;">
                             <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="upi_id" class="form-label">UPI ID *</label>
-                                <input type="text" class="form-control" id="upi_id" name="upi_id" value="{{ old('upi_id') }}" placeholder="example@upi">
-                                @error('upi_id')
-                                    <div class="text-danger small">{{ $message }}</div>
-                                @enderror
-                            </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="upi_id" class="form-label">UPI ID *</label>
+                                    <input type="text" class="form-control" id="upi_id" name="upi_id" value="{{ old('upi_id') }}" placeholder="example@upi">
+                                    @error('upi_id')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Payout Frequency -->
-                    <div class="form-section">
-                        <h3 class="section-title">Payout Frequency</h3>
-                        <div class="row">
+                        <div class="row" id="inlinePayoutDetailsRow" style="display:block;">
                         <div class="col-md-6 mb-3">
                             <label for="payout_frequency" class="form-label">Payout Frequency *</label>
                             <select class="form-select" id="payout_frequency" name="payout_frequency" required onchange="togglePayoutSchedule()">
@@ -385,6 +359,10 @@
                         </div>
                     </div>
 
+                    
+
+                    
+
                     <!-- Commission Settings -->
                     <div class="form-section">
                         <h3 class="section-title">Commission Settings</h3>
@@ -415,10 +393,10 @@
                         </div>
                     </div>
                     
-                    <!-- Lease Commitment (only for lease-to-rent) -->
-                    <div class="form-section" id="leaseCommitmentSection" style="display: none;">
-                        <h3 class="section-title">Lease Commitment</h3>
-                        <div class="row">
+                    
+
+                    <!-- Lease Commitment (inline inside Commission Settings) -->
+                    <div class="row" id="leaseCommitmentSection" style="display: none;">
                         <div class="col-md-6 mb-3">
                             <label for="lease_commitment_months" class="form-label">Lease Commitment (Months) *</label>
                             <select class="form-select" id="lease_commitment_months" name="lease_commitment_months">
@@ -474,14 +452,14 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <div class="form-group">
-                                    <label for="pan_card" class="form-label required">PAN Card</label>
+                                    <label for="pan_card" class="form-label">PAN Card</label>
                                     <div class="file-upload-area" onclick="document.getElementById('pan_card').click()">
                                         <div class="upload-icon">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                         </div>
                                         <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
                                     </div>
-                                    <input type="file" class="form-control @error('pan_card') is-invalid @enderror" id="pan_card" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" required style="display: none;" onchange="updateFileLabel('pan_card', this)">
+                                    <input type="file" class="form-control @error('pan_card') is-invalid @enderror" id="pan_card" name="pan_card" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="updateFileLabel('pan_card', this)">
                                     <div class="helper-text">PDF, JPG, PNG files only (Max 10MB)</div>
                                     @error('pan_card')
                                         <div class="text-danger small">{{ $message }}</div>
@@ -510,11 +488,11 @@
                     </div>
 
                     <!-- Form Actions -->
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{{ route('business.vendors.index') }}" class="btn btn-secondary cancel-button">
+                    <div class="form-actions d-flex justify-content-end gap-2 mt-4 nxz-action-buttons">
+                        <a href="{{ route('business.vendors.index') }}" class="btn nxz-btn-secondary cancel-button">
                             <i class="fas fa-times me-2"></i>Cancel
                         </a>
-                        <button type="submit" class="btn save-button">
+                        <button type="submit" class="btn nxz-btn-primary save-button">
                             <i class="fas fa-save me-2"></i>Register Vendor
                         </button>
                     </div>

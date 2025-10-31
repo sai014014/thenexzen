@@ -202,6 +202,7 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::post('/customers/{customer}/status', [\App\Http\Controllers\Business\CustomerController::class, 'updateStatus'])->name('customers.update-status-post');
         Route::get('/customers/{customer}/download/{type}', [\App\Http\Controllers\Business\CustomerController::class, 'downloadDocument'])->name('customers.download-document');
         Route::get('/customers/{customer}/drivers/{driver}/download/{type}', [\App\Http\Controllers\Business\CustomerController::class, 'downloadDriverDocument'])->name('customers.download-driver-document');
+        Route::post('/customers/quick-create', [\App\Http\Controllers\Business\CustomerController::class, 'quickStore'])->name('customers.quick-create');
         
         // Vendor Management Routes
         Route::get('/vendors/search', [\App\Http\Controllers\Business\VendorController::class, 'search'])->name('vendors.search');
@@ -211,6 +212,15 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::get('/vendors/{vendor}/download/{type}', [\App\Http\Controllers\Business\VendorController::class, 'downloadDocument'])->name('vendors.download-document');
         
         // Booking Management Routes
+        // New Single-page Booking Flow (must be BEFORE resource route to avoid conflicts)
+        Route::get('/bookings/flow', [\App\Http\Controllers\Business\BookingController::class, 'createFlow'])->name('bookings.flow.create');
+        Route::post('/bookings/flow/save-step', [\App\Http\Controllers\Business\BookingController::class, 'saveFlowStep'])->name('bookings.flow.save_step');
+        Route::post('/bookings/flow/clear-draft', [\App\Http\Controllers\Business\BookingController::class, 'clearFlowDraft'])->name('bookings.flow.clear_draft');
+        Route::get('/bookings/flow/vehicles/list', [\App\Http\Controllers\Business\BookingController::class, 'listFlowVehicles'])->name('bookings.flow.vehicles');
+        Route::post('/bookings/flow/billing/summary', [\App\Http\Controllers\Business\BookingController::class, 'billingSummary'])->name('bookings.flow.billing_summary');
+        Route::post('/bookings/flow/store', [\App\Http\Controllers\Business\BookingController::class, 'storeFromFlow'])->name('bookings.flow.store');
+        Route::get('/bookings/flow/vehicle/{vehicleId}/billing', [\App\Http\Controllers\Business\BookingController::class, 'getVehicleForBilling'])->name('bookings.flow.vehicle.billing');
+        
         Route::get('/bookings/quick-create', [\App\Http\Controllers\Business\BookingController::class, 'quickCreate'])->name('bookings.quick-create');
         Route::resource('bookings', \App\Http\Controllers\Business\BookingController::class);
         Route::post('/bookings/{booking}/start', [\App\Http\Controllers\Business\BookingController::class, 'start'])->name('bookings.start');
@@ -219,7 +229,11 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::get('/bookings/available-vehicles', [\App\Http\Controllers\Business\BookingController::class, 'getAvailableVehicles'])->name('bookings.available-vehicles');
         Route::post('/bookings/calculate-pricing', [\App\Http\Controllers\Business\BookingController::class, 'calculatePricing'])->name('bookings.calculate-pricing');
         
-        // 5-Stage Booking Flow Routes
+        // API Routes for Single-Page Booking Flow
+        Route::get('/api/vehicles/available', [\App\Http\Controllers\Business\BookingController::class, 'getAvailableVehicles'])->name('api.vehicles.available');
+        Route::get('/api/customers/search', [\App\Http\Controllers\Business\BookingController::class, 'searchCustomers'])->name('api.customers.search');
+        
+        // 5-Stage Booking Flow Routes (old multi-page flow - kept for backward compatibility)
         Route::prefix('bookings/flow')->name('bookings.flow.')->group(function () {
             Route::get('/step1', [\App\Http\Controllers\Business\BookingController::class, 'createStep1'])->name('step1');
             Route::post('/step1', [\App\Http\Controllers\Business\BookingController::class, 'processStep1'])->name('process-step1');
@@ -239,10 +253,6 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::get('/reports/vehicle', [\App\Http\Controllers\Business\ReportsController::class, 'vehicleReport'])->name('reports.vehicle');
         Route::get('/reports/vendor', [\App\Http\Controllers\Business\ReportsController::class, 'vendorReport'])->name('reports.vendor');
         Route::get('/reports/booking', [\App\Http\Controllers\Business\ReportsController::class, 'bookingReport'])->name('reports.booking');
-        
-        // API Routes for Single-Page Booking Flow
-        Route::get('/api/vehicles/available', [\App\Http\Controllers\Business\BookingController::class, 'getAvailableVehicles'])->name('api.vehicles.available');
-        Route::get('/api/customers/search', [\App\Http\Controllers\Business\BookingController::class, 'searchCustomers'])->name('api.customers.search');
     });
 });
 

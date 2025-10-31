@@ -96,41 +96,7 @@
     margin: 0;
 }
 
-.save-button {
-    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
-    border: none;
-    border-radius: 8px;
-    padding: 15px 60px;
-    color: white;
-    font-weight: 500;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(107, 106, 222, 0.3);
-}
-
-.save-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(107, 106, 222, 0.4);
-    color: white;
-}
-
-.cancel-button {
-    background: #919191;
-    border: none;
-    text-decoration:none;
-    border-radius: 8px;
-    padding: 15px 24px;
-    color: white;
-    font-weight: 500;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    margin-right: 12px;
-}
-
-.cancel-button:hover {
-    background: #5a6268;
-    color: white;
-}
+/* Buttons use common `nxz-btn-primary` and `nxz-btn-secondary` in common.css */
 
 .image-preview-container {
     display: flex;
@@ -577,6 +543,23 @@
                                        placeholder="150">
                                 <div class="helper-text">Engine cubic capacity in CC (for bikes and scooters)</div>
                                 @error('engine_capacity_cc')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="seating_capacity_bike" class="form-label required">Seating Capacity</label>
+                                <select class="form-select @error('seating_capacity') is-invalid @enderror" 
+                                        id="seating_capacity_bike" 
+                                        name="seating_capacity">
+                                    <option value="">Select Seating Capacity</option>
+                                    @for($i = 1; $i <= 2; $i++)
+                                        <option value="{{ $i }}" {{ old('seating_capacity', $vehicle->seating_capacity) == $i ? 'selected' : '' }}>{{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <div class="helper-text">Number of seats (for bikes and scooters)</div>
+                                @error('seating_capacity')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -1130,10 +1113,10 @@
 
                     <!-- Form Actions -->
                     <div class="d-flex justify-content-end gap-2 mb-4">
-                        <a href="{{ route('business.vehicles.index') }}" class="cancel-button">
+                        <a href="{{ route('business.vehicles.index') }}" class="nxz-btn-secondary btn cancel-button">
                             Cancel
                         </a>
-                        <button type="submit" class="save-button">
+                        <button type="submit" class="nxz-btn-primary btn save-button">
                             <i class="fas fa-save me-2"></i>Save
                         </button>
                     </div>
@@ -2659,18 +2642,22 @@ $(document).ready(function() {
         
         // Show relevant fields based on vehicle type
         const carSeating = document.getElementById('seating_capacity');
+        const bikeSeating = document.getElementById('seating_capacity_bike');
         const heavySeating = document.getElementById('seating_capacity_heavy');
+
+        // Reset disabled/required
+        if (carSeating) { carSeating.required = false; carSeating.disabled = true; }
+        if (bikeSeating) { bikeSeating.required = false; bikeSeating.disabled = true; }
+        if (heavySeating) { heavySeating.required = false; heavySeating.disabled = true; }
 
         if (vehicleType === 'car') {
             $('#car-fields').show();
             $('#default-transmission-field').show();
-            if (carSeating) carSeating.required = true;
-            if (heavySeating) heavySeating.required = false;
+            if (carSeating) { carSeating.required = true; carSeating.disabled = false; }
         } else if (vehicleType === 'bike_scooter') {
             $('#bike-scooter-fields').show();
             $('#default-transmission-field').show();
-            if (carSeating) carSeating.required = false;
-            if (heavySeating) heavySeating.required = false;
+            if (bikeSeating) { bikeSeating.required = true; bikeSeating.disabled = false; }
         } else if (vehicleType === 'heavy_vehicle') {
             $('#heavy-vehicle-fields').show();
             $('#default-transmission-field').show();

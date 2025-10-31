@@ -57,7 +57,36 @@ class VehicleController extends Controller
             }
         }
 
-        $vehicles = $query->latest()->paginate(20);
+        // Sorting
+        $sort = $request->get('sort');
+        $dir = strtolower($request->get('dir', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+        // Map UI sort keys to database columns
+        $sortableColumns = [
+            'vehicle' => ['vehicle_make', 'vehicle_model'],
+            'unit_type' => ['vehicle_type'],
+            'fuel' => ['fuel_type'],
+            'price' => ['rental_price_24h'],
+            'capacity' => ['seating_capacity'],
+            'status' => ['vehicle_status'],
+        ];
+
+        if ($sort && isset($sortableColumns[$sort])) {
+            $columns = $sortableColumns[$sort];
+            // Apply primary and optional secondary sorts
+            foreach ($columns as $index => $column) {
+                if ($index === 0) {
+                    $query->orderBy($column, $dir);
+                } else {
+                    $query->orderBy($column, $dir);
+                }
+            }
+        } else {
+            // Default latest
+            $query->latest();
+        }
+
+        $vehicles = $query->paginate(20)->appends($request->query());
         
         // Get subscription information for capacity display
         $subscription = $business->subscriptions()->whereIn('status', ['active', 'trial'])->first();
@@ -873,6 +902,7 @@ class VehicleController extends Controller
             $rules['transmission_type'] = 'required|in:manual,automatic,hybrid';
         } elseif ($request->vehicle_type === 'bike_scooter') {
             $rules['engine_capacity_cc'] = 'required|integer|min:50|max:2000';
+            $rules['seating_capacity'] = 'required|integer|min:1|max:2';
             // Accept transmission_type directly for bikes; keep legacy key for backward compatibility
             $rules['transmission_type'] = 'required|in:gear,gearless';
         } elseif ($request->vehicle_type === 'heavy_vehicle') {

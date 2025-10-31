@@ -85,7 +85,7 @@ class VendorController extends Controller
         $sortBy = $request->get('sort_by', 'created_at');
         $sortDirection = $request->get('sort_direction', 'desc');
         
-        $allowedSortFields = ['vendor_name', 'created_at', 'gstin', 'pan_number'];
+        $allowedSortFields = ['vendor_name', 'vendor_type', 'mobile_number', 'email_address', 'created_at'];
         if (in_array($sortBy, $allowedSortFields)) {
             $query->orderBy($sortBy, $sortDirection);
         } else {
@@ -166,11 +166,12 @@ class VendorController extends Controller
                         'pan_number' => $vendor->pan_number,
                         'commission_type' => $vendor->commission_type,
                         'commission_rate' => $vendor->commission_rate
-                    ]
+                    ],
+                    'redirect_url' => route('business.vendors.index')
                 ]);
             }
 
-            return redirect()->route('business.vendors.show', $vendor)
+            return redirect()->route('business.vendors.index')
                 ->with('success', 'Vendor registered successfully!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->ajax() || $request->wantsJson()) {
@@ -279,10 +280,10 @@ class VendorController extends Controller
             abort(403, 'Unauthorized access to vendor.');
         }
 
-        // Get vehicles associated with this vendor (by vendor_name)
+        // Get vehicles associated with this vendor (by name), without excluding by ownership_type
         $vehicles = $business->vehicles()
             ->where('vendor_name', $vendor->vendor_name)
-            ->where('ownership_type', 'vendor_provided')
+            ->orderByRaw("CASE WHEN ownership_type='vendor_provided' THEN 0 ELSE 1 END")
             ->orderBy('vehicle_make')
             ->orderBy('vehicle_model')
             ->get();
@@ -460,7 +461,7 @@ class VendorController extends Controller
             'vendor_name' => 'required|string|max:255',
             'vendor_type' => 'required|in:vehicle_provider,service_partner,other',
             'gstin' => 'nullable|string|size:15|unique:vendors,gstin,' . $vendorId,
-            'pan_number' => 'required|string|size:10|unique:vendors,pan_number,' . $vendorId,
+            'pan_number' => 'nullable|string|size:10|unique:vendors,pan_number,' . $vendorId,
             'primary_contact_person' => 'required|string|max:255',
             'mobile_number' => 'required|string|max:15|unique:vendors,mobile_number,' . $vendorId,
             'alternate_contact_number' => 'nullable|string|max:15',

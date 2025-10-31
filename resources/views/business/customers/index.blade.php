@@ -4,7 +4,6 @@
 @section('page-title', 'Customer Management')
 
 @section('content')
-<div class="content-wrapper">
                 <!-- Search, Filters and Add Customer Section -->
                 <div class="row mb-3 align-items-end filter-row">
                     <div class="col-md-4">
@@ -36,6 +35,7 @@
                 </div>
 
 <!-- Customer List Table -->
+<div class="filter-section">
 <div class="table-responsive">
     <table id="customerTable" class="table table-striped table-bordered">
         <thead>

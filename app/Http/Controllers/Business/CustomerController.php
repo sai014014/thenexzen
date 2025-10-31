@@ -216,6 +216,54 @@ class CustomerController extends Controller
     }
 
     /**
+     * Quick create customer for booking flow (AJAX)
+     */
+    public function quickStore(Request $request)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        if (!$businessAdmin) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $business = $businessAdmin->business;
+        
+        $request->validate([
+            'full_name' => 'required|string|max:255',
+            'mobile_number' => 'required|string|max:20',
+            'email_address' => 'nullable|email|max:255',
+            'customer_type' => 'required|in:individual,corporate',
+        ]);
+
+        try {
+            $customer = Customer::create([
+                'business_id' => $business->id,
+                'full_name' => $request->full_name,
+                'mobile_number' => $request->mobile_number,
+                'email_address' => $request->email_address,
+                'customer_type' => $request->customer_type,
+                'status' => 'active',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'customer' => [
+                    'id' => $customer->id,
+                    'full_name' => $customer->full_name,
+                    'mobile_number' => $customer->mobile_number,
+                    'email_address' => $customer->email_address,
+                    'company_name' => $customer->company_name,
+                ],
+                'message' => 'Customer created successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating customer: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Customer $customer)

@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Business;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vendor;
+use App\Models\Vehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class VendorController extends Controller
 {
@@ -288,7 +291,25 @@ class VendorController extends Controller
             ->orderBy('vehicle_model')
             ->get();
 
-        return view('business.vendors.show', compact('vendor', 'business', 'businessAdmin', 'vehicles'));
+        // Calculate monthly earnings history (last 12 months)
+        $monthlyEarnings = $this->calculateMonthlyEarnings($vehicles, $vendor);
+        
+        // Reverse array to show current/latest month first
+        $monthlyEarnings = array_reverse($monthlyEarnings);
+        
+        // Calculate current month earnings
+        $currentMonth = Carbon::now()->startOfMonth();
+        $currentMonthEnd = Carbon::now()->endOfMonth();
+        $currentMonthEarnings = $this->calculateMonthEarnings($vehicles, $currentMonth, $currentMonthEnd);
+
+        return view('business.vendors.show', compact(
+            'vendor', 
+            'business', 
+            'businessAdmin', 
+            'vehicles',
+            'monthlyEarnings',
+            'currentMonthEarnings'
+        ));
     }
 
     /**
@@ -424,9 +445,9 @@ class VendorController extends Controller
     }
 
     /**
-     * Download vendor document
+     * View vendor document inline (PDF/Image) in the browser
      */
-    public function downloadDocument(Vendor $vendor, $type)
+    public function viewDocument(Vendor $vendor, $type)
     {
         $businessAdmin = Auth::guard('business_admin')->user();
         
@@ -447,9 +468,49 @@ class VendorController extends Controller
             abort(404, 'Document not found.');
         }
 
-        $filename = $this->getDocumentFilename($vendor, $type);
+        $mime = mime_content_type($documentPath);
+
+        // Display inline in new tab
+        return response()->file($documentPath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($documentPath) . '"'
+        ]);
+    }
+
+    /**
+     * Download vendor document (uses original filename)
+     */
+    public function downloadDocument(Vendor $vendor, $type)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
         
-        return Storage::disk('public')->download($documentPath, $filename);
+        if (!$businessAdmin) {
+            return redirect()->route('business.login')->with('error', 'Please log in to continue.');
+        }
+        
+        $business = $businessAdmin->business;
+
+        // Ensure the vendor belongs to this business
+        if ($vendor->business_id !== $business->id) {
+            abort(403, 'Unauthorized access to vendor.');
+        }
+
+        // Get the relative path from vendor model
+        $relativePath = match($type) {
+            'vendor_agreement' => $vendor->vendor_agreement_path,
+            'gstin_certificate' => $vendor->gstin_certificate_path,
+            'pan_card' => $vendor->pan_card_path,
+            default => null
+        };
+        
+        if (!$relativePath || !Storage::disk('public')->exists($relativePath)) {
+            abort(404, 'Document not found.');
+        }
+
+        // Use original filename from path instead of generic name
+        $filename = basename($relativePath);
+        
+        return Storage::disk('public')->download($relativePath, $filename);
     }
 
     /**
@@ -573,6 +634,115 @@ class VendorController extends Controller
     /**
      * Get document filename for download
      */
+    /**
+     * Calculate monthly earnings history for vendor (last 12 months)
+     */
+    private function calculateMonthlyEarnings(Collection $vehicles, Vendor $vendor): array
+    {
+        $monthlyData = [];
+        $now = Carbon::now();
+        
+        // Get last 12 months
+        for ($i = 11; $i >= 0; $i--) {
+            $monthStart = $now->copy()->subMonths($i)->startOfMonth();
+            $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
+            
+            $monthEarnings = $this->calculateMonthEarnings($vehicles, $monthStart, $monthEnd);
+            $monthEarnings['month'] = $monthStart->format('M Y');
+            $monthEarnings['month_key'] = $monthStart->format('Y-m');
+            
+            $monthlyData[] = $monthEarnings;
+        }
+        
+        return $monthlyData;
+    }
+    
+    /**
+     * Calculate earnings for a specific month based on vehicle commission settings
+     */
+    private function calculateMonthEarnings(Collection $vehicles, Carbon $monthStart, Carbon $monthEnd): array
+    {
+        $totalEarnings = 0;
+        $totalBookings = 0;
+        $totalBusinessRevenue = 0;
+        $bookingDetails = [];
+        
+        foreach ($vehicles as $vehicle) {
+            // Get completed bookings for this month
+            $bookings = $vehicle->bookings()
+                ->where('status', 'completed')
+                ->whereNotNull('completed_at')
+                ->whereBetween('completed_at', [$monthStart, $monthEnd])
+                ->get();
+            
+            foreach ($bookings as $booking) {
+                $businessRevenue = $booking->total_amount;
+                $totalBusinessRevenue += $businessRevenue;
+                $totalBookings++;
+                
+                // Calculate vendor earnings based on VEHICLE-SPECIFIC commission settings
+                $vendorEarning = $this->calculateVendorEarning($vehicle, $booking);
+                $totalEarnings += $vendorEarning;
+                
+                $bookingDetails[] = [
+                    'booking_id' => $booking->booking_number ?? $booking->id,
+                    'vehicle' => "{$vehicle->vehicle_make} {$vehicle->vehicle_model}",
+                    'business_revenue' => $businessRevenue,
+                    'vendor_earning' => $vendorEarning,
+                    'completed_at' => $booking->completed_at->format('d M Y'),
+                ];
+            }
+        }
+        
+        return [
+            'total_earnings' => $totalEarnings,
+            'total_bookings' => $totalBookings,
+            'total_business_revenue' => $totalBusinessRevenue,
+            'net_business_profit' => $totalBusinessRevenue - $totalEarnings,
+            'bookings' => $bookingDetails,
+        ];
+    }
+    
+    /**
+     * Calculate vendor earning for a single booking based on vehicle commission settings
+     */
+    private function calculateVendorEarning(Vehicle $vehicle, $booking): float
+    {
+        $commissionType = $vehicle->commission_type ?? 'fixed';
+        $commissionRate = $vehicle->commission_rate ?? $vehicle->commission_value ?? 0;
+        
+        // Normalize commission type
+        if ($commissionType === 'fixed_amount') {
+            $commissionType = 'fixed';
+        } elseif ($commissionType === 'percentage_of_revenue') {
+            $commissionType = 'percentage';
+        }
+        
+        $businessRevenue = $booking->total_amount;
+        
+        switch ($commissionType) {
+            case 'fixed':
+                // Fixed amount per booking
+                return (float)$commissionRate;
+                
+            case 'percentage':
+                // Percentage of booking amount
+                return $businessRevenue * ((float)$commissionRate / 100);
+                
+            case 'per_booking_per_day':
+                // Per day commission
+                $days = max(1, (int)ceil($booking->start_date_time->diffInHours($booking->end_date_time) / 24));
+                return (float)$commissionRate * $days;
+                
+            case 'lease_to_rent':
+                // Lease to rent - fixed monthly amount (if booking in month, pay full month)
+                return (float)$commissionRate;
+                
+            default:
+                return 0;
+        }
+    }
+
     private function getDocumentFilename(Vendor $vendor, $type)
     {
         $filename = $vendor->vendor_name . '_';

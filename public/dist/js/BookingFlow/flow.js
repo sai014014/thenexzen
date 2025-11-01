@@ -14,21 +14,55 @@
       if (step >= 2) {
         const pickupDt = qs('#pickup_datetime')?.value;
         const dropoffDt = qs('#dropoff_datetime')?.value;
-        const pickupLoc = qs('#pickup_location')?.value;
-        const dropoffLoc = qs('#dropoff_location')?.value;
         
-        if (!pickupDt || !dropoffDt || !pickupLoc || !dropoffLoc) {
-          alert('Please complete Step 1 (pickup/drop-off dates and locations) before proceeding.');
+        if (!pickupDt || !dropoffDt) {
+          alert('Please complete Step 1 (pickup/drop-off dates) before proceeding.');
+          showStep(1);
+          return;
+        }
+        
+        // Validate dates are correct (end date must be after start date)
+        const pickupDate = new Date(pickupDt);
+        const dropoffDate = new Date(dropoffDt);
+        if (isNaN(pickupDate.getTime()) || isNaN(dropoffDate.getTime())) {
+          alert('Invalid date format. Please check your pickup and drop-off dates.');
+          showStep(1);
+          return;
+        }
+        if (dropoffDate <= pickupDate) {
+          alert('Drop-off date and time must be after pickup date and time. Please correct the dates in Step 1.');
           showStep(1);
           return;
         }
       }
       
-      // Check step 2 completion before allowing step 3+
+      // Check step 1 completion (vehicle selection) before allowing step 3+
       if (step >= 3) {
+        const pickupDt = qs('#pickup_datetime')?.value;
+        const dropoffDt = qs('#dropoff_datetime')?.value;
+        if (!pickupDt || !dropoffDt) {
+          alert('Please complete Step 1 (pickup/drop-off dates) before proceeding.');
+          showStep(1);
+          return;
+        }
+        
+        // Validate dates are correct (end date must be after start date)
+        const pickupDate = new Date(pickupDt);
+        const dropoffDate = new Date(dropoffDt);
+        if (isNaN(pickupDate.getTime()) || isNaN(dropoffDate.getTime())) {
+          alert('Invalid date format. Please check your pickup and drop-off dates.');
+          showStep(1);
+          return;
+        }
+        if (dropoffDate <= pickupDate) {
+          alert('Drop-off date and time must be after pickup date and time. Please correct the dates in Step 1.');
+          showStep(1);
+          return;
+        }
+        
         if (!state.data.selectedVehicleId) {
-          alert('Please select a vehicle in Step 2 before proceeding.');
-          showStep(2, true);
+          alert('Please select a vehicle in Step 1 before proceeding.');
+          showStep(1, true);
           return;
         }
       }
@@ -45,7 +79,27 @@
       
       // Check step 4 completion before allowing step 5
       if (step >= 5) {
-        const rent24h = qs('#rent_24h')?.value;
+        let rent24h = qs('#rent_24h')?.value;
+        
+        // If rent_24h is empty, try to get from vehicle data or summary
+        if (!rent24h || parseFloat(rent24h) <= 0) {
+          // Try to get from vehicle card if available
+          if (state.data.selectedVehicleId) {
+            const vehicleCard = qs(`[data-vehicle-id="${state.data.selectedVehicleId}"]`);
+            if (vehicleCard) {
+              const priceText = vehicleCard.querySelector('.vehicle-price')?.textContent || '';
+              const priceMatch = priceText.match(/₹([\d,]+)/);
+              if (priceMatch) {
+                rent24h = priceMatch[1].replace(/,/g, '');
+                // Auto-populate the field
+                if (qs('#rent_24h')) {
+                  qs('#rent_24h').value = rent24h;
+                }
+              }
+            }
+          }
+        }
+        
         if (!rent24h || parseFloat(rent24h) <= 0) {
           alert('Please complete Step 4 (vehicle rental charges) before proceeding.');
           showStep(4, true);
@@ -58,9 +112,51 @@
     qsa('.flow-step').forEach(s => s.classList.add('d-none'));
     const el = qs(`#step-${step}`);
     if (el) el.classList.remove('d-none');
-    qsa('.progress-steps .step').forEach(s => s.classList.toggle('active', Number(s.dataset.step) === step));
+    
+    // Show/hide booking summary sidebar (hide for step 1, show for other steps)
+    const mainContent = qs('#mainContent');
+    const summarySidebar = qs('#summarySidebar');
+    if (mainContent && summarySidebar) {
+      if (step === 1) {
+        // Step 1: Full width, hide summary
+        mainContent.classList.remove('col-lg-8');
+        mainContent.classList.add('col-12');
+        summarySidebar.classList.add('d-none');
+      } else {
+        // Other steps: Show summary sidebar
+        mainContent.classList.remove('col-12');
+        mainContent.classList.add('col-lg-8');
+        summarySidebar.classList.remove('d-none');
+      }
+    }
+    // Update progress steps - map internal step numbers to display steps
+    // Step 1 (dates & vehicles) = display step 1
+    // Step 3 (customer) = display step 3
+    // Step 4 (billing) = display step 4
+    // Step 5 (confirm) = display step 5
+    qsa('.progress-steps .step').forEach(s => {
+      const stepNum = Number(s.dataset.step);
+      const isActive = stepNum === step;
+      s.classList.toggle('active', isActive);
+      // Mark as completed if we're on a later step
+      if (stepNum < step) {
+        s.classList.add('completed');
+      } else {
+        s.classList.remove('completed');
+      }
+    });
     
     // Initialize step-specific functionality
+    if (step === 1) {
+      // Load vehicles if dates are set
+      const pickupDt = qs('#pickup_datetime')?.value;
+      const dropoffDt = qs('#dropoff_datetime')?.value;
+      if (pickupDt && dropoffDt) {
+        setTimeout(() => {
+          fetchVehicles();
+        }, 100);
+      }
+    }
     if (step === 3) {
       setTimeout(() => {
         initCustomerDropdown();
@@ -71,11 +167,86 @@
         loadVehicleDataForBilling();
       }, 100);
     }
+    if (step === 5) {
+      setTimeout(() => {
+        // Ensure Step 4 billing fields are restored if draft exists
+        const step4Data = state.data.step4RestoreData;
+        if (step4Data) {
+          // Restore Step 4 fields even if we're on step 5 (needed for preview)
+          if (qs('#rent_24h')) qs('#rent_24h').value = step4Data.rent_24h || '';
+          if (qs('#km_limit')) qs('#km_limit').value = step4Data.km_limit || '';
+          if (qs('#extra_per_hour')) qs('#extra_per_hour').value = step4Data.extra_per_hour || '';
+          if (qs('#extra_per_km')) qs('#extra_per_km').value = step4Data.extra_per_km || '';
+          if (qs('#discount_amount')) qs('#discount_amount').value = step4Data.discount_amount || '';
+          if (qs('#discount_type')) qs('#discount_type').value = step4Data.discount_type || 'amount';
+          if (qs('#advance_payment')) qs('#advance_payment').value = step4Data.advance_payment || '';
+          if (qs('#payment_method')) qs('#payment_method').value = step4Data.payment_method || '';
+        }
+        
+        // ALWAYS ensure Step 4 billing fields are loaded from vehicle if rent_24h is missing or 0
+        if (state.data.selectedVehicleId) {
+          const rent24hValue = qs('#rent_24h')?.value;
+          if (!rent24hValue || parseFloat(rent24hValue) <= 0) {
+            // Load vehicle data to populate billing fields
+            loadVehicleDataForBilling().then(() => {
+              // Wait a bit for fields to be populated
+              setTimeout(() => {
+                // Re-apply step4 data after vehicle data loads (draft values take precedence)
+                if (step4Data) {
+                  if (qs('#rent_24h') && step4Data.rent_24h) qs('#rent_24h').value = step4Data.rent_24h;
+                  if (qs('#km_limit') && step4Data.km_limit) qs('#km_limit').value = step4Data.km_limit;
+                  if (qs('#extra_per_hour') && step4Data.extra_per_hour) qs('#extra_per_hour').value = step4Data.extra_per_hour;
+                  if (qs('#extra_per_km') && step4Data.extra_per_km) qs('#extra_per_km').value = step4Data.extra_per_km;
+                  if (qs('#discount_amount') && step4Data.discount_amount) qs('#discount_amount').value = step4Data.discount_amount;
+                  if (qs('#discount_type') && step4Data.discount_type) qs('#discount_type').value = step4Data.discount_type;
+                  if (qs('#advance_payment') && step4Data.advance_payment) qs('#advance_payment').value = step4Data.advance_payment;
+                  if (qs('#payment_method') && step4Data.payment_method) qs('#payment_method').value = step4Data.payment_method;
+                }
+                
+                recomputeSummary();
+              }, 300);
+            });
+          }
+        }
+        
+        // Also ensure vehicle and customer summaries are updated for preview
+        if (state.data.selectedVehicleId) {
+          updateSummaryVehicle(state.data.selectedVehicleId);
+        }
+        if (state.data.selectedCustomerId || selectedCustomerId) {
+          const customer = selectedCustomerData || state.data.selectedCustomer;
+          if (customer && customer.name) {
+            updateSummaryCustomer(customer);
+          }
+        }
+        
+        // Recompute summary to ensure all values are current
+        recomputeSummary();
+        
+        // Render preview
+        renderConfirmPreview();
+        // Refresh preview again after summaries are updated
+        setTimeout(() => {
+          recomputeSummary();
+          renderConfirmPreview();
+        }, 400);
+      }, 100);
+    }
   }
 
   async function saveStep(stepPayload) {
     try {
-      await fetch(window.bookingFlow?.saveStepUrl || '/business/bookings/flow/save-step', {
+      // Ensure additional_charges is properly formatted (should be array, not JSON string)
+      if (stepPayload.additional_charges && typeof stepPayload.additional_charges === 'string') {
+        try {
+          stepPayload.additional_charges = JSON.parse(stepPayload.additional_charges);
+        } catch (e) {
+          // If parsing fails, set to empty array
+          stepPayload.additional_charges = [];
+        }
+      }
+      
+      const res = await fetch(window.bookingFlow?.saveStepUrl || '/business/bookings/flow/save-step', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,8 +255,13 @@
         },
         body: JSON.stringify(stepPayload),
       });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Error saving step:', res.status, errorText);
+      }
     } catch (e) {
-      // no-op
+      console.error('Error in saveStep:', e);
     }
   }
 
@@ -114,14 +290,24 @@
         setTimeout(() => {
           const modalEl = document.getElementById('resumeDraftModal');
           if (modalEl && window.bootstrap) {
-            const modal = new bootstrap.Modal(modalEl);
-            modal.show();
+            // Create modal instance but don't show it yet
+            const modal = new bootstrap.Modal(modalEl, {
+              backdrop: true,
+              keyboard: true,
+              focus: false  // Disable auto-focus to prevent aria-hidden issues
+            });
+            
+            // Attach event listeners BEFORE showing modal
             const resumeBtn = document.getElementById('resumeDraftBtn');
             const newBtn = document.getElementById('newBookingBtn');
             
             // Resume button - draft already restored, just hide modal
             if (resumeBtn) {
-              resumeBtn.addEventListener('click', () => {
+              // Remove existing listeners first
+              const newResumeBtn = resumeBtn.cloneNode(true);
+              resumeBtn.parentNode.replaceChild(newResumeBtn, resumeBtn);
+              
+              newResumeBtn.addEventListener('click', () => {
                 modal.hide();
                 // Re-apply draft in case something was missed
                 setTimeout(() => {
@@ -132,7 +318,11 @@
             
             // New booking button - clear draft and reset
             if (newBtn) {
-              newBtn.addEventListener('click', async () => {
+              // Remove existing listeners first
+              const newNewBtn = newBtn.cloneNode(true);
+              newBtn.parentNode.replaceChild(newNewBtn, newBtn);
+              
+              newNewBtn.addEventListener('click', async () => {
                 try {
                   await fetch(window.bookingFlow?.clearDraftUrl || '/business/bookings/flow/clear-draft', {
                     method: 'POST',
@@ -151,19 +341,21 @@
                 // Clear form fields
                 if (qs('#pickup_datetime')) qs('#pickup_datetime').value = '';
                 if (qs('#dropoff_datetime')) qs('#dropoff_datetime').value = '';
-                if (qs('#pickup_location')) qs('#pickup_location').value = '';
-                if (qs('#dropoff_location')) qs('#dropoff_location').value = '';
                 showStep(1);
                 modal.hide();
                 // Reload page to clear draft completely
                 window.location.reload();
               });
             }
+            
+            // Show modal only after listeners are attached and a small delay
+            // This ensures DOM is ready and prevents aria-hidden focus issues
+            setTimeout(() => {
+              modal.show();
+            }, 100);
           }
         }, 500);
-      };
-      
-      waitForReady();
+      }
     }
   }
 
@@ -175,11 +367,17 @@
     setTimeout(initDraftRestore, 200);
   }
 
+  // Flag to prevent autosave during draft restoration
+  let isRestoringDraft = false;
+
   function applyDraft(draft) {
     if (!draft || !draft.data) {
       console.warn('No draft data to apply');
       return;
     }
+    
+    // Set flag to prevent autosave during restoration
+    isRestoringDraft = true;
     
     const d = draft.data || {};
     
@@ -191,25 +389,31 @@
       if (qs('#dropoff_datetime')) {
         qs('#dropoff_datetime').value = d.step_1.dropoff_datetime || '';
       }
-      if (qs('#pickup_location')) {
-        qs('#pickup_location').value = d.step_1.pickup_location || '';
-      }
-      if (qs('#dropoff_location')) {
-        qs('#dropoff_location').value = d.step_1.dropoff_location || '';
-      }
-      // Trigger change events to update summary
-      ['pickup_datetime', 'dropoff_datetime', 'pickup_location', 'dropoff_location'].forEach(id => {
-        const el = qs('#' + id);
-        if (el && el.value) {
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
+      // Update summary without triggering autosave (we'll update manually)
       updateSummaryDates(d.step_1);
+      
+      // Trigger change events AFTER a delay to allow flag to be set, but only to update UI
+      setTimeout(() => {
+        if (qs('#pickup_datetime')?.value || qs('#dropoff_datetime')?.value) {
+          // Only reload vehicles if dates are set, but don't save (isRestoringDraft is still true)
+          fetchVehicles();
+        }
+        // Clear flag after restoration is complete
+        setTimeout(() => {
+          isRestoringDraft = false;
+        }, 500);
+      }, 100);
+    } else {
+      // If no step 1 data, clear flag immediately
+      setTimeout(() => {
+        isRestoringDraft = false;
+      }, 100);
     }
     
     // Step 2 - Restore selected vehicle
     if (d.step_2 && d.step_2.vehicle_id) {
       state.data.selectedVehicleId = d.step_2.vehicle_id;
+      // Update vehicle summary after vehicles are loaded (handled in showStep for step 2+)
     }
     
     // Step 3 - Restore selected customer
@@ -226,58 +430,41 @@
             phone: d.step_3.customer_phone || '',
             email: d.step_3.customer_email || '',
           };
+          // Update customer summary immediately
+          updateSummaryCustomer(selectedCustomerData);
         }
       }
     }
     
     // Step 4 - Restore billing fields (restore even if empty or zero)
+    // This restoration happens immediately, but will be re-applied after vehicle data loads if needed
     if (d.step_4) {
-      if (qs('#rent_24h')) {
-        qs('#rent_24h').value = d.step_4.rent_24h || '';
-      }
-      if (qs('#km_limit')) {
-        qs('#km_limit').value = d.step_4.km_limit || '';
-      }
-      if (qs('#extra_per_hour')) {
-        qs('#extra_per_hour').value = d.step_4.extra_per_hour || '';
-      }
-      if (qs('#extra_per_km')) {
-        qs('#extra_per_km').value = d.step_4.extra_per_km || '';
-      }
-      if (qs('#discount_amount')) {
-        qs('#discount_amount').value = d.step_4.discount_amount || '';
-      }
-      if (qs('#discount_type')) {
-        qs('#discount_type').value = d.step_4.discount_type || 'amount';
-      }
-      if (qs('#advance_payment')) {
-        qs('#advance_payment').value = d.step_4.advance_payment || '';
-      }
-      if (qs('#payment_method')) {
-        qs('#payment_method').value = d.step_4.payment_method || '';
-      }
-      // Restore additional charges if stored
-      if (d.step_4.additional_charges && Array.isArray(d.step_4.additional_charges) && d.step_4.additional_charges.length > 0) {
-        // Restore additional charges rows
-        const addBtn = qs('#addAdditionalCharge');
-        if (addBtn && additionalChargeCounter === 0) {
-          d.step_4.additional_charges.forEach((charge, idx) => {
-            if (idx > 0) {
-              addBtn.click(); // Trigger add row for each charge after first
-            }
-            setTimeout(() => {
-              const rows = qsa('.charge-description');
-              if (rows[idx]) {
-                rows[idx].value = charge.description || '';
-              }
-              const amounts = qsa('.charge-amount');
-              if (amounts[idx]) {
-                amounts[idx].value = charge.amount || '';
-              }
-            }, 100);
-          });
-        }
-      }
+      // Store Step 4 data for later restoration (after vehicle data loads)
+      // This ensures values aren't overwritten by vehicle defaults
+      const step4Data = {
+        rent_24h: d.step_4.rent_24h || '',
+        km_limit: d.step_4.km_limit || '',
+        extra_per_hour: d.step_4.extra_per_hour || '',
+        extra_per_km: d.step_4.extra_per_km || '',
+        discount_amount: d.step_4.discount_amount || '',
+        discount_type: d.step_4.discount_type || 'amount',
+        advance_payment: d.step_4.advance_payment || '',
+        payment_method: d.step_4.payment_method || '',
+        additional_charges: d.step_4.additional_charges || []
+      };
+      
+      // Store in state for later use
+      state.data.step4RestoreData = step4Data;
+      
+      // Try to restore immediately if fields exist
+      if (qs('#rent_24h')) qs('#rent_24h').value = step4Data.rent_24h;
+      if (qs('#km_limit')) qs('#km_limit').value = step4Data.km_limit;
+      if (qs('#extra_per_hour')) qs('#extra_per_hour').value = step4Data.extra_per_hour;
+      if (qs('#extra_per_km')) qs('#extra_per_km').value = step4Data.extra_per_km;
+      if (qs('#discount_amount')) qs('#discount_amount').value = step4Data.discount_amount;
+      if (qs('#discount_type')) qs('#discount_type').value = step4Data.discount_type;
+      if (qs('#advance_payment')) qs('#advance_payment').value = step4Data.advance_payment;
+      if (qs('#payment_method')) qs('#payment_method').value = step4Data.payment_method;
     }
     
     // Determine the correct step to navigate to by validating each step
@@ -287,9 +474,7 @@
     // Check if step 1 is complete
     const step1Complete = d.step_1 && 
       d.step_1.pickup_datetime && 
-      d.step_1.dropoff_datetime && 
-      d.step_1.pickup_location && 
-      d.step_1.dropoff_location;
+      d.step_1.dropoff_datetime;
     
     if (step1Complete) {
       targetStep = 2;
@@ -320,30 +505,108 @@
     // Skip validation since we've already validated which step to show
     showStep(targetStep, true);
     
-    // Load vehicles if on step 2 or later
+    // Load vehicles if on step 2 or later, then update summary
     if (targetStep >= 2) {
       setTimeout(() => {
-        fetchVehicles();
+        fetchVehicles().then(() => {
+          // After vehicles are loaded, update vehicle summary if vehicle was selected
+          if (d.step_2 && d.step_2.vehicle_id) {
+            setTimeout(() => {
+              updateSummaryVehicle(d.step_2.vehicle_id);
+            }, 300);
+          }
+        });
       }, 200);
     }
     
-    // Load vehicle billing data if on step 4
-    if (targetStep === 4) {
+    // Load vehicle billing data and restore Step 4 fields if on step 4 or step 5
+    if (targetStep >= 4) {
       setTimeout(() => {
+        // Load vehicle billing data first (to populate default values if needed)
+        // But we'll restore Step 4 values after it loads
         loadVehicleDataForBilling();
-        // Re-apply Step 4 values after vehicle data loads (in case vehicle data overwrote them)
-        if (d.step_4) {
-          setTimeout(() => {
-            if (qs('#rent_24h') && d.step_4.rent_24h) qs('#rent_24h').value = d.step_4.rent_24h;
-            if (qs('#km_limit') && d.step_4.km_limit) qs('#km_limit').value = d.step_4.km_limit;
-            if (qs('#extra_per_hour') && d.step_4.extra_per_hour) qs('#extra_per_hour').value = d.step_4.extra_per_hour;
-            if (qs('#extra_per_km') && d.step_4.extra_per_km) qs('#extra_per_km').value = d.step_4.extra_per_km;
-            if (qs('#discount_amount') && d.step_4.discount_amount) qs('#discount_amount').value = d.step_4.discount_amount;
-            if (qs('#discount_type') && d.step_4.discount_type) qs('#discount_type').value = d.step_4.discount_type;
-            if (qs('#advance_payment') && d.step_4.advance_payment) qs('#advance_payment').value = d.step_4.advance_payment;
-            if (qs('#payment_method') && d.step_4.payment_method) qs('#payment_method').value = d.step_4.payment_method;
-          }, 600);
-        }
+        
+        // Restore Step 4 values after vehicle data loads (this ensures draft values take precedence)
+        const restoreStep4Values = () => {
+          const step4Data = state.data.step4RestoreData || d.step_4;
+          if (!step4Data) return;
+          
+          // Restore all Step 4 billing fields (always restore, even if empty)
+          if (qs('#rent_24h')) qs('#rent_24h').value = step4Data.rent_24h || '';
+          if (qs('#km_limit')) qs('#km_limit').value = step4Data.km_limit || '';
+          if (qs('#extra_per_hour')) qs('#extra_per_hour').value = step4Data.extra_per_hour || '';
+          if (qs('#extra_per_km')) qs('#extra_per_km').value = step4Data.extra_per_km || '';
+          if (qs('#discount_amount')) qs('#discount_amount').value = step4Data.discount_amount || '';
+          if (qs('#discount_type')) qs('#discount_type').value = step4Data.discount_type || 'amount';
+          if (qs('#advance_payment')) qs('#advance_payment').value = step4Data.advance_payment || '';
+          if (qs('#payment_method')) qs('#payment_method').value = step4Data.payment_method || '';
+          
+          // Restore additional charges if stored
+          if (step4Data.additional_charges && Array.isArray(step4Data.additional_charges) && step4Data.additional_charges.length > 0) {
+            const addBtn = qs('#addAdditionalCharge');
+            if (addBtn) {
+              // Wait a bit for DOM to be ready (especially if step 4 is not visible)
+              setTimeout(() => {
+                // Clear existing additional charge rows first
+                const existingRemoveBtns = qsa('.remove-charge');
+                if (existingRemoveBtns.length > 0) {
+                  existingRemoveBtns.forEach((btn, idx) => {
+                    setTimeout(() => {
+                      if (btn && btn.parentElement) {
+                        btn.click();
+                      }
+                    }, idx * 50);
+                  });
+                }
+                
+                // Wait for rows to be cleared, then add saved charges
+                setTimeout(() => {
+                  step4Data.additional_charges.forEach((charge, idx) => {
+                    // Click add button for each charge (skip first if using existing row)
+                    setTimeout(() => {
+                      if (idx >= 1) {
+                        addBtn.click();
+                      }
+                      // Wait for new row to be added
+                      setTimeout(() => {
+                        const rows = qsa('.charge-description');
+                        const amounts = qsa('.charge-amount');
+                        const targetIdx = idx < rows.length ? idx : rows.length - 1;
+                        if (rows[targetIdx]) rows[targetIdx].value = charge.description || '';
+                        if (amounts[targetIdx]) amounts[targetIdx].value = charge.amount || '';
+                      }, 100);
+                    }, idx * 200);
+                  });
+                  // Recompute after all charges are restored
+                  setTimeout(() => {
+                    recomputeSummary();
+                  }, step4Data.additional_charges.length * 250);
+                }, 500);
+              }, 400);
+            }
+          }
+          
+          // Trigger discount display update
+          if (qs('#discount_amount') && qs('#discount_type')) {
+            const discountAmount = parseFloat(qs('#discount_amount').value || 0);
+            const discountType = qs('#discount_type').value || 'amount';
+            const display = qs('#booking_discount_display') || qs('#discount_display');
+            if (display) {
+              if (discountType === 'percentage') {
+                display.value = `${discountAmount}%`;
+              } else {
+                display.value = `₹${discountAmount.toFixed(2)}`;
+              }
+            }
+          }
+          
+          // Recalculate summary after restoring Step 4 values
+          recomputeSummary();
+        };
+        
+        // Apply restoration after vehicle data loads (multiple attempts to ensure it works)
+        setTimeout(restoreStep4Values, 800);
+        setTimeout(restoreStep4Values, 1200);
       }, 400);
     }
     
@@ -353,70 +616,210 @@
         initCustomerDropdown();
       }, 200);
     }
+    
+    // If restoring to step 4 or 5, also update vehicle summary (vehicle list might already be loaded)
+    if (targetStep >= 4 && d.step_2 && d.step_2.vehicle_id) {
+      setTimeout(() => {
+        // Try to update from vehicle card if available
+        updateSummaryVehicle(d.step_2.vehicle_id);
+        // If vehicle card not found, fetch vehicles first
+        const vehicleCard = qs(`[data-vehicle-id="${d.step_2.vehicle_id}"]`);
+        if (!vehicleCard && targetStep >= 2) {
+          fetchVehicles().then(() => {
+            setTimeout(() => {
+              updateSummaryVehicle(d.step_2.vehicle_id);
+            }, 500);
+          });
+        }
+      }, 800);
+    }
   }
 
-  // Step 1
-  const step1Next = qs('#step1Next');
-  if (step1Next) {
-    step1Next.addEventListener('click', async () => {
-      const payload = {
-        step: 1,
-        pickup_datetime: qs('#pickup_datetime').value,
-        dropoff_datetime: qs('#dropoff_datetime').value,
-        pickup_location: qs('#pickup_location').value,
-        dropoff_location: qs('#dropoff_location').value,
-      };
-      // minimal validation
-      if (!payload.pickup_datetime || !payload.dropoff_datetime || !payload.pickup_location || !payload.dropoff_location) {
-        alert('Please fill pickup/drop dates and locations');
-        return;
+  // Set default dates on page load
+  function setDefaultDates() {
+    const pickupInput = qs('#pickup_datetime');
+    const dropoffInput = qs('#dropoff_datetime');
+    
+    // Set min attribute for pickup date to today (prevent selecting past dates)
+    if (pickupInput) {
+      const now = new Date();
+      // Remove seconds and milliseconds for datetime-local format
+      now.setSeconds(0, 0);
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+      pickupInput.setAttribute('min', minDateTime);
+      
+      // If pickup input is empty, set to current date and time
+      if (!pickupInput.value) {
+        pickupInput.value = minDateTime;
+      } else {
+        // If pickup has a value but it's in the past, reset to now
+        const pickupDate = new Date(pickupInput.value);
+        if (pickupDate < now) {
+          pickupInput.value = minDateTime;
+        }
       }
-      const pd = new Date(payload.pickup_datetime);
-      const dd = new Date(payload.dropoff_datetime);
-      if (isFinite(pd) && isFinite(dd) && dd <= pd) {
-        alert('Drop-off must be after pickup');
-        return;
+    }
+    
+    // Update dropoff min when pickup changes
+    if (pickupInput && dropoffInput) {
+      // Set initial dropoff min based on pickup value
+      if (pickupInput.value) {
+        dropoffInput.setAttribute('min', pickupInput.value);
       }
-      await saveStep(payload);
-      updateSummaryDates(payload);
-      showStep(2);
-      fetchVehicles();
-    });
+    }
+    
+    if (dropoffInput && !dropoffInput.value && pickupInput?.value) {
+      // Set to start date + 24 hours
+      const pickupDate = new Date(pickupInput.value);
+      pickupDate.setHours(pickupDate.getHours() + 24);
+      const year = pickupDate.getFullYear();
+      const month = String(pickupDate.getMonth() + 1).padStart(2, '0');
+      const day = String(pickupDate.getDate()).padStart(2, '0');
+      const hours = String(pickupDate.getHours()).padStart(2, '0');
+      const minutes = String(pickupDate.getMinutes()).padStart(2, '0');
+      dropoffInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    
+    // Auto-load vehicles if both dates are set
+    if (pickupInput?.value && dropoffInput?.value) {
+      setTimeout(() => {
+        fetchVehicles();
+        updateSummaryDates();
+      }, 300);
+    }
+  }
+  
+  // Set default dates when page loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setDefaultDates);
+  } else {
+    setTimeout(setDefaultDates, 100);
   }
 
-  // Autosave Step 1 on change
-  ['#pickup_datetime','#dropoff_datetime','#pickup_location','#dropoff_location'].forEach(sel => {
+  // Autosave Step 1 on change and reload vehicles
+  ['#pickup_datetime','#dropoff_datetime'].forEach(sel => {
     const el = qs(sel);
     if (el) {
       el.addEventListener('change', () => {
-        saveStep({
-          step: 1,
-          pickup_datetime: qs('#pickup_datetime').value,
-          dropoff_datetime: qs('#dropoff_datetime').value,
-          pickup_location: qs('#pickup_location').value,
-          dropoff_location: qs('#dropoff_location').value,
-        });
+        // Don't autosave during draft restoration
+        if (!isRestoringDraft) {
+          saveStep({
+            step: 1,
+            pickup_datetime: qs('#pickup_datetime').value,
+            dropoff_datetime: qs('#dropoff_datetime').value,
+          });
+        }
+        updateSummaryDates();
+        
+        // If both dates are set, reload vehicles
+        const pickupDt = qs('#pickup_datetime')?.value;
+        const dropoffDt = qs('#dropoff_datetime')?.value;
+        if (pickupDt && dropoffDt) {
+          // Validate dates
+          const pd = new Date(pickupDt);
+          const dd = new Date(dropoffDt);
+          if (isFinite(pd) && isFinite(dd) && dd > pd) {
+            fetchVehicles();
+          }
+        }
       });
+      
+      // Also update dropoff when pickup changes (auto-set to +24hrs if empty)
+      if (sel === '#pickup_datetime') {
+        el.addEventListener('change', () => {
+          const dropoffInput = qs('#dropoff_datetime');
+          
+          // Update dropoff min to be at least pickup date
+          if (dropoffInput && el.value) {
+            dropoffInput.setAttribute('min', el.value);
+          }
+          
+          // Auto-set dropoff to +24hrs if empty
+          if (dropoffInput && !dropoffInput.value && el.value) {
+            const pickupDate = new Date(el.value);
+            pickupDate.setHours(pickupDate.getHours() + 24);
+            const year = pickupDate.getFullYear();
+            const month = String(pickupDate.getMonth() + 1).padStart(2, '0');
+            const day = String(pickupDate.getDate()).padStart(2, '0');
+            const hours = String(pickupDate.getHours()).padStart(2, '0');
+            const minutes = String(pickupDate.getMinutes()).padStart(2, '0');
+            dropoffInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            dropoffInput.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+      }
     }
   });
 
   // Navigation buttons
   qsa('[data-prev]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const prevStep = Math.max(1, state.step - 1);
+      // Map previous steps: from step 3 go to step 1, from step 4 go to step 3, from step 5 go to step 4
+      let prevStep = state.step - 1;
+      if (state.step === 3) prevStep = 1; // From customer, go back to dates & vehicles
+      prevStep = Math.max(1, prevStep);
       // Going back doesn't need validation - skip it
       showStep(prevStep, true);
       if (prevStep === 3) setTimeout(initCustomerDropdown, 100);
       if (prevStep === 4) setTimeout(loadVehicleDataForBilling, 100);
+      if (prevStep === 1) {
+        // Reload vehicles when going back to step 1
+        const pickupDt = qs('#pickup_datetime')?.value;
+        const dropoffDt = qs('#dropoff_datetime')?.value;
+        if (pickupDt && dropoffDt) {
+          setTimeout(() => fetchVehicles(), 300);
+        }
+      }
+    });
+  });
+  
+  // Clickable progress steps for navigation
+  qsa('.clickable-step').forEach(stepEl => {
+    stepEl.addEventListener('click', (e) => {
+      const targetStep = Number(stepEl.dataset.step);
+      if (targetStep && targetStep !== state.step) {
+        // Validate dates first before allowing any navigation from Step 1
+        if (targetStep >= 2 || state.step >= 2) {
+          const pickupDt = qs('#pickup_datetime')?.value;
+          const dropoffDt = qs('#dropoff_datetime')?.value;
+          
+          if (pickupDt && dropoffDt) {
+            const pickupDate = new Date(pickupDt);
+            const dropoffDate = new Date(dropoffDt);
+            
+            if (isNaN(pickupDate.getTime()) || isNaN(dropoffDate.getTime())) {
+              alert('Invalid date format. Please check your pickup and drop-off dates in Step 1.');
+              showStep(1);
+              return;
+            }
+            
+            if (dropoffDate <= pickupDate) {
+              alert('Drop-off date and time must be after pickup date and time. Please correct the dates in Step 1.');
+              showStep(1);
+              return;
+            }
+          }
+        }
+        // Allow navigation - validation will happen in showStep
+        showStep(targetStep);
+      }
     });
   });
   
   // Generic next buttons - validation handled in showStep()
   qsa('[data-next]').forEach(btn => {
-    // Skip if it's step4Next or step3Next or step1Next - they have their own handlers
-    if (btn.id === 'step4Next' || btn.id === 'step3Next' || btn.id === 'step1Next') return;
+    // Skip if it's step4Next or step3Next - they have their own handlers
+    if (btn.id === 'step4Next' || btn.id === 'step3Next') return;
     btn.addEventListener('click', () => {
-      const nextStep = Math.min(5, state.step + 1);
+      // Map steps: after step 1, next is step 3 (customer), then 4, then 5
+      let nextStep = state.step + 1;
+      if (state.step === 1) nextStep = 3; // Skip step 2 (merged into step 1)
+      nextStep = Math.min(5, nextStep);
       // showStep() will validate previous steps
       showStep(nextStep);
     });
@@ -440,7 +843,7 @@
       sort: currentSort || '',
     });
     try {
-      qs('#vehicleList').innerHTML = '<p class="text-muted">Loading vehicles...</p>';
+      qs('#vehicleList').innerHTML = '<div class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Loading...</span></div>Loading vehicles...</div>';
       const url = window.bookingFlow?.vehiclesUrl || '/business/bookings/flow/vehicles/list';
       const res = await fetch(url + '?' + params.toString(), { 
         headers: { 
@@ -484,6 +887,7 @@
           state.data.selectedVehicleId = id;
           await saveStep({ step: 2, vehicle_id: id });
           updateSummaryVehicle(id);
+          // Navigate directly to step 3 (customer) - no next button needed
           showStep(3); // This will trigger initCustomerDropdown
         });
       });
@@ -876,18 +1280,47 @@
       
       const vehicleData = await res.json();
       
-      // Populate fields only if they're empty (allow user to edit if needed)
-      if (vehicleData.rental_price_24h && !qs('#rent_24h')?.value) {
-        qs('#rent_24h').value = vehicleData.rental_price_24h;
+      // Handle both response formats (vehicle object or direct properties)
+      const vehicle = vehicleData.vehicle || vehicleData;
+      
+      // Populate fields ONLY if they're completely empty (don't overwrite user-entered values)
+      // This allows users to customize rental info without vehicle defaults overwriting them
+      if (vehicle.rental_price_24h) {
+        const currentValue = qs('#rent_24h')?.value?.trim();
+        // Only populate if field is truly empty (not 0, empty string, or whitespace)
+        if (!currentValue) {
+          qs('#rent_24h').value = vehicle.rental_price_24h;
+        }
       }
-      if (vehicleData.km_limit_per_booking && !qs('#km_limit')?.value) {
-        qs('#km_limit').value = vehicleData.km_limit_per_booking;
+      if (vehicle.km_limit_per_booking) {
+        const currentKmLimit = qs('#km_limit')?.value?.trim();
+        if (!currentKmLimit) {
+          qs('#km_limit').value = vehicle.km_limit_per_booking;
+        }
       }
-      if (vehicleData.extra_rental_price_per_hour && !qs('#extra_per_hour')?.value) {
-        qs('#extra_per_hour').value = vehicleData.extra_rental_price_per_hour;
+      if (vehicle.extra_rental_price_per_hour) {
+        const currentExtraHour = qs('#extra_per_hour')?.value?.trim();
+        if (!currentExtraHour) {
+          qs('#extra_per_hour').value = vehicle.extra_rental_price_per_hour;
+        }
       }
-      if (vehicleData.extra_price_per_km && !qs('#extra_per_km')?.value) {
-        qs('#extra_per_km').value = vehicleData.extra_price_per_km;
+      if (vehicle.extra_price_per_km) {
+        const currentExtraKm = qs('#extra_per_km')?.value?.trim();
+        if (!currentExtraKm) {
+          qs('#extra_per_km').value = vehicle.extra_price_per_km;
+        }
+      }
+      
+      // Also update vehicle summary if vehicle data is available
+      if (vehicle.vehicle_make && vehicle.vehicle_model) {
+        const vehicleName = `${vehicle.vehicle_make} ${vehicle.vehicle_model}`.trim();
+        const priceText = `₹${parseFloat(vehicle.rental_price_24h || 0).toFixed(2)} / 24hrs`;
+        const sumVehicleDiv = qs('#sumVehicle');
+        if (sumVehicleDiv) {
+          sumVehicleDiv.classList.remove('d-none');
+          if (qs('#sumVehicleName')) qs('#sumVehicleName').textContent = vehicleName;
+          if (qs('#sumVehicleAmount')) qs('#sumVehicleAmount').textContent = priceText;
+        }
       }
       
       // Trigger recompute summary after loading data
@@ -902,9 +1335,13 @@
       if (vehicleCard) {
         const priceText = vehicleCard.querySelector('.vehicle-price')?.textContent || '';
         const priceMatch = priceText.match(/₹([\d,]+)/);
-        if (priceMatch && !qs('#rent_24h')?.value) {
+        if (priceMatch) {
           const price = priceMatch[1].replace(/,/g, '');
-          qs('#rent_24h').value = price;
+          const currentValue = qs('#rent_24h')?.value;
+          // Populate if field is empty or value is 0
+          if (!currentValue || parseFloat(currentValue) <= 0) {
+            qs('#rent_24h').value = price;
+          }
         }
       }
     }
@@ -1006,13 +1443,28 @@
         },
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      
+      // Check if response has content before parsing JSON
+      const text = await res.text();
+      if (!text || text.trim() === '') {
+        throw new Error('Empty response from server');
+      }
+      
+      const data = JSON.parse(text);
       if (qs('#sumSubTotal')) qs('#sumSubTotal').textContent = `₹${data.subTotal}`;
       if (qs('#sumDiscount')) qs('#sumDiscount').textContent = `₹${data.discount}`;
       if (qs('#sumAdvance')) qs('#sumAdvance').textContent = `₹${data.advance}`;
       if (qs('#sumDue')) qs('#sumDue').textContent = `₹${data.amountDue}`;
     } catch (e) {
       console.error('Error computing summary:', e);
+      // Set default values on error
+      if (qs('#sumSubTotal')) qs('#sumSubTotal').textContent = '₹0.00';
+      if (qs('#sumDiscount')) qs('#sumDiscount').textContent = '₹0.00';
+      if (qs('#sumAdvance')) qs('#sumAdvance').textContent = '₹0.00';
+      if (qs('#sumDue')) qs('#sumDue').textContent = '₹0.00';
     }
   }
 
@@ -1088,24 +1540,22 @@
     // Step 1 - always collect if fields exist
     const pickupDt = qs('#pickup_datetime')?.value;
     const dropoffDt = qs('#dropoff_datetime')?.value;
-    const pickupLoc = qs('#pickup_location')?.value;
-    const dropoffLoc = qs('#dropoff_location')?.value;
-    if (pickupDt || dropoffDt || pickupLoc || dropoffLoc) {
+    if (pickupDt || dropoffDt) {
       allDraftData.step_1 = {
         pickup_datetime: pickupDt || '',
         dropoff_datetime: dropoffDt || '',
-        pickup_location: pickupLoc || '',
-        dropoff_location: dropoffLoc || '',
       };
     }
     
-    // Step 2 - ALWAYS check and save if vehicle selected (check multiple sources)
+    // Step 1 also includes vehicle selection (merged from previous step 2)
+    // ALWAYS check and save if vehicle selected (check multiple sources)
     const vehicleId = state.data.selectedVehicleId || 
                      (qs('[data-vehicle-id]') && qs('.vehicle-card.selected')?.dataset?.vehicleId) ||
                      (qs('[data-vehicle-id]') && qs('[data-vehicle-id].selected')?.dataset?.vehicleId);
     if (vehicleId) {
       // Ensure it's saved in state too
       state.data.selectedVehicleId = vehicleId;
+      // Save vehicle as step_2 for backend compatibility (backend still expects step_2 for vehicle)
       allDraftData.step_2 = {
         vehicle_id: vehicleId,
       };
@@ -1141,7 +1591,7 @@
       }
     }
     
-    // Step 4 - collect all billing fields (always collect, even if empty)
+    // Step 4 - Collect ALL billing data (always collect if on step 4 or 5, or if any field has data)
     const rent24h = qs('#rent_24h')?.value;
     const kmLimit = qs('#km_limit')?.value;
     const extraHour = qs('#extra_per_hour')?.value;
@@ -1151,17 +1601,21 @@
     const advancePay = qs('#advance_payment')?.value;
     const payMethod = qs('#payment_method')?.value;
     
-    if (rent24h || kmLimit || extraHour || extraKm || discountAmt || advancePay || payMethod) {
-      const charges = [];
-      qsa('.charge-amount').forEach((input, idx) => {
-        const row = input.closest('.card');
-        const desc = row.querySelector('.charge-description')?.value || '';
-        const amount = parseFloat(input.value || 0);
-        if (amount > 0 || desc) {
+    // Collect additional charges
+    const charges = [];
+    qsa('.charge-description').forEach((descInput, idx) => {
+      const amountInput = qsa('.charge-amount')[idx];
+      if (descInput && amountInput) {
+        const desc = descInput.value?.trim() || '';
+        const amount = parseFloat(amountInput.value || 0);
+        if (desc || amount > 0) {
           charges.push({ description: desc, amount: amount });
         }
-      });
-      
+      }
+    });
+    
+    // Always save step 4 data if we're on step 4 or 5, or if any billing field has data
+    if (currentStep >= 4 || rent24h || kmLimit || extraHour || extraKm || discountAmt || advancePay || payMethod || charges.length > 0) {
       allDraftData.step_4 = {
         rent_24h: rent24h || '',
         km_limit: kmLimit || '',
@@ -1175,10 +1629,17 @@
       };
     }
     
-    // Save all steps data at once
+    // Save all steps data to backend
+    // Note: We have 4 pages: Step 1 (dates + vehicle merged), Step 3 (customer), Step 4 (billing), Step 5 (confirm - no data)
+    // Step 2 is saved separately for backend compatibility (vehicle selection)
     for (const [stepKey, stepData] of Object.entries(allDraftData)) {
       const stepNum = stepKey.replace('step_', '');
-      await saveStep({ step: parseInt(stepNum), ...stepData });
+      try {
+        await saveStep({ step: parseInt(stepNum), ...stepData });
+      } catch (error) {
+        console.error(`Error saving ${stepKey}:`, error);
+        // Continue saving other steps even if one fails
+      }
     }
     
     return allDraftData;
@@ -1223,18 +1684,44 @@
   }
 
   async function updateSummaryVehicle(vehicleId) {
-    // Fetch vehicle details and update summary - placeholder for now
-    // In real implementation, fetch from API or use cached data
+    if (!vehicleId) return;
+    
+    const sumVehicleDiv = qs('#sumVehicle');
+    if (!sumVehicleDiv) return;
+    
+    // Try to get from vehicle card in DOM first (fastest)
     const vehicleCard = qs(`[data-vehicle-id="${vehicleId}"]`);
     if (vehicleCard) {
       const name = vehicleCard.querySelector('.vehicle-name')?.textContent || '';
       const price = vehicleCard.querySelector('.vehicle-price')?.textContent || '';
-      const sumVehicleDiv = qs('#sumVehicle');
-      if (sumVehicleDiv) {
-        sumVehicleDiv.classList.remove('d-none');
-        if (qs('#sumVehicleName')) qs('#sumVehicleName').textContent = name;
-        if (qs('#sumVehicleAmount')) qs('#sumVehicleAmount').textContent = price;
+      sumVehicleDiv.classList.remove('d-none');
+      if (qs('#sumVehicleName')) qs('#sumVehicleName').textContent = name;
+      if (qs('#sumVehicleAmount')) qs('#sumVehicleAmount').textContent = price;
+      return;
+    }
+    
+    // If vehicle card not in DOM, fetch from billing API (which includes vehicle name and price)
+    try {
+      const url = window.bookingFlow?.vehicleBillingUrl?.replace(':vehicleId', vehicleId) || 
+                  `/business/bookings/flow/vehicle/${vehicleId}/billing`;
+      const res = await fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.vehicle) {
+          const vehicleName = `${data.vehicle.vehicle_make || ''} ${data.vehicle.vehicle_model || ''}`.trim();
+          const priceText = `₹${parseFloat(data.vehicle.rental_price_24h || 0).toFixed(2)} / 24hrs`;
+          sumVehicleDiv.classList.remove('d-none');
+          if (qs('#sumVehicleName')) qs('#sumVehicleName').textContent = vehicleName;
+          if (qs('#sumVehicleAmount')) qs('#sumVehicleAmount').textContent = priceText;
+        }
       }
+    } catch (e) {
+      console.warn('Could not fetch vehicle details for summary:', e);
     }
   }
 
@@ -1248,65 +1735,138 @@
     const p = payload || {
       pickup_datetime: qs('#pickup_datetime')?.value,
       dropoff_datetime: qs('#dropoff_datetime')?.value,
-      pickup_location: qs('#pickup_location')?.value,
-      dropoff_location: qs('#dropoff_location')?.value,
     };
     if (!p) return;
     const [pd, dd] = [p.pickup_datetime, p.dropoff_datetime];
     if (qs('#sumPickupDate')) qs('#sumPickupDate').textContent = formatDate(pd);
     if (qs('#sumPickupTime')) qs('#sumPickupTime').textContent = `Time: ${formatTime(pd)}`;
-    if (qs('#sumPickupLoc')) qs('#sumPickupLoc').textContent = `Location: ${p.pickup_location || ''}`;
     if (qs('#sumDropDate')) qs('#sumDropDate').textContent = formatDate(dd);
     if (qs('#sumDropTime')) qs('#sumDropTime').textContent = `Time: ${formatTime(dd)}`;
-    if (qs('#sumDropLoc')) qs('#sumDropLoc').textContent = `Location: ${p.dropoff_location || ''}`;
   }
-  ['#pickup_datetime','#dropoff_datetime','#pickup_location','#dropoff_location'].forEach(sel=>{
+  ['#pickup_datetime','#dropoff_datetime'].forEach(sel=>{
     const el = qs(sel); if (el) el.addEventListener('change', ()=>updateSummaryDates());
   });
+
+  // Helper function to format datetime-local value for display
+  function formatDateTimeForPreview(dtString) {
+    if (!dtString) return '';
+    try {
+      const dt = new Date(dtString);
+      if (isNaN(dt.getTime())) return dtString;
+      const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+      return dt.toLocaleDateString('en-US', options);
+    } catch (e) {
+      return dtString;
+    }
+  }
 
   // Step 5: Preview and Confirm
   function renderConfirmPreview() {
     const el = qs('#confirmPreview');
-    if (!el) return;
+    if (!el) {
+      console.warn('confirmPreview element not found');
+      return;
+    }
 
-    const pickup = qs('#pickup_datetime')?.value || '';
-    const dropoff = qs('#dropoff_datetime')?.value || '';
-    const pickupLoc = qs('#pickup_location')?.value || '';
-    const dropoffLoc = qs('#dropoff_location')?.value || '';
+    // Get dates
+    const pickupDt = qs('#pickup_datetime')?.value || '';
+    const dropoffDt = qs('#dropoff_datetime')?.value || '';
+    
+    // Format dates for display
+    const pickupFormatted = formatDateTimeForPreview(pickupDt);
+    const dropoffFormatted = formatDateTimeForPreview(dropoffDt);
 
-    const vehicleName = qs('#sumVehicleName')?.textContent || '';
-    const vehicleAmount = qs('#sumVehicleAmount')?.textContent || '';
+    // Get vehicle info from summary or fallback
+    let vehicleName = qs('#sumVehicleName')?.textContent?.trim() || '';
+    let vehicleAmount = qs('#sumVehicleAmount')?.textContent?.trim() || '';
+    
+    // Fallback: try to get from vehicle card if summary is empty
+    if (!vehicleName && state.data.selectedVehicleId) {
+      const vehicleCard = qs(`[data-vehicle-id="${state.data.selectedVehicleId}"]`);
+      if (vehicleCard) {
+        vehicleName = vehicleCard.querySelector('.vehicle-name')?.textContent?.trim() || '';
+        vehicleAmount = vehicleCard.querySelector('.vehicle-price')?.textContent?.trim() || '';
+      }
+    }
 
-    const customerName = qs('#sumCustomerName')?.textContent || '';
+    // Get customer info
+    let customerName = qs('#sumCustomerName')?.textContent?.trim() || '';
+    if (!customerName) {
+      const customerInput = qs('#booking_customer_select') || qs('#customer_select');
+      customerName = customerInput?.value?.trim() || selectedCustomerData?.name || '';
+    }
 
-    const subTotal = qs('#sumSubTotal')?.textContent || '₹0.00';
-    const discount = qs('#sumDiscount')?.textContent || '₹0.00';
-    const advance = qs('#sumAdvance')?.textContent || '₹0.00';
-    const amountDue = qs('#sumDue')?.textContent || '₹0.00';
+    // Get billing info from summary, or calculate from form fields
+    let subTotal = qs('#sumSubTotal')?.textContent?.trim() || '₹0.00';
+    let discount = qs('#sumDiscount')?.textContent?.trim() || '₹0.00';
+    let advance = qs('#sumAdvance')?.textContent?.trim() || '₹0.00';
+    let amountDue = qs('#sumDue')?.textContent?.trim() || '₹0.00';
+
+    // Fallback: calculate from form fields if summary is empty
+    if (subTotal === '₹0.00' || !subTotal.includes('₹')) {
+      const rent24h = parseFloat(qs('#rent_24h')?.value || 0);
+      const pickup = new Date(pickupDt);
+      const dropoff = new Date(dropoffDt);
+      if (!isNaN(pickup.getTime()) && !isNaN(dropoff.getTime())) {
+        const hours = Math.max(24, (dropoff - pickup) / (1000 * 60 * 60));
+        const days = Math.ceil(hours / 24);
+        const baseRental = rent24h * days;
+        
+        // Additional charges
+        let additionalCharges = 0;
+        qsa('.charge-amount').forEach(input => {
+          additionalCharges += parseFloat(input.value || 0);
+        });
+        
+        const calculatedSubTotal = baseRental + additionalCharges;
+        subTotal = `₹${calculatedSubTotal.toFixed(2)}`;
+        
+        // Discount
+        const discountAmount = parseFloat(qs('#discount_amount')?.value || 0);
+        const discountType = qs('#discount_type')?.value || 'amount';
+        let discountValue = 0;
+        if (discountType === 'percentage') {
+          discountValue = calculatedSubTotal * (discountAmount / 100);
+        } else {
+          discountValue = discountAmount;
+        }
+        discountValue = Math.min(discountValue, calculatedSubTotal);
+        discount = `₹${discountValue.toFixed(2)}`;
+        
+        // Advance
+        const advanceAmount = parseFloat(qs('#advance_payment')?.value || 0);
+        advance = `₹${advanceAmount.toFixed(2)}`;
+        
+        // Amount due
+        const totalAmount = calculatedSubTotal - discountValue;
+        const amountDueValue = Math.max(0, totalAmount - advanceAmount);
+        amountDue = `₹${amountDueValue.toFixed(2)}`;
+      }
+    }
 
     el.innerHTML = `
       <div class="vstack gap-3">
         <div>
-          <div class="text-muted small">Trip</div>
-          <div class="small">Pickup: ${pickup} • ${pickupLoc}</div>
-          <div class="small">Drop: ${dropoff} • ${dropoffLoc}</div>
+          <div class="text-muted small mb-1">Trip Details</div>
+          <div class="small mb-1"><strong>Pickup:</strong> ${pickupFormatted || pickupDt}</div>
+          <div class="small mb-1"><strong>Drop-off:</strong> ${dropoffFormatted || dropoffDt}</div>
         </div>
         <div>
-          <div class="text-muted small">Vehicle</div>
-          <div class="small fw-semibold">${vehicleName}</div>
-          <div class="small">${vehicleAmount}</div>
+          <div class="text-muted small mb-1">Vehicle</div>
+          <div class="small fw-semibold">${vehicleName || 'Not selected'}</div>
+          ${vehicleAmount ? `<div class="small text-muted">${vehicleAmount}</div>` : ''}
         </div>
         <div>
-          <div class="text-muted small">Customer</div>
-          <div class="small fw-semibold">${customerName}</div>
+          <div class="text-muted small mb-1">Customer</div>
+          <div class="small fw-semibold">${customerName || 'Not selected'}</div>
         </div>
         <div>
-          <div class="text-muted small">Billing</div>
-          <div class="d-flex justify-content-between small"><span>Sub Total</span><span>${subTotal}</span></div>
-          <div class="d-flex justify-content-between small"><span>Discount</span><span>${discount}</span></div>
-          <div class="d-flex justify-content-between small"><span>Advance</span><span>${advance}</span></div>
+          <div class="text-muted small mb-2">Billing Summary</div>
+          <div class="d-flex justify-content-between small mb-1"><span>Sub Total</span><span>${subTotal}</span></div>
+          <div class="d-flex justify-content-between small mb-1 text-muted"><span>Discount</span><span>${discount}</span></div>
+          <div class="d-flex justify-content-between small mb-1"><span>Advance Payment</span><span>${advance}</span></div>
           <hr class="my-2">
-          <div class="d-flex justify-content-between fw-semibold"><span>Amount Due</span><span>${amountDue}</span></div>
+          <div class="d-flex justify-content-between fw-semibold"><span>Amount Due</span><span class="text-primary">${amountDue}</span></div>
         </div>
       </div>
     `;
@@ -1339,9 +1899,7 @@
     if (step === 1) {
       const p = qs('#pickup_datetime')?.value;
       const d = qs('#dropoff_datetime')?.value;
-      const pl = qs('#pickup_location')?.value;
-      const dl = qs('#dropoff_location')?.value;
-      if (!p || !d || !pl || !dl) { showError('Please fill pickup/drop dates and locations'); return false; }
+      if (!p || !d) { showError('Please fill pickup/drop dates'); return false; }
       const pd = new Date(p), dd = new Date(d);
       if (isFinite(pd) && isFinite(dd) && dd <= pd) { showError('Drop-off must be after pickup'); return false; }
       return true;
@@ -1355,8 +1913,29 @@
       return true;
     }
     if (step === 4) {
-      const rent = parseFloat(qs('#rent_24h')?.value || '0');
-      if (!(rent > 0)) { showError('Please enter a valid rent for 24 hrs'); return false; }
+      let rent = parseFloat(qs('#rent_24h')?.value || '0');
+      
+      // If rent_24h is empty or 0, try to get from vehicle data
+      if (!(rent > 0) && state.data.selectedVehicleId) {
+        // Try to load vehicle data synchronously or use cached data
+        const vehicleCard = qs(`[data-vehicle-id="${state.data.selectedVehicleId}"]`);
+        if (vehicleCard) {
+          const priceText = vehicleCard.querySelector('.vehicle-price')?.textContent || '';
+          const priceMatch = priceText.match(/₹([\d,]+)/);
+          if (priceMatch) {
+            rent = parseFloat(priceMatch[1].replace(/,/g, ''));
+            // Auto-populate the field
+            if (qs('#rent_24h')) {
+              qs('#rent_24h').value = rent;
+            }
+          }
+        }
+      }
+      
+      if (!(rent > 0)) { 
+        showError('Please enter a valid rent for 24 hrs'); 
+        return false; 
+      }
       return true;
     }
     return true;
@@ -1411,6 +1990,23 @@
         return;
       }
       
+      // Validate Step 1 dates first (most critical validation)
+      if (!validateStep(1)) { 
+        // Scroll to Step 1 to show the error
+        showStep(1);
+        return; 
+      }
+      
+      // Ensure rent_24h is populated before validation
+      if (!qs('#rent_24h')?.value || parseFloat(qs('#rent_24h')?.value || 0) <= 0) {
+        // Try to load vehicle data if not already loaded
+        if (state.data.selectedVehicleId) {
+          await loadVehicleDataForBilling();
+          // Wait a bit for field to be populated
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
+      
       if (!validateStep(4)) { return; }
       
       // Set flag and disable button
@@ -1419,6 +2015,33 @@
       confirmBtn.style.pointerEvents = 'none';
       const originalText = confirmBtn.textContent;
       confirmBtn.textContent = 'Creating Booking...';
+      
+      // Collect all form data before sending
+      const pickupDt = qs('#pickup_datetime')?.value || state.data.step_1?.pickup_datetime || '';
+      const dropoffDt = qs('#dropoff_datetime')?.value || state.data.step_1?.dropoff_datetime || '';
+      
+      // Final date validation before sending
+      if (pickupDt && dropoffDt) {
+        const pickupDate = new Date(pickupDt);
+        const dropoffDate = new Date(dropoffDt);
+        if (isNaN(pickupDate.getTime()) || isNaN(dropoffDate.getTime())) {
+          showError('Invalid date format. Please check your dates.');
+          isBookingInProgress = false;
+          confirmBtn.disabled = false;
+          confirmBtn.style.pointerEvents = '';
+          confirmBtn.textContent = originalText;
+          return;
+        }
+        if (dropoffDate <= pickupDate) {
+          showError('Drop-off date and time must be after pickup date and time.');
+          isBookingInProgress = false;
+          confirmBtn.disabled = false;
+          confirmBtn.style.pointerEvents = '';
+          confirmBtn.textContent = originalText;
+          showStep(1); // Navigate back to Step 1
+          return;
+        }
+      }
       
       try {
         const res = await fetch(window.bookingFlow?.storeUrl || '/business/bookings/flow/store', {
@@ -1445,11 +2068,22 @@
             });
           } catch (_) {}
           
-          // Success - redirect immediately
+          // Show success message before redirect
+          const successMessage = data.message || 'Booking created successfully!';
+          
+          // Success - redirect immediately with success parameter
           if (data.redirect_url) {
-            window.location.href = data.redirect_url;
+            // Add success message to URL as query parameter
+            const url = new URL(data.redirect_url, window.location.origin);
+            url.searchParams.set('booking_created', 'success');
+            url.searchParams.set('message', encodeURIComponent(successMessage));
+            window.location.href = url.toString();
           } else {
-            window.location.href = window.bookingFlow?.successRedirect || '/business/bookings';
+            const redirectUrl = window.bookingFlow?.successRedirect || '/business/bookings';
+            const url = new URL(redirectUrl, window.location.origin);
+            url.searchParams.set('booking_created', 'success');
+            url.searchParams.set('message', encodeURIComponent(successMessage));
+            window.location.href = url.toString();
           }
         } else if (res.status === 409 && data.redirect_url) {
           // Duplicate booking detected - redirect to existing booking

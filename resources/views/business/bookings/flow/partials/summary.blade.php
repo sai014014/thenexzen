@@ -8,13 +8,11 @@
                 <div class="text-muted small">Pickup</div>
                 <div id="sumPickupDate" class="small"></div>
                 <div id="sumPickupTime" class="small"></div>
-                <div id="sumPickupLoc" class="small"></div>
             </div>
             <div class="col-6">
                 <div class="text-muted small">Drop</div>
                 <div id="sumDropDate" class="small"></div>
                 <div id="sumDropTime" class="small"></div>
-                <div id="sumDropLoc" class="small"></div>
             </div>
         </div>
         <hr>

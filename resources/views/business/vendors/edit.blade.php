@@ -5,12 +5,121 @@
 
 @push('styles')
 <style>
-.form-section { background: #fff; border: 1px solid #e9ecef; border-radius: 12px; padding: 18px 18px 8px; margin-bottom: 18px; }
-.section-title { font-size: 16px; font-weight: 600; color: #2d3748; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+/* Vendor Edit Page Specific Styles - Match Vehicle Create */
+.vendor-add-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.form-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+    padding: 24px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-control, .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #6B6ADE;
+    box-shadow: 0 0 0 0.2rem rgba(107, 106, 222, 0.25);
+}
+
+.file-upload-area {
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #6B6ADE;
+    background-color: #f0f0ff;
+}
+
+.file-upload-area.dragover {
+    border-color: #6B6ADE;
+    background-color: #f0f0ff;
+}
+
+.upload-icon {
+    font-size: 24px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.upload-text {
+    color: #6c757d;
+    font-size: 12px;
+    margin: 0;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 10px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Buttons use common `nxz-btn-primary` and `nxz-btn-secondary` in common.css */
+
+.back-button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+}
+</style>
+@endpush
+
+@push('styles')
+<style>
 .form-actions { padding: 12px 0; }
 .form-actions .btn { min-width: 160px; }
-.back-button { padding: 12px 24px; border-radius: 8px; font-weight: 500; font-size: 14px; }
-.file-help { font-size: 12px; color: #6c757d; margin-top: 8px; }
 </style>
 @endpush
 
@@ -123,62 +232,70 @@
                             <option value="cheque" {{ old('payout_method', $vendor->payout_method) == 'cheque' ? 'selected' : '' }}>Cheque</option>
                             <option value="other" {{ old('payout_method', $vendor->payout_method) == 'other' ? 'selected' : '' }}>Other</option>
                         </select>
-                        @error('payout_method')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('payout_method')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-6 mb-3" id="otherPayoutMethodDiv" style="display: none;">
                         <label for="other_payout_method" class="form-label">Specify Other Method</label>
                         <input type="text" class="form-control" id="other_payout_method" name="other_payout_method" value="{{ old('other_payout_method', $vendor->other_payout_method) }}">
-                        @error('other_payout_method')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('other_payout_method')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
-
-                <!-- Inline Bank Details -->
+                <!-- Inline bank/UPI details directly under payout method -->
                 <div id="bankDetailsDiv" style="display: none;">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="bank_name" class="form-label">Bank Name *</label>
                             <input type="text" class="form-control" id="bank_name" name="bank_name" value="{{ old('bank_name', $vendor->bank_name) }}">
-                            @error('bank_name')<div class="text-danger small">{{ $message }}</div>@enderror
+                            @error('bank_name')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="account_holder_name" class="form-label">Account Holder Name *</label>
                             <input type="text" class="form-control" id="account_holder_name" name="account_holder_name" value="{{ old('account_holder_name', $vendor->account_holder_name) }}">
-                            @error('account_holder_name')<div class="text-danger small">{{ $message }}</div>@enderror
+                            @error('account_holder_name')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="account_number" class="form-label">Account Number *</label>
                             <input type="text" class="form-control" id="account_number" name="account_number" value="{{ old('account_number', $vendor->account_number) }}">
-                            @error('account_number')<div class="text-danger small">{{ $message }}</div>@enderror
+                            @error('account_number')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="ifsc_code" class="form-label">IFSC Code *</label>
                             <input type="text" class="form-control" id="ifsc_code" name="ifsc_code" value="{{ old('ifsc_code', $vendor->ifsc_code) }}" maxlength="11">
-                            @error('ifsc_code')<div class="text-danger small">{{ $message }}</div>@enderror
+                            @error('ifsc_code')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="bank_branch_name" class="form-label">Bank Branch Name</label>
                             <input type="text" class="form-control" id="bank_branch_name" name="bank_branch_name" value="{{ old('bank_branch_name', $vendor->bank_branch_name) }}">
-                            @error('bank_branch_name')<div class="text-danger small">{{ $message }}</div>@enderror
+                            @error('bank_branch_name')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 </div>
-
-                <!-- Inline UPI Details -->
                 <div id="upiDetailsDiv" style="display: none;">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="upi_id" class="form-label">UPI ID *</label>
                             <input type="text" class="form-control" id="upi_id" name="upi_id" value="{{ old('upi_id', $vendor->upi_id) }}" placeholder="example@upi">
-                            @error('upi_id')<div class="text-danger small">{{ $message }}</div>@enderror
+                            @error('upi_id')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Payout Frequency -->
-            <div class="form-section">
-                <h3 class="section-title">Payout Frequency</h3>
-                <div class="row">
+                <div class="row" id="inlinePayoutDetailsRow" style="display:block;">
                     <div class="col-md-6 mb-3">
                         <label for="payout_frequency" class="form-label">Payout Frequency *</label>
                         <select class="form-select" id="payout_frequency" name="payout_frequency" required onchange="togglePayoutSchedule()">
@@ -189,27 +306,39 @@
                             <option value="quarterly" {{ old('payout_frequency', $vendor->payout_frequency) == 'quarterly' ? 'selected' : '' }}>Quarterly</option>
                             <option value="after_every_booking" {{ old('payout_frequency', $vendor->payout_frequency) == 'after_every_booking' ? 'selected' : '' }}>After Every Booking</option>
                         </select>
-                        @error('payout_frequency')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('payout_frequency')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-6 mb-3" id="payoutDayOfWeekDiv" style="display: none;">
                         <label for="payout_day_of_week" class="form-label">Day of Week *</label>
                         <select class="form-select" id="payout_day_of_week" name="payout_day_of_week">
                             <option value="">Select Day</option>
-                            @foreach(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as $d)
-                                <option value="{{ $d }}" {{ old('payout_day_of_week', $vendor->payout_day_of_week) == $d ? 'selected' : '' }}>{{ ucfirst($d) }}</option>
-                            @endforeach
+                            <option value="monday" {{ old('payout_day_of_week', $vendor->payout_day_of_week) == 'monday' ? 'selected' : '' }}>Monday</option>
+                            <option value="tuesday" {{ old('payout_day_of_week', $vendor->payout_day_of_week) == 'tuesday' ? 'selected' : '' }}>Tuesday</option>
+                            <option value="wednesday" {{ old('payout_day_of_week', $vendor->payout_day_of_week) == 'wednesday' ? 'selected' : '' }}>Wednesday</option>
+                            <option value="thursday" {{ old('payout_day_of_week', $vendor->payout_day_of_week) == 'thursday' ? 'selected' : '' }}>Thursday</option>
+                            <option value="friday" {{ old('payout_day_of_week', $vendor->payout_day_of_week) == 'friday' ? 'selected' : '' }}>Friday</option>
+                            <option value="saturday" {{ old('payout_day_of_week', $vendor->payout_day_of_week) == 'saturday' ? 'selected' : '' }}>Saturday</option>
+                            <option value="sunday" {{ old('payout_day_of_week', $vendor->payout_day_of_week) == 'sunday' ? 'selected' : '' }}>Sunday</option>
                         </select>
-                        @error('payout_day_of_week')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('payout_day_of_week')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-6 mb-3" id="payoutDayOfMonthDiv" style="display: none;">
                         <label for="payout_day_of_month" class="form-label">Day of Month *</label>
                         <input type="number" class="form-control" id="payout_day_of_month" name="payout_day_of_month" value="{{ old('payout_day_of_month', $vendor->payout_day_of_month) }}" min="1" max="31">
-                        @error('payout_day_of_month')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('payout_day_of_month')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-12 mb-3">
                         <label for="payout_terms" class="form-label">Payout Terms</label>
                         <textarea class="form-control" id="payout_terms" name="payout_terms" rows="3" placeholder="Any special payout terms, thresholds, or conditions">{{ old('payout_terms', $vendor->payout_terms) }}</textarea>
-                        @error('payout_terms')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('payout_terms')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -227,7 +356,9 @@
                             <option value="per_booking_per_day" {{ old('commission_type', $vendor->commission_type) == 'per_booking_per_day' ? 'selected' : '' }}>Per Booking Per Day</option>
                             <option value="lease_to_rent" {{ old('commission_type', $vendor->commission_type) == 'lease_to_rent' ? 'selected' : '' }}>Lease-to-Rent</option>
                         </select>
-                        @error('commission_type')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('commission_type')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="commission_rate" class="form-label">Commission Rate *</label>
@@ -235,19 +366,26 @@
                             <input type="number" class="form-control" id="commission_rate" name="commission_rate" value="{{ old('commission_rate', $vendor->commission_rate) }}" step="0.01" min="0" required>
                             <span class="input-group-text" id="commissionUnit">₹</span>
                         </div>
-                        @error('commission_rate')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('commission_rate')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
+
+                <!-- Lease Commitment (inline inside Commission Settings) -->
                 <div class="row" id="leaseCommitmentSection" style="display: none;">
                     <div class="col-md-6 mb-3">
                         <label for="lease_commitment_months" class="form-label">Lease Commitment (Months) *</label>
                         <select class="form-select" id="lease_commitment_months" name="lease_commitment_months">
                             <option value="">Select Commitment Period</option>
-                            @foreach([3,6,12,24] as $m)
-                                <option value="{{ $m }}" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == $m ? 'selected' : '' }}>{{ $m }} Months</option>
-                            @endforeach
+                            <option value="3" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == '3' ? 'selected' : '' }}>3 Months</option>
+                            <option value="6" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == '6' ? 'selected' : '' }}>6 Months</option>
+                            <option value="12" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == '12' ? 'selected' : '' }}>12 Months</option>
+                            <option value="24" {{ old('lease_commitment_months', $vendor->lease_commitment_months) == '24' ? 'selected' : '' }}>24 Months</option>
                         </select>
-                        @error('lease_commitment_months')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @error('lease_commitment_months')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -269,7 +407,7 @@
                             <div id="vendor_agreement_label" class="mt-2 small text-muted" style="display: none;"></div>
                             @if($vendor->vendor_agreement_path)
                                 <div class="mt-2"><small class="text-muted">Current:</small>
-                                    <a href="{{ route('business.vendors.download-document', [$vendor, 'vendor_agreement']) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i>Download Current</a>
+                                    <a href="{{ route('business.vendors.view-document', [$vendor, 'vendor_agreement']) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View Current</a>
                                 </div>
                             @endif
                         </div>
@@ -287,7 +425,7 @@
                             <div id="gstin_certificate_label" class="mt-2 small text-muted" style="display: none;"></div>
                             @if($vendor->gstin_certificate_path)
                                 <div class="mt-2"><small class="text-muted">Current:</small>
-                                    <a href="{{ route('business.vendors.download-document', [$vendor, 'gstin_certificate']) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i>Download Current</a>
+                                    <a href="{{ route('business.vendors.view-document', [$vendor, 'gstin_certificate']) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View Current</a>
                                 </div>
                             @endif
                         </div>
@@ -305,7 +443,7 @@
                             <div id="pan_card_label" class="mt-2 small text-muted" style="display: none;"></div>
                             @if($vendor->pan_card_path)
                                 <div class="mt-2"><small class="text-muted">Current:</small>
-                                    <a href="{{ route('business.vendors.download-document', [$vendor, 'pan_card']) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i>Download Current</a>
+                                    <a href="{{ route('business.vendors.view-document', [$vendor, 'pan_card']) }}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="fas fa-eye me-1"></i>View Current</a>
                                 </div>
                             @endif
                         </div>
@@ -327,11 +465,11 @@
             </div>
 
             <!-- Form Actions -->
-            <div class="form-actions d-flex justify-content-end gap-2 nxz-action-buttons">
-                <a href="{{ route('business.vendors.show', $vendor) }}" class="btn nxz-btn-secondary">
+            <div class="form-actions d-flex justify-content-end gap-2 mt-4 nxz-action-buttons">
+                <a href="{{ route('business.vendors.index') }}" class="btn nxz-btn-secondary cancel-button">
                     <i class="fas fa-times me-2"></i>Cancel
                 </a>
-                <button type="submit" class="btn nxz-btn-primary">
+                <button type="submit" class="btn nxz-btn-primary save-button">
                     <i class="fas fa-save me-2"></i>Update Vendor
                 </button>
             </div>
@@ -414,10 +552,9 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleCommissionFields();
 });
 
-// Update file label after selection (parity with create page)
+// Update file label after selection
 function updateFileLabel(inputId, input) {
     const labelDiv = document.getElementById(inputId + '_label');
-    if (!labelDiv) return;
     if (input.files && input.files.length > 0) {
         let labelText = '';
         if (input.files.length === 1) {
@@ -425,10 +562,14 @@ function updateFileLabel(inputId, input) {
         } else {
             labelText = `Selected: ${input.files.length} files`;
         }
-        labelDiv.textContent = labelText;
-        labelDiv.style.display = 'block';
+        if (labelDiv) {
+            labelDiv.textContent = labelText;
+            labelDiv.style.display = 'block';
+        }
     } else {
-        labelDiv.style.display = 'none';
+        if (labelDiv) {
+            labelDiv.style.display = 'none';
+        }
     }
 }
 </script>

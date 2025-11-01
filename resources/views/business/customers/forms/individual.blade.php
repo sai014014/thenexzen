@@ -97,8 +97,8 @@
             @if(isset($customer) && $customer && $customer->driving_license_path)
             <div class="mt-2">
                 <small class="text-muted">Current file: </small>
-                <a href="{{ route('business.customers.download-document', ['customer' => $customer, 'type' => 'driving_license']) }}" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-download me-1"></i>Download Current
+                <a href="{{ route('business.customers.view-document', ['customer' => $customer, 'type' => 'driving_license']) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-eye me-1"></i>View Current
                 </a>
             </div>
             @endif

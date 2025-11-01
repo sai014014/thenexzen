@@ -25,6 +25,7 @@ class Booking extends Model
         'amount_paid',
         'amount_due',
         'advance_amount',
+        'discount_amount',
         'payment_method',
         'advance_payment_method',
         'notes',
@@ -33,6 +34,8 @@ class Booking extends Model
         'started_at',
         'completed_at',
         'cancelled_at',
+        'start_meter_reading',
+        'end_meter_reading',
     ];
 
     protected $casts = [
@@ -47,6 +50,9 @@ class Booking extends Model
         'amount_paid' => 'decimal:2',
         'amount_due' => 'decimal:2',
         'advance_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'start_meter_reading' => 'decimal:2',
+        'end_meter_reading' => 'decimal:2',
     ];
 
     protected $attributes = [
@@ -62,12 +68,20 @@ class Booking extends Model
         
         static::creating(function ($booking) {
             if (empty($booking->booking_number)) {
-                // Generate new format booking ID
-                $business = $booking->business;
-                if ($business) {
-                    $booking->booking_number = self::generateBookingId($business, $booking->start_date_time);
+                // Generate new format booking ID: <ClientID>-<YYMMDD>-<XXXX>
+                // Try to load business if business_id is set
+                $business = null;
+                if ($booking->business_id) {
+                    // Try to get business relationship or load it directly
+                    $business = $booking->business ?? \App\Models\Business::find($booking->business_id);
+                }
+                
+                if ($business && $business->client_id) {
+                    // Use current date (booking creation date) for the date part
+                    $bookingDate = now();
+                    $booking->booking_number = self::generateBookingId($business, $bookingDate);
                 } else {
-                    // Fallback to old format if no business
+                    // Fallback to old format if no business or no client_id
                     $booking->booking_number = self::generateBookingNumber();
                 }
             }
@@ -301,9 +315,13 @@ class Booking extends Model
             return false;
         }
         
+        // Capture vehicle meter reading when booking starts
+        $vehicleMileage = $this->vehicle->mileage ?? 0;
+        
         $this->update([
             'status' => 'ongoing',
             'started_at' => now(),
+            'start_meter_reading' => $vehicleMileage,
         ]);
         
         // Mark vehicle as unavailable when booking starts
@@ -398,17 +416,22 @@ class Booking extends Model
         }
         
         // Check for booking conflicts (only ongoing and upcoming bookings)
+        // A conflict exists if:
+        // 1. Existing booking ends AFTER new booking starts (overlap)
+        // 2. Existing booking starts BEFORE new booking ends (overlap)
+        // Note: If existing booking ends exactly when new booking starts, NO conflict (back-to-back is allowed)
         $query = static::where('vehicle_id', $vehicleId)
             ->whereIn('status', ['ongoing', 'upcoming'])
             ->where(function ($q) use ($startDateTime, $endDateTime) {
                 // Check for any overlap in time periods
                 $q->where(function ($overlapQuery) use ($startDateTime, $endDateTime) {
-                    // New booking starts during existing booking
+                    // New booking starts during existing booking (existing ends AFTER new starts)
                     $overlapQuery->where('start_date_time', '<=', $startDateTime)
                                 ->where('end_date_time', '>', $startDateTime)
-                    // OR new booking ends during existing booking
+                    // OR new booking ends during existing booking (existing starts BEFORE new ends)
+                    // Note: Using '>' not '>=' to allow back-to-back bookings
                     ->orWhere('start_date_time', '<', $endDateTime)
-                                ->where('end_date_time', '>=', $endDateTime)
+                                ->where('end_date_time', '>', $endDateTime)
                     // OR new booking completely contains existing booking
                     ->orWhere(function ($containQuery) use ($startDateTime, $endDateTime) {
                         $containQuery->where('start_date_time', '>=', $startDateTime)
@@ -438,8 +461,9 @@ class Booking extends Model
                     $overlapQuery->where('start_date_time', '<=', $startDateTime)
                                 ->where('end_date_time', '>', $startDateTime)
                     // OR new booking ends during existing booking
+                    // Note: Using '>' not '>=' to allow back-to-back bookings
                     ->orWhere('start_date_time', '<', $endDateTime)
-                                ->where('end_date_time', '>=', $endDateTime)
+                                ->where('end_date_time', '>', $endDateTime)
                     // OR new booking completely contains existing booking
                     ->orWhere(function ($containQuery) use ($startDateTime, $endDateTime) {
                         $containQuery->where('start_date_time', '>=', $startDateTime)

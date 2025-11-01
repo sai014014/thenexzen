@@ -2360,6 +2360,126 @@ label {
     margin-bottom: 24px;
 }
 
+/* White Header Style for Customer */
+.customer-header-card.white-header {
+    background: #FFFFFF;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+}
+
+.customer-header-card.white-header .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.customer-header-card.white-header h2 {
+    font-size: 24px;
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.customer-header-card.white-header .text-muted,
+.customer-header-card.white-header .small.text-muted {
+    color: #9ca3af !important;
+}
+
+.customer-header-card.white-header .btn-link {
+    color: #2563eb !important;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.customer-header-card.white-header .btn-link.text-danger {
+    color: #EF4444 !important;
+}
+
+.customer-header-card.white-header .btn-link:hover {
+    opacity: 0.8;
+}
+
+/* Vendor Header Card - White Background Style */
+.vendor-header-card.white-header {
+    background: #FFFFFF;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+}
+
+.vendor-header-card.white-header .status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.vendor-header-card.white-header h2 {
+    font-size: 24px;
+    color: #2c3e50;
+    font-weight: 600;
+    margin: 0;
+}
+
+.vendor-header-card.white-header .text-muted,
+.vendor-header-card.white-header .small.text-muted {
+    color: #9ca3af !important;
+}
+
+.vendor-header-card.white-header .btn-link {
+    color: #2563eb !important;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.vendor-header-card.white-header .btn-link.text-danger {
+    color: #EF4444 !important;
+}
+
+.vendor-header-card.white-header .btn-link:hover {
+    opacity: 0.8;
+}
+
+.vendor-header-card.white-header .vendor-details-group {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.vendor-header-card.white-header .vendor-details-group-horizontal {
+    display: flex;
+    gap: 120px;
+    align-items: flex-start;
+}
+
+.vendor-header-card.white-header .vendor-detail-item {
+    min-width: 0;
+}
+
+.vendor-header-card.white-header .vendor-detail-label {
+    color: #9ca3af;
+    font-size: 13px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.vendor-header-card.white-header .vendor-detail-value {
+    color: #2c3e50;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+@media (max-width: 992px) {
+    .vendor-header-card.white-header .vendor-details-group {
+        flex-direction: column;
+        gap: 16px;
+    }
+}
+
 .customer-header-card .status-dot,
 .vendor-header-card .status-dot {
     width: 12px;
@@ -2696,9 +2816,15 @@ label {
 
 /* Booking Flow UI polish */
 .booking-flow .progress-steps { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
-.booking-flow .progress-steps .step { color:#6b7280; font-weight:500; }
+.booking-flow .progress-steps .step { color:#6b7280; font-weight:500; user-select:none; }
 .booking-flow .progress-steps .step.active { color:#6B6ADE; font-weight:600; }
-.booking-flow .progress-steps .dot { width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#e9e9ff; color:#6B6ADE; font-weight:700; }
+.booking-flow .progress-steps .step.clickable-step { cursor:pointer !important; transition:color 0.2s ease, opacity 0.2s ease; }
+.booking-flow .progress-steps .step.clickable-step:hover { color:#6B6ADE !important; opacity:0.9; }
+.booking-flow .progress-steps .step.completed { color:#10b981; cursor:pointer !important; }
+.booking-flow .progress-steps .step.completed:hover { color:#10b981; opacity:0.9; }
+.booking-flow .progress-steps .dot { width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:#e9e9ff; color:#6B6ADE; font-weight:700; margin-right:6px; }
+.booking-flow .progress-steps .step.active .dot { background:#6B6ADE; color:#fff; }
+.booking-flow .progress-steps .step.completed .dot { background:#10b981; color:#fff; }
 
 .vehicle-card { border:1px solid rgba(17,24,39,.08); border-radius:12px; transition: box-shadow .2s ease, transform .06s ease; background:#fff; }
 .vehicle-card:hover { box-shadow: 0 8px 20px rgba(17,24,39,.08); transform: translateY(-1px); }
@@ -2719,3 +2845,169 @@ label {
 
 /* Modal compact spacing */
 .modal .form-control.form-control-sm { height: 36px; }
+
+/* Vendor Details Container Styles - White Background */
+.vendor-details-dark-container {
+    background: #FFFFFF;
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.vendor-details-dark-container .card-header {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 0 20px 0 !important;
+    margin-bottom: 0;
+}
+
+.vendor-details-dark-container .card-header h5 {
+    color: #2c3e50;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+}
+
+.vendor-details-dark-container .card-header h5 i {
+    color: #2563eb;
+}
+
+.vendor-details-dark-container .card-body {
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.vendor-details-dark-container .row {
+    margin-bottom: 20px;
+}
+
+.vendor-details-dark-container .row:last-child {
+    margin-bottom: 0;
+}
+
+.vendor-details-dark-container .text-muted {
+    color: #6c757d !important;
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.vendor-details-dark-container strong {
+    color: #2c3e50;
+    font-size: 15px;
+    font-weight: 600;
+    display: block;
+    line-height: 1.5;
+}
+
+.vendor-details-dark-container ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.vendor-details-dark-container ol li {
+    color: #2c3e50;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.vendor-details-dark-container .btn-link {
+    color: #6c757d !important;
+    padding: 2px 4px !important;
+}
+
+.vendor-details-dark-container .btn-link:hover {
+    color: #2563eb !important;
+}
+
+/* Two-column layout for mobile numbers */
+.vendor-details-dark-container .mobile-numbers-row {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 24px;
+}
+
+.vendor-details-dark-container .mobile-numbers-row > div {
+    flex: 1;
+}
+
+.vendor-details-dark-container .mobile-numbers-row .text-muted {
+    color: #6c757d !important;
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 6px;
+}
+
+.vendor-details-dark-container .mobile-numbers-row strong {
+    color: #2c3e50;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* Single column fields */
+.vendor-details-dark-container .single-field {
+    margin-bottom: 24px;
+}
+
+.vendor-details-dark-container .single-field:last-child {
+    margin-bottom: 0;
+}
+
+/* Branches section */
+.vendor-details-dark-container .branches-section {
+    margin-top: 24px;
+}
+
+/* Email with copy icon */
+.vendor-details-dark-container .email-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vendor-details-dark-container .email-field strong {
+    flex: 1;
+}
+
+/* Documents section within container */
+.vendor-details-dark-container .document-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6 !important;
+}
+
+.vendor-details-dark-container .document-card .text-truncate,
+.vendor-details-dark-container .document-card .small {
+    color: #6c757d !important;
+}
+
+.vendor-details-dark-container .document-card .btn-outline-primary {
+    border-color: #2563eb;
+    color: #2563eb;
+}
+
+.vendor-details-dark-container .document-card .btn-outline-primary:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #FFFFFF;
+}
+
+.vendor-details-dark-container .text-center.text-muted {
+    color: #6c757d !important;
+}
+
+.vendor-details-dark-container .text-center.text-muted i {
+    color: #2563eb !important;
+}
+
+/* Responsive adjustments for mobile numbers */
+@media (max-width: 768px) {
+    .vendor-details-dark-container .mobile-numbers-row {
+        flex-direction: column;
+        gap: 24px;
+    }
+}

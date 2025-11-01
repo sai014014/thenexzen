@@ -51,8 +51,56 @@ class BookingController extends Controller
             });
         }
 
-        // Sort by start date
-        $query->orderBy('start_date_time', 'desc');
+        // Sorting functionality
+        $sort = $request->get('sort');
+        $dir = strtolower($request->get('dir', 'desc')) === 'desc' ? 'desc' : 'asc';
+        $needsCustomerJoin = false;
+        $needsVehicleJoin = false;
+
+        // Handle sorting with proper joins for related tables
+        if ($sort) {
+            switch ($sort) {
+                case 'booking_id':
+                    $query->orderBy('bookings.booking_number', $dir);
+                    break;
+                case 'customer':
+                    $needsCustomerJoin = true;
+                    $query->leftJoin('customers', 'bookings.customer_id', '=', 'customers.id')
+                          ->orderBy('customers.full_name', $dir)
+                          ->orderBy('customers.company_name', $dir);
+                    break;
+                case 'vehicle':
+                    $needsVehicleJoin = true;
+                    $query->leftJoin('vehicles', 'bookings.vehicle_id', '=', 'vehicles.id')
+                          ->orderBy('vehicles.vehicle_make', $dir)
+                          ->orderBy('vehicles.vehicle_model', $dir);
+                    break;
+                case 'start_date':
+                    $query->orderBy('bookings.start_date_time', $dir);
+                    break;
+                case 'end_date':
+                    $query->orderBy('bookings.end_date_time', $dir);
+                    break;
+                case 'status':
+                    $query->orderBy('bookings.status', $dir);
+                    break;
+                case 'amount_due':
+                    $query->orderBy('bookings.amount_due', $dir);
+                    break;
+                default:
+                    // Default sort by start date descending
+                    $query->orderBy('bookings.start_date_time', 'desc');
+                    break;
+            }
+        } else {
+            // Default sort by start date descending
+            $query->orderBy('bookings.start_date_time', 'desc');
+        }
+        
+        // Ensure we select only bookings columns when joins are used to avoid conflicts
+        if ($needsCustomerJoin || $needsVehicleJoin) {
+            $query->select('bookings.*');
+        }
 
         $bookings = $query->paginate(15)->withQueryString();
 
@@ -118,26 +166,47 @@ class BookingController extends Controller
     // Save step payload to session / draft
     public function saveFlowStep(Request $request)
     {
-        $payload = $request->all();
-        $flow = session()->get('booking.flow', []);
-        
-        if (($payload['step'] ?? null) === 'draft') {
-            session()->put('booking.flow', $flow);
-            return response()->json(['status' => 'ok']);
-        }
-        
-        $step = (int)($payload['step'] ?? 0);
-        if ($step >= 1 && $step <= 5) {
-            // Merge with existing step data to preserve all fields
-            $existingStepData = $flow['step_'.$step] ?? [];
-            $flow['step_'.$step] = array_merge($existingStepData, $payload);
+        try {
+            $payload = $request->all();
+            $flow = session()->get('booking.flow', []);
             
-            // Remove the 'step' key from the stored data (it's just for routing)
-            unset($flow['step_'.$step]['step']);
+            if (($payload['step'] ?? null) === 'draft') {
+                session()->put('booking.flow', $flow);
+                return response()->json(['status' => 'ok']);
+            }
+            
+            $step = (int)($payload['step'] ?? 0);
+            if ($step >= 1 && $step <= 5) {
+                // Merge with existing step data to preserve all fields
+                $existingStepData = $flow['step_'.$step] ?? [];
+                
+                // Handle additional_charges - ensure it's properly formatted
+                if (isset($payload['additional_charges'])) {
+                    // If it's already an array, keep it as is; if it's a JSON string, decode it
+                    if (is_string($payload['additional_charges'])) {
+                        $decoded = json_decode($payload['additional_charges'], true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            $payload['additional_charges'] = $decoded;
+                        }
+                    }
+                    // Ensure it's always an array
+                    if (!is_array($payload['additional_charges'])) {
+                        $payload['additional_charges'] = [];
+                    }
+                }
+                
+                $flow['step_'.$step] = array_merge($existingStepData, $payload);
+                
+                // Remove the 'step' key from the stored data (it's just for routing)
+                unset($flow['step_'.$step]['step']);
+            }
+            
+            session()->put('booking.flow', $flow);
+            return response()->json(['status' => 'ok', 'saved' => true]);
+        } catch (\Exception $e) {
+            \Log::error('Error saving booking flow step: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Failed to save step'], 500);
         }
-        
-        session()->put('booking.flow', $flow);
-        return response()->json(['status' => 'ok', 'saved' => true]);
     }
 
     // Clear draft from session
@@ -197,9 +266,32 @@ class BookingController extends Controller
             $vehicles = $vehicles->where('fuel_type', $request->fuel);
         }
 
-        // Map to display format
-        $vehicles = $vehicles->map(function ($v) {
+        // Map to display format with return time info
+        $vehicles = $vehicles->map(function ($v) use ($startDateTime) {
             $firstImage = $v->images()->first();
+            
+            // Find if this vehicle has a booking that returns on the exact same day as booking start
+            // Only show return info if return date matches the booking start date (same day)
+            // This means the vehicle will be returned and available on the booking start date
+            $upcomingReturn = null;
+            $currentBooking = Booking::where('vehicle_id', $v->id)
+                ->whereIn('status', ['ongoing', 'upcoming'])
+                ->whereDate('end_date_time', '=', $startDateTime->format('Y-m-d'))
+                ->where('end_date_time', '<=', $startDateTime)
+                ->where('end_date_time', '>=', now())
+                ->orderBy('end_date_time', 'asc')
+                ->first();
+            
+            if ($currentBooking) {
+                // Only show return info if return date is on the same day as booking start
+                // Vehicle is returning on the booking start date
+                $upcomingReturn = [
+                    'date' => $currentBooking->end_date_time->format('Y-m-d'),
+                    'time' => $currentBooking->end_date_time->format('H:i'),
+                    'datetime' => $currentBooking->end_date_time->format('M d, Y \a\t h:i A'),
+                ];
+            }
+            
             return [
                 'id' => $v->id,
                 'name' => $v->vehicle_make . ' ' . $v->vehicle_model,
@@ -209,6 +301,7 @@ class BookingController extends Controller
                 'fuel' => ucfirst($v->fuel_type ?? 'N/A'),
                 'price_per_day' => $v->rental_price_24h ?? 0,
                 'image' => $firstImage ? asset('storage/' . $firstImage->image_path) : asset('images/vehicle-brands/default.svg'),
+                'return_info' => $upcomingReturn,
             ];
         });
 
@@ -229,62 +322,86 @@ class BookingController extends Controller
     // Billing summary compute (AJAX)
     public function billingSummary(Request $request)
     {
-        $rent = (float)$request->input('rent_24h', 0);
-        $additionalCharges = json_decode($request->input('additional_charges', '[]'), true) ?? [];
-        $discountAmount = (float)$request->input('discount_amount', 0);
-        $discountType = $request->input('discount_type', 'amount'); // 'amount' or 'percentage'
-        $advance = (float)$request->input('advance_payment', 0);
-        $pickupDatetime = $request->input('pickup_datetime');
-        $dropoffDatetime = $request->input('dropoff_datetime');
-        
-        // Calculate days from dates
-        $days = 1;
-        if ($pickupDatetime && $dropoffDatetime) {
-            try {
-                $start = Carbon::parse($pickupDatetime);
-                $end = Carbon::parse($dropoffDatetime);
-                $hours = $start->diffInHours($end);
-                $days = max(1, ceil($hours / 24)); // Minimum 1 day
-            } catch (\Exception $e) {
-                $days = 1;
+        try {
+            $rent = (float)$request->input('rent_24h', 0);
+            
+            // Handle additional_charges - can be JSON string or array
+            $additionalChargesInput = $request->input('additional_charges', '[]');
+            $additionalCharges = [];
+            if (is_string($additionalChargesInput)) {
+                $decoded = json_decode($additionalChargesInput, true);
+                $additionalCharges = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
+            } elseif (is_array($additionalChargesInput)) {
+                $additionalCharges = $additionalChargesInput;
             }
+            
+            $discountAmount = (float)$request->input('discount_amount', 0);
+            $discountType = $request->input('discount_type', 'amount'); // 'amount' or 'percentage'
+            $advance = (float)$request->input('advance_payment', 0);
+            $pickupDatetime = $request->input('pickup_datetime');
+            $dropoffDatetime = $request->input('dropoff_datetime');
+            
+            // Calculate days from dates
+            $days = 1;
+            if ($pickupDatetime && $dropoffDatetime) {
+                try {
+                    $start = Carbon::parse($pickupDatetime);
+                    $end = Carbon::parse($dropoffDatetime);
+                    $hours = $start->diffInHours($end);
+                    $days = max(1, ceil($hours / 24)); // Minimum 1 day
+                } catch (\Exception $e) {
+                    $days = 1;
+                }
+            }
+            
+            // Calculate base rental
+            $baseRental = $rent * $days;
+            
+            // Sum additional charges
+            $totalAdditional = 0;
+            foreach ($additionalCharges as $charge) {
+                $totalAdditional += (float)($charge['amount'] ?? 0);
+            }
+            
+            // Calculate subtotal
+            $subTotal = $baseRental + $totalAdditional;
+            
+            // Calculate discount
+            $discountValue = 0;
+            if ($discountType === 'percentage') {
+                $discountValue = $subTotal * ($discountAmount / 100);
+            } else {
+                $discountValue = $discountAmount;
+            }
+            $discountValue = min($discountValue, $subTotal); // Can't discount more than subtotal
+            
+            // Calculate final amount
+            $totalAfterDiscount = $subTotal - $discountValue;
+            $amountDue = max(0, $totalAfterDiscount - $advance);
+            
+            return response()->json([
+                'baseRental' => number_format($baseRental, 2),
+                'days' => $days,
+                'additionalCharges' => number_format($totalAdditional, 2),
+                'subTotal' => number_format($subTotal, 2),
+                'discount' => number_format($discountValue, 2),
+                'advance' => number_format($advance, 2),
+                'totalAfterDiscount' => number_format($totalAfterDiscount, 2),
+                'amountDue' => number_format($amountDue, 2),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error computing billing summary: ' . $e->getMessage());
+            return response()->json([
+                'baseRental' => '0.00',
+                'days' => 1,
+                'additionalCharges' => '0.00',
+                'subTotal' => '0.00',
+                'discount' => '0.00',
+                'advance' => '0.00',
+                'totalAfterDiscount' => '0.00',
+                'amountDue' => '0.00',
+            ], 200); // Return 200 with zeros instead of 500 to prevent JSON parse errors
         }
-        
-        // Calculate base rental
-        $baseRental = $rent * $days;
-        
-        // Sum additional charges
-        $totalAdditional = 0;
-        foreach ($additionalCharges as $charge) {
-            $totalAdditional += (float)($charge['amount'] ?? 0);
-        }
-        
-        // Calculate subtotal
-        $subTotal = $baseRental + $totalAdditional;
-        
-        // Calculate discount
-        $discountValue = 0;
-        if ($discountType === 'percentage') {
-            $discountValue = $subTotal * ($discountAmount / 100);
-        } else {
-            $discountValue = $discountAmount;
-        }
-        $discountValue = min($discountValue, $subTotal); // Can't discount more than subtotal
-        
-        // Calculate final amount
-        $totalAfterDiscount = $subTotal - $discountValue;
-        $amountDue = max(0, $totalAfterDiscount - $advance);
-        
-        return response()->json([
-            'baseRental' => number_format($baseRental, 2),
-            'days' => $days,
-            'additionalCharges' => number_format($totalAdditional, 2),
-            'subTotal' => number_format($subTotal, 2),
-            'discount' => number_format($discountValue, 2),
-            'advance' => number_format($advance, 2),
-            'totalAfterDiscount' => number_format($totalAfterDiscount, 2),
-            'amountDue' => number_format($amountDue, 2),
-        ]);
     }
 
     // Store booking from flow (AJAX)
@@ -373,8 +490,34 @@ class BookingController extends Controller
             }
             
             // Parse dates
-            $startDateTime = Carbon::parse($step1['pickup_datetime']);
-            $endDateTime = Carbon::parse($step1['dropoff_datetime']);
+            try {
+                $startDateTime = Carbon::parse($step1['pickup_datetime']);
+                $endDateTime = Carbon::parse($step1['dropoff_datetime']);
+            } catch (\Exception $e) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid date format provided.'
+                ], 400);
+            }
+            
+            // Validate end date is after start date
+            if ($endDateTime->lte($startDateTime)) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Drop-off date and time must be after pickup date and time.'
+                ], 400);
+            }
+            
+            // Validate dates are not in the past (for pickup)
+            if ($startDateTime->isPast()) {
+                session()->forget($processingKey);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Pickup date and time cannot be in the past.'
+                ], 400);
+            }
             
             // Validate customer belongs to business
             $customer = Customer::where('id', $step3['customer_id'])
@@ -462,12 +605,11 @@ class BookingController extends Controller
             $advanceAmount = (float)($step4['advance_payment'] ?? $step4['advance_amount'] ?? 0);
             $amountDue = max(0, $totalAmount - $advanceAmount);
             
-            // Create booking
+            // Create booking (booking_number will be auto-generated in model boot method)
             $booking = Booking::create([
                 'business_id' => $business->id,
                 'customer_id' => $step3['customer_id'],
                 'vehicle_id' => $step2['vehicle_id'],
-                'booking_number' => Booking::generateBookingNumber(),
                 'start_date_time' => $startDateTime,
                 'end_date_time' => $endDateTime,
                 'pickup_location' => $step1['pickup_location'] ?? null,
@@ -505,24 +647,6 @@ class BookingController extends Controller
                 'message' => 'Failed to create booking: ' . $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Show the quick create booking form.
-     */
-    public function quickCreate()
-    {
-        $businessAdmin = Auth::guard('business_admin')->user();
-        
-        if (!$businessAdmin) {
-            return redirect()->route('business.login')->with('error', 'Please log in to continue.');
-        }
-
-        $business = $businessAdmin->business;
-        $customers = $business->customers()->where('status', 'active')->get();
-        $vehicles = $business->vehicles()->where('is_available', true)->get();
-
-        return view('business.bookings.quick-create', compact('customers', 'vehicles', 'business', 'businessAdmin'));
     }
 
     /**
@@ -885,12 +1009,11 @@ class BookingController extends Controller
             $totalAmount = $baseRentalPrice * $days;
             $amountDue = $totalAmount - ($validatedData['advance_amount'] ?? 0);
 
-            // Create booking
+            // Create booking (booking_number will be auto-generated in model boot method)
             $booking = Booking::create([
                 'business_id' => $business->id,
                 'customer_id' => $validatedData['customer_id'],
                 'vehicle_id' => $validatedData['vehicle_id'],
-                'booking_number' => Booking::generateBookingNumber(),
                 'start_date_time' => $startDateTime,
                 'end_date_time' => $endDateTime,
                 'base_rental_price' => $baseRentalPrice,
@@ -1208,6 +1331,40 @@ class BookingController extends Controller
             'completion_notes' => 'nullable|string|max:1000',
             'actual_return_datetime' => 'nullable|date',
             'additional_charges' => 'nullable|string', // JSON array
+            'return_meter_reading' => 'required|numeric|min:0',
+        ]);
+
+        // Process meter reading (always required)
+        $startMeterReading = (float)($booking->start_meter_reading ?? $booking->vehicle->mileage ?? 0);
+        $returnMeterReading = (float)$request->return_meter_reading;
+        
+        // Validate return meter reading is greater than start reading
+        if ($returnMeterReading <= $startMeterReading) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['return_meter_reading' => 'Return meter reading must be greater than booking start meter reading.']);
+        }
+        
+        // Calculate km traveled
+        $kmTraveled = $returnMeterReading - $startMeterReading;
+        
+        // Check if exceeded km limit
+        $kmLimit = (float)($booking->vehicle->km_limit_per_booking ?? 0);
+        $extraPerKm = (float)($booking->vehicle->extra_price_per_km ?? 0);
+        
+        // Calculate extra km charges if exceeded
+        $extraKmCharges = 0.0;
+        if ($kmLimit > 0 && $kmTraveled > $kmLimit) {
+            $extraKm = $kmTraveled - $kmLimit;
+            $extraKmCharges = $extraKm * $extraPerKm;
+        }
+        
+        // Store end meter reading
+        $booking->end_meter_reading = $returnMeterReading;
+        
+        // Update vehicle mileage directly
+        $booking->vehicle->update([
+            'mileage' => $returnMeterReading
         ]);
 
         // Optionally adjust end date and totals if actual return differs
@@ -1220,25 +1377,63 @@ class BookingController extends Controller
                 $basePerDay = (float)($booking->base_rental_price ?? 0);
                 $hours = $booking->start_date_time ? $booking->start_date_time->diffInHours($actualEnd) : 0;
                 $days = max(1, (int)ceil($hours / 24));
-
-                $existingExtras = (float)($booking->extra_charges ?? 0);
-                $newExtras = 0.0;
-                if ($request->filled('additional_charges')) {
-                    $charges = json_decode($request->additional_charges, true);
-                    if (is_array($charges)) {
-                        foreach ($charges as $c) {
-                            $newExtras += (float)($c['amount'] ?? 0);
-                        }
-                    }
-                }
-
-                $booking->extra_charges = $existingExtras + $newExtras;
-                $booking->total_amount = ($basePerDay * $days) + $booking->extra_charges;
-                $booking->updateAmountDue();
             } catch (\Exception $e) {
-                // ignore parse errors; proceed with current values
+                // ignore parse errors; use original end date
+                $days = max(1, (int)ceil(($booking->end_date_time->diffInHours($booking->start_date_time)) / 24));
+            }
+        } else {
+            // Use original days if return date not changed
+            $hours = $booking->start_date_time ? $booking->start_date_time->diffInHours($booking->end_date_time) : 0;
+            $days = max(1, (int)ceil($hours / 24));
+        }
+
+        // Get base per day rate
+        $basePerDay = (float)($booking->base_rental_price ?? 0);
+        
+        // Calculate additional charges
+        $existingExtras = (float)($booking->extra_charges ?? 0);
+        $newExtras = 0.0;
+        if ($request->filled('additional_charges')) {
+            $charges = json_decode($request->additional_charges, true);
+            if (is_array($charges)) {
+                foreach ($charges as $c) {
+                    $newExtras += (float)($c['amount'] ?? 0);
+                }
             }
         }
+
+        // Recalculate totals: base rental + extra km charges + additional charges
+        // existingExtras contains original additional charges from booking creation
+        // We add new extras (from complete modal) and extra km charges
+        $booking->extra_charges = $existingExtras + $newExtras + $extraKmCharges;
+        
+        // Calculate new base rental based on actual days
+        // base_rental_price in booking stores: rent24h * originalDays (before discount)
+        // We need to get the original per-day rate and multiply by new days
+        $originalDays = max(1, (int)ceil(($booking->end_date_time->diffInHours($booking->start_date_time)) / 24));
+        $originalBaseRental = (float)($booking->base_rental_price ?? 0);
+        
+        // Get per-day rate (base_rental_price is the full rental before discount)
+        $perDayRate = $originalDays > 0 ? $originalBaseRental / $originalDays : $basePerDay;
+        
+        // Calculate new base rental for actual days
+        $newBaseRental = $perDayRate * $days;
+        
+        // Update base_rental_price to reflect new days
+        $booking->base_rental_price = $newBaseRental;
+        
+        // Calculate new subtotal (base rental + all charges)
+        $newSubTotal = $newBaseRental + $booking->extra_charges;
+        
+        // Preserve original discount amount (applied to new subtotal)
+        $originalDiscount = (float)($booking->discount_amount ?? 0);
+        
+        // If original discount was percentage-based, we'd need to recalculate it
+        // For now, we apply the same discount amount (works for fixed discounts)
+        // Calculate new total: subtotal - original discount (but not less than 0)
+        $booking->total_amount = max(0, $newSubTotal - $originalDiscount);
+        
+        $booking->updateAmountDue();
 
         // Apply final payment
         $booking->amount_paid = $booking->amount_paid + $request->final_amount_paid;
@@ -1246,7 +1441,7 @@ class BookingController extends Controller
 
         // Add completion notes
         if ($request->completion_notes) {
-            $booking->notes = ($booking->notes ? $booking->notes . "\n\n" : '') .
+            $booking->notes = ($booking->notes ? $booking->notes . "\n\n" : '') . 
                              "Completion Notes: " . $request->completion_notes;
             $booking->save();
         }
@@ -1434,7 +1629,7 @@ class BookingController extends Controller
                     ELSE 3 
                 END', ["{$searchQuery}%", "{$searchQuery}%"])
                 ->limit(50)
-                ->get();
+            ->get();
         }
 
         return response()->json(['customers' => $customers]);
@@ -1461,6 +1656,15 @@ class BookingController extends Controller
         }
 
         return response()->json([
+            'vehicle' => [
+                'id' => $vehicle->id,
+                'vehicle_make' => $vehicle->vehicle_make ?? '',
+                'vehicle_model' => $vehicle->vehicle_model ?? '',
+                'rental_price_24h' => $vehicle->rental_price_24h ?? 0,
+                'km_limit_per_booking' => $vehicle->km_limit_per_booking ?? 0,
+                'extra_rental_price_per_hour' => $vehicle->extra_rental_price_per_hour ?? 0,
+                'extra_price_per_km' => $vehicle->extra_price_per_km ?? 0,
+            ],
             'id' => $vehicle->id,
             'rental_price_24h' => $vehicle->rental_price_24h ?? 0,
             'km_limit_per_booking' => $vehicle->km_limit_per_booking ?? 0,

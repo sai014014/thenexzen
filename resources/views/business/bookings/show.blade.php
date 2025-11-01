@@ -8,17 +8,25 @@
 @endpush
 
 @section('content')
+@if(request()->get('booking_created') === 'success')
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <strong>Booking Created Successfully!</strong> 
+        {{ request()->get('message') ? urldecode(request()->get('message')) : 'Your booking has been confirmed and is now ready.' }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
 <div class="row">
 	<div class="col-lg-8">
 		<div class="card mb-3">
-			<div class="card-body">
+                    <div class="card-body">
 				<div class="d-flex justify-content-between align-items-start">
 					<div>
 						<h5 class="mb-1">Booking #{{ $booking->booking_number ?? $booking->id }}</h5>
 						<div class="text-muted small">Status:
 							<span class="badge bg-{{ $booking->status === 'upcoming' ? 'warning' : ($booking->status === 'ongoing' ? 'primary' : ($booking->status === 'completed' ? 'success' : ($booking->status === 'cancelled' ? 'danger' : 'secondary'))) }}">{{ ucfirst($booking->status) }}</span>
-						</div>
-					</div>
+                        </div>
+                    </div>
 					<div class="d-flex gap-2">
 						@if ($booking->status === 'upcoming')
 							<a href="{{ route('business.bookings.edit', $booking) }}" class="btn btn-outline-secondary btn-pill">Edit</a>
@@ -27,59 +35,59 @@
 								<button type="submit" class="btn btn-primary btn-pill">Start Vehicle</button>
 							</form>
 							<button type="button" class="btn btn-outline-danger btn-pill" data-bs-toggle="modal" data-bs-target="#cancelBookingModal">Cancel Booking</button>
-						@endif
+                                @endif
 						@if ($booking->status === 'ongoing')
 							<button type="button" class="btn btn-success btn-pill" data-bs-toggle="modal" data-bs-target="#completeBookingModal">Complete Booking</button>
 							<button type="button" class="btn btn-outline-danger btn-pill" data-bs-toggle="modal" data-bs-target="#cancelBookingModal">Cancel Booking</button>
-						@endif
-					</div>
-				</div>
+                            @endif
+                        </div>
+                    </div>
 				<hr>
 				<div class="row g-3">
 					<div class="col-md-6">
 						<div class="text-muted small mb-1">Pickup</div>
 						<div class="small">{{ optional($booking->start_date_time)->format('D, d M Y h:i A') }}</div>
-					</div>
+                </div>
 					<div class="col-md-6">
 						<div class="text-muted small mb-1">Drop-off</div>
 						<div class="small">{{ optional($booking->end_date_time)->format('D, d M Y h:i A') }}</div>
-					</div>
+            </div>
 					<div class="col-md-6">
 						<div class="text-muted small mb-1">Customer</div>
 						<div class="small fw-semibold">{{ $booking->customer->full_name ?? $booking->customer->company_name ?? '-' }}</div>
 						<div class="text-muted small">{{ $booking->customer->mobile_number ?? '' }} @if(!empty($booking->customer->email_address)) • {{ $booking->customer->email_address }} @endif</div>
-					</div>
+                    </div>
 					<div class="col-md-6">
 						<div class="text-muted small mb-1">Vehicle</div>
 						<div class="small fw-semibold">{{ $booking->vehicle->vehicle_make ?? '' }} {{ $booking->vehicle->vehicle_model ?? '' }}</div>
 						<div class="text-muted small">Reg: {{ $booking->vehicle->vehicle_number ?? '-' }}</div>
-					</div>
-				</div>
-			</div>
-		</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 		@if($booking->status === 'cancelled' && $booking->cancellation_reason)
 		<div class="card mb-3 border-danger">
-			<div class="card-body">
+                    <div class="card-body">
 				<div class="d-flex align-items-center mb-2">
 					<i class="fas fa-times-circle text-danger me-2 fs-5"></i>
 					<h6 class="mb-0 text-danger">Cancellation Details</h6>
-				</div>
+                            </div>
 				<hr class="my-2">
 				<div class="mb-2">
 					<div class="text-muted small mb-1">Cancelled On</div>
 					<div class="small">{{ optional($booking->cancelled_at)->format('D, d M Y h:i A') ?? '—' }}</div>
-				</div>
+                            </div>
 				<div>
 					<div class="text-muted small mb-1">Cancellation Reason</div>
 					<div class="small">{!! nl2br(e($booking->cancellation_reason)) !!}</div>
-				</div>
-			</div>
-		</div>
-		@endif
+                    </div>
+                </div>
+            </div>
+            @endif
 
-		<div class="card">
-			<div class="card-body">
+                <div class="card">
+                    <div class="card-body">
 				<h6 class="mb-3">Billing</h6>
 				<div class="d-flex justify-content-between small"><span>Base Rental</span><span>₹{{ number_format($booking->base_rental_price ?? 0, 2) }}</span></div>
 				<div class="d-flex justify-content-between small"><span>Additional Charges</span><span>₹{{ number_format($booking->extra_charges ?? 0, 2) }}</span></div>
@@ -87,31 +95,31 @@
 				<div class="d-flex justify-content-between small"><span>Total Amount</span><span>₹{{ number_format($booking->total_amount ?? 0, 2) }}</span></div>
 				<div class="d-flex justify-content-between small"><span>Amount Paid</span><span>₹{{ number_format($booking->amount_paid ?? 0, 2) }}</span></div>
 				<div class="d-flex justify-content-between fw-semibold"><span>Amount Due</span><span>₹{{ number_format($booking->amount_due ?? 0, 2) }}</span></div>
-			</div>
-		</div>
-	</div>
+                            </div>
+                        </div>
+                    </div>
 	<div class="col-lg-4">
 		<div class="card">
 			<div class="card-body">
 				<h6 class="mb-3">Notes</h6>
 				<div class="small">{!! nl2br(e($booking->notes ?? '—')) !!}</div>
-			</div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Cancel Booking Modal -->
 @if (in_array($booking->status, ['upcoming', 'ongoing']))
 <div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
 				<h5 class="modal-title">Cancel Booking</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
+            </div>
 			<form action="{{ route('business.bookings.cancel', $booking) }}" method="POST" id="cancelBookingForm">
 				@csrf
-				<div class="modal-body">
+            <div class="modal-body">
 					<div class="alert alert-warning">
 						<i class="fas fa-exclamation-triangle me-2"></i>
 						<strong>Warning:</strong> This action cannot be undone. The booking will be marked as cancelled.
@@ -133,61 +141,95 @@
 							<li class="text-warning">Note: Vehicle will be marked as available after cancellation</li>
 							@endif
 						</ul>
-					</div>
-				</div>
-				<div class="modal-footer">
+                </div>
+            </div>
+            <div class="modal-footer">
 					<button type="button" class="btn btn-outline-secondary btn-pill" data-bs-dismiss="modal">Close</button>
 					<button type="submit" class="btn btn-danger btn-pill">Cancel Booking</button>
 				</div>
-			</form>
-		</div>
-	</div>
-</div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endif
 
 @if ($booking->status === 'ongoing')
 <!-- Complete Booking Modal -->
 <div class="modal fade" id="completeBookingModal" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">Complete Booking</h5>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Complete Booking</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
+            </div>
 			<form action="{{ route('business.bookings.complete', $booking) }}" method="POST" id="completeBookingForm">
-				@csrf
-				<div class="modal-body">
-					<div class="mb-3">
-						<label class="form-label">Actual Return Date & Time</label>
-						<input type="datetime-local" name="actual_return_datetime" id="actual_return_datetime" class="form-control" value="{{ optional($booking->end_date_time)->format('Y-m-d\\TH:i') }}" />
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
+					<label class="form-label">Actual Return Date & Time</label>
+					<input type="datetime-local" name="actual_return_datetime" id="actual_return_datetime" class="form-control" value="{{ optional($booking->end_date_time)->format('Y-m-d\\TH:i') }}" />
+				</div>
+				
+				<!-- Meter Reading Section -->
+				<div class="mb-3 border-top pt-3">
+					<h6 class="mb-3">Vehicle Meter Reading</h6>
+					<div class="row g-3">
+						<div class="col-md-6">
+							<label class="form-label">Meter Reading at Booking Start</label>
+							<input type="number" step="0.01" id="booking_start_meter" class="form-control" value="{{ $booking->start_meter_reading ?? ($booking->vehicle->mileage ?? 0) }}" readonly />
+							<small class="text-muted">Captured when booking was started</small>
+                    </div>
+						<div class="col-md-6">
+							<label class="form-label">Meter Reading on Return <span class="text-danger">*</span></label>
+							<input type="number" step="0.01" name="return_meter_reading" id="return_meter_reading" class="form-control" required min="{{ ($booking->start_meter_reading ?? ($booking->vehicle->mileage ?? 0)) + 0.01 }}" />
+							<small class="text-muted" id="meterReadingHelper">Enter current meter reading</small>
+							<div class="text-danger small d-none" id="meterReadingError">Return reading must be greater than start reading</div>
+                    </div>
+                </div>
+					@if($booking->vehicle->km_limit_per_booking)
+					<div class="mt-2 small text-muted">
+						KM Limit: {{ number_format($booking->vehicle->km_limit_per_booking) }} km | 
+						Extra per KM: ₹{{ number_format($booking->vehicle->extra_price_per_km ?? 0, 2) }}
 					</div>
-					<div class="mb-3">
-						<div class="d-flex justify-content-between align-items-center mb-2">
-							<label class="form-label mb-0">Additional Charges</label>
-							<button type="button" class="btn btn-sm btn-outline-primary" id="addCompleteCharge">+ Add</button>
-						</div>
-						<div id="completeCharges" class="vstack gap-2"></div>
+					@endif
+				</div>
+				
+				<div class="mb-3">
+					<div class="d-flex justify-content-between align-items-center mb-2">
+						<label class="form-label mb-0">Additional Charges</label>
+						<button type="button" class="btn btn-sm btn-outline-primary" id="addCompleteCharge">+ Add</button>
 					</div>
+					<div id="completeCharges" class="vstack gap-2"></div>
+                </div>
 					<div class="row g-3">
 						<div class="col-md-6">
 							<label class="form-label">Final Amount Received</label>
 							<input type="number" step="0.01" name="final_amount_paid" id="final_amount_paid" class="form-control" required />
-						</div>
+        </div>
 						<div class="col-md-6">
 							<label class="form-label">Amount Due (after recalculation)</label>
 							<input type="text" id="final_amount_due" class="form-control" value="₹{{ number_format($booking->amount_due ?? 0, 2) }}" readonly />
-						</div>
-					</div>
+    </div>
+</div>
 					<hr class="my-3">
-					<div class="small text-muted">Recalculated using per-day rent × days + additional charges, minus payments.</div>
-				</div>
-				<div class="modal-footer">
+					<div class="small text-muted">
+						<p class="mb-1"><strong>Recalculation Details:</strong></p>
+						<ul class="mb-0 ps-3 small">
+							<li>Base rental recalculated based on actual return date</li>
+							<li>Extra KM charges added if meter reading exceeds limit</li>
+							<li>Additional charges: Manual entries</li>
+							<li>Original discount applied to new subtotal</li>
+							<li>Amount due: Total - (Advance + Final payment)</li>
+						</ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
 					<button type="button" class="btn btn-outline-secondary btn-pill" data-bs-dismiss="modal">Close</button>
 					<button type="submit" class="btn btn-success btn-pill">Mark as Completed</button>
-				</div>
-			</form>
-		</div>
-	</div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endif
 @endsection
@@ -197,8 +239,12 @@
 (function(){
 	const perDay = {{ (float)($booking->base_rental_price ?? ($booking->vehicle->rental_price_24h ?? 0)) }};
 	const startAt = new Date(@json(optional($booking->start_date_time)?->format('c')));
+	const originalEndAt = new Date(@json(optional($booking->end_date_time)?->format('c')));
 	let paidSoFar = {{ (float)($booking->amount_paid ?? 0) }};
 	let existingExtras = {{ (float)($booking->extra_charges ?? 0) }};
+	const startMeterReading = {{ (float)($booking->start_meter_reading ?? ($booking->vehicle->mileage ?? 0)) }};
+	const kmLimit = {{ (float)($booking->vehicle->km_limit_per_booking ?? 0) }};
+	const extraPerKm = {{ (float)($booking->vehicle->extra_price_per_km ?? 0) }};
 
 	function computeDays(end) {
 		const ms = Math.max(0, end - startAt);
@@ -211,14 +257,83 @@
 		const endInput = document.getElementById('actual_return_datetime');
 		const finalPaidInput = document.getElementById('final_amount_paid');
 		const dueInput = document.getElementById('final_amount_due');
-		let endAt = endInput && endInput.value ? new Date(endInput.value) : new Date(@json(optional($booking->end_date_time)?->format('c')));
+		const returnMeterInput = document.getElementById('return_meter_reading');
+		const meterError = document.getElementById('meterReadingError');
+		const meterHelper = document.getElementById('meterReadingHelper');
+		
+		let endAt = endInput && endInput.value ? new Date(endInput.value) : originalEndAt;
 		const days = computeDays(endAt);
+		
+		// Calculate base rental based on actual days (could be more or less than original)
+		let baseRental = perDay * days;
+		
+		// Calculate extra km charges if meter reading exceeds limit
+		let extraKmCharges = 0;
+		let kmTraveled = 0;
+		if (returnMeterInput && returnMeterInput.value) {
+			const returnReading = parseFloat(returnMeterInput.value);
+			if (returnReading >= startMeterReading) {
+				kmTraveled = returnReading - startMeterReading;
+				if (kmLimit > 0 && kmTraveled > kmLimit) {
+					const extraKm = kmTraveled - kmLimit;
+					extraKmCharges = extraKm * extraPerKm;
+				}
+			}
+		}
+		
+		// Validate meter reading
+		if (returnMeterInput && returnMeterInput.value) {
+			const returnReading = parseFloat(returnMeterInput.value);
+			if (returnReading <= startMeterReading) {
+				meterError.classList.remove('d-none');
+				meterHelper.classList.add('d-none');
+				returnMeterInput.classList.add('is-invalid');
+			} else {
+				meterError.classList.add('d-none');
+				meterHelper.classList.remove('d-none');
+				returnMeterInput.classList.remove('is-invalid');
+				meterHelper.textContent = `Traveled: ${kmTraveled.toFixed(2)} km${kmLimit > 0 ? ` (Limit: ${kmLimit} km)` : ''}`;
+			}
+		}
+		
+		// Calculate days difference (positive or negative)
+		const originalDays = Math.max(1, Math.ceil((originalEndAt - startAt) / (36e5 * 24)));
+		const actualDays = days;
+		const daysDifference = actualDays - originalDays;
+		
+		// Additional charges from manual entries
 		let addedCharges = 0;
 		document.querySelectorAll('#completeCharges .charge-amount').forEach(inp=>{ addedCharges += parseFloat(inp.value||0); });
-		const total = perDay * days + existingExtras + addedCharges;
+		
+		// Total calculation: base rental + extra km charges + existing extras + additional charges
+		const total = baseRental + extraKmCharges + existingExtras + addedCharges;
 		const finalPaid = parseFloat(finalPaidInput?.value || 0);
-		const due = Math.max(0, total - (paidSoFar + finalPaid));
-		if (dueInput) dueInput.value = formatINR(due);
+		const due = total - (paidSoFar + finalPaid);
+		
+		// Update display
+		if (dueInput) {
+			if (due > 0) {
+				dueInput.value = formatINR(due);
+				dueInput.classList.remove('text-success');
+				dueInput.classList.add('text-danger');
+			} else if (due < 0) {
+				dueInput.value = formatINR(Math.abs(due)) + ' (Refund)';
+				dueInput.classList.remove('text-danger');
+				dueInput.classList.add('text-success');
+			} else {
+				dueInput.value = formatINR(0);
+				dueInput.classList.remove('text-danger', 'text-success');
+			}
+		}
+		
+		// Show summary info
+		const summaryInfo = [];
+		if (daysDifference !== 0) {
+			summaryInfo.push(`Days ${daysDifference > 0 ? '+' : ''}${daysDifference} (${actualDays} vs ${originalDays})`);
+		}
+		if (extraKmCharges > 0) {
+			summaryInfo.push(`Extra KM: ₹${extraKmCharges.toFixed(2)}`);
+		}
 	}
 	
 	const addBtn = document.getElementById('addCompleteCharge');
@@ -242,14 +357,29 @@
 		});
 	}
 	
-	['actual_return_datetime','final_amount_paid'].forEach(id=>{
-		const el = document.getElementById(id); if (el) el.addEventListener('input', recomputeFinal);
+	['actual_return_datetime','final_amount_paid','return_meter_reading'].forEach(id=>{
+		const el = document.getElementById(id); 
+		if (el) {
+			el.addEventListener('input', recomputeFinal);
+			el.addEventListener('change', recomputeFinal);
+		}
 	});
 
 	document.getElementById('completeBookingModal')?.addEventListener('shown.bs.modal', recomputeFinal);
 
-	// On submit, serialize additional charges fields
+	// On submit, serialize additional charges fields and validate meter reading
 	document.getElementById('completeBookingForm')?.addEventListener('submit', function(e){
+		const returnMeterInput = document.getElementById('return_meter_reading');
+		if (returnMeterInput && returnMeterInput.value) {
+			const returnReading = parseFloat(returnMeterInput.value);
+			if (returnReading <= startMeterReading) {
+				e.preventDefault();
+				alert('Return meter reading must be greater than booking start meter reading.');
+				returnMeterInput.focus();
+				return false;
+			}
+		}
+		
 		const charges = [];
 		document.querySelectorAll('#completeCharges .row').forEach(row=>{
 			const desc = row.querySelector('.charge-desc')?.value || '';

@@ -1,11 +1,17 @@
 @props(['vehicle'])
 <div class="card vehicle-card" data-vehicle-id="{{ $vehicle['id'] }}">
     <div class="card-body d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3 flex-grow-1">
             <img src="{{ $vehicle['image'] ?? asset('images/vehicle-brands/default.svg') }}" alt="{{ $vehicle['name'] }}" style="width:72px;height:48px;object-fit:contain;">
-            <div>
+            <div class="flex-grow-1">
                 <div class="fw-semibold vehicle-name">{{ $vehicle['name'] }}</div>
-                <div class="text-muted small">{{ $vehicle['transmission'] }} • {{ $vehicle['seats'] }} Seats • {{ $vehicle['fuel'] }}</div>
+                <div class="text-muted small mb-1">{{ $vehicle['transmission'] }} • {{ $vehicle['seats'] }} Seats • {{ $vehicle['fuel'] }}</div>
+                @if(!empty($vehicle['return_info']))
+                <div class="small text-danger d-flex align-items-center gap-1">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Returns on {{ $vehicle['return_info']['datetime'] }}</span>
+                </div>
+                @endif
             </div>
         </div>
         <div class="text-end">

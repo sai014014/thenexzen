@@ -33,12 +33,9 @@
 
     <!-- Booking Action Buttons -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="btn-group">
+        <div>
             <a href="{{ route('business.bookings.flow.create') }}" class="btn btn-primary">
-                <i class="fas fa-magic me-2"></i>5-Step Flow
-            </a>
-            <a href="{{ route('business.bookings.quick-create') }}" class="btn btn-outline-primary">
-                <i class="fas fa-bolt me-2"></i>Quick Create
+                <i class="fas fa-magic me-2"></i>Advance Booking
             </a>
         </div>
     </div>
@@ -92,37 +89,63 @@
     </ul>
 
     <!-- Search Bar -->
-    <div class="booking-search-container mb-3">
-        <i class="fas fa-search search-icon"></i>
-        <input type="text" id="bookingSearch" class="form-control search-input" placeholder="Search by booking ID, customer, or vehicle..." value="{{ request('search') }}">
+    <div class="row mb-3 align-items-end filter-row">
+        <div class="col-md-12">
+            <div class="vehicle-search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="bookingSearch" class="form-control search-input" placeholder="Search by booking ID, customer, or vehicle..." value="{{ request('search') }}">
+            </div>
+        </div>
     </div>
 
     <!-- Bookings Table -->
-    <div class="table-responsive">
-        <table id="bookingTable" class="table table-striped table-bordered">
+    <div class="filter-section">
+        <div class="table-responsive">
+            <table id="bookingTable" class="table table-striped table-bordered">
             <thead>
-                            <tr>
-                                <th>Booking ID</th>
-                                <th>Customer Name</th>
-                                <th>Vehicle Details</th>
-                                <th>Start Date & Time</th>
-                                @if($status !== 'upcoming' && $status !== 'all')
-                                <th>End Date & Time</th>
-                                @elseif($status === 'all')
-                                <th>End Date & Time</th>
-                                @endif
-                                <th>Status</th>
-                                @if($status === 'ongoing' || $status === 'all')
-                                <th>Amount Due</th>
-                                @endif
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
+                    @php
+                        $currentSort = request('sort');
+                        $currentDir = strtolower(request('dir', 'desc')) === 'desc' ? 'desc' : 'asc';
+                        $nextDir = $currentDir === 'asc' ? 'desc' : 'asc';
+                        $sortLink = function ($key, $label) use ($currentSort, $currentDir, $nextDir) {
+                            $params = array_merge(request()->query(), [
+                                'sort' => $key,
+                                'dir' => $currentSort === $key ? $nextDir : 'asc',
+                            ]);
+                            // Always show a sort icon; neutral when not active
+                            $icon = '↕';
+                            if ($currentSort === $key) {
+                                $icon = $currentDir === 'asc' ? '▲' : '▼';
+                            }
+                            $url = request()->url() . '?' . http_build_query($params);
+                            $activeClass = $currentSort === $key ? 'text-primary fw-semibold' : 'text-muted';
+                            $iconStyle = 'font-size:11px;';
+                            if ($currentSort !== $key) { $iconStyle .= 'opacity:0.6;'; }
+                            return '<a href="' . e($url) . '" class="text-decoration-none">' . e($label) . ' <span class="ms-1 ' . $activeClass . '" style="' . $iconStyle . '">' . e($icon) . '</span></a>';
+                        };
+                    @endphp
+                    <tr>
+                        <th>{!! $sortLink('booking_id', 'Booking ID') !!}</th>
+                        <th>{!! $sortLink('customer', 'Customer Name') !!}</th>
+                        <th>{!! $sortLink('vehicle', 'Vehicle Details') !!}</th>
+                        <th>{!! $sortLink('start_date', 'Start Date & Time') !!}</th>
+                        @if($status !== 'upcoming' && $status !== 'all')
+                        <th>{!! $sortLink('end_date', 'End Date & Time') !!}</th>
+                        @elseif($status === 'all')
+                        <th>{!! $sortLink('end_date', 'End Date & Time') !!}</th>
+                        @endif
+                        <th>{!! $sortLink('status', 'Status') !!}</th>
+                        @if($status === 'ongoing' || $status === 'all')
+                        <th>{!! $sortLink('amount_due', 'Amount Due') !!}</th>
+                        @endif
+                        <th>Actions</th>
+                    </tr>
+                </thead>
                         <tbody>
                             @forelse($bookings as $booking)
                             <tr>
                                 <td>
-                                    <span class="badge bg-secondary">#{{ $booking->booking_number }}</span>
+                                    <span class="badge bg-secondary">{{ $booking->booking_number }}</span>
                                 </td>
                                 <td>
                                     <div>
@@ -196,7 +219,8 @@
                             @endforelse
                         </tbody>
                     </table>
-                </div>
+        </div>
+    </div>
 
                 @if($bookings->hasPages())
                 <div class="d-flex justify-content-between align-items-center mt-3">

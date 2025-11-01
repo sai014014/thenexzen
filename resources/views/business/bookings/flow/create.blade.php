@@ -8,84 +8,74 @@
     @include('business.bookings.flow.partials.progress')
 
     <div class="row">
-        <div class="col-lg-8">
-            <!-- Step 1: Dates -->
+        <div class="col-lg-8" id="mainContent">
+            <!-- Step 1: Dates & Vehicles (Merged) -->
             <section id="step-1" data-step="1" class="flow-step">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Pick-up date & time <span class="text-danger">*</span></label>
-                                <input type="datetime-local" class="form-control" id="pickup_datetime" />
+                <div class="row g-4">
+                    <!-- Left side: Date pickers and filters -->
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="mb-3">Select Dates</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">Start date & time <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control" id="pickup_datetime" min="{{ date('Y-m-d\TH:i') }}" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">End date & time <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control" id="dropoff_datetime" />
+                                </div>
+                                <div class="d-flex justify-content-center gap-2 mt-3">
+                                    <button class="btn btn-outline-secondary btn-pill save-draft-btn">Save Draft</button>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Pick-up location <span class="text-danger">*</span></label>
-                                <select id="pickup_location" class="form-select" data-title="Select">
-                                    <option value="">Select</option>
-                                    <option value="Garage">Garage</option>
-                                    <option value="Near Bus Stop">Near Bus Stop</option>
+                        </div>
+                    </div>
+                    
+                    <!-- Right side: Vehicles list -->
+                    <div class="col-lg-8">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>Sort by: <a href="#" class="nxz-link" id="sortPrice">low to high</a></div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted">Filters:</span>
+                                <select id="filterTransmission" class="form-select form-select-sm" data-title="Transmission Type">
+                                    <option value="">Transmission</option>
+                                    <option value="manual">Manual</option>
+                                    <option value="automatic">Automatic</option>
+                                    <option value="hybrid">Hybrid</option>
+                                    <option value="gear">Gear</option>
+                                    <option value="gearless">Gearless</option>
                                 </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Drop-off date & time <span class="text-danger">*</span></label>
-                                <input type="datetime-local" class="form-control" id="dropoff_datetime" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Drop-off location <span class="text-danger">*</span></label>
-                                <select id="dropoff_location" class="form-select" data-title="Select">
-                                    <option value="">Select</option>
-                                    <option value="Garage">Garage</option>
-                                    <option value="Near Bus Stop">Near Bus Stop</option>
+                                <select id="filterSeats" class="form-select form-select-sm" data-title="Seats">
+                                    <option value="">Seats</option>
+                                    @for($i = 1; $i <= 50; $i++)
+                                        <option value="{{ $i }}">{{ $i }}</option>
+                                    @endfor
+                                </select>
+                                <select id="filterFuel" class="form-select form-select-sm" data-title="Fuel Type">
+                                    <option value="">Fuel</option>
+                                    <option value="petrol">Petrol</option>
+                                    <option value="diesel">Diesel</option>
+                                    <option value="cng">CNG</option>
+                                    <option value="electric">Electric</option>
+                                    <option value="hybrid">Hybrid</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-center gap-2 mt-4">
-                            <button class="btn btn-outline-secondary btn-pill save-draft-btn">Save Draft</button>
-                            <button class="btn btn-primary btn-pill" id="step1Next">Proceed</button>
+                        <div id="vehicleList" class="vstack gap-3">
+                            <div class="text-center text-muted py-4">
+                                <div class="spinner-border spinner-border-sm me-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                Loading vehicles...
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Step 2: Vehicles -->
-            <section id="step-2" data-step="2" class="flow-step d-none">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div>Sort by: <a href="#" class="nxz-link" id="sortPrice">low to high</a></div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted">Filters:</span>
-                        <select id="filterTransmission" class="form-select" data-title="Transmission Type">
-                            <option value="">Transmission Type</option>
-                            <option value="manual">Manual</option>
-                            <option value="automatic">Automatic</option>
-                            <option value="hybrid">Hybrid</option>
-                            <option value="gear">Gear</option>
-                            <option value="gearless">Gearless</option>
-                        </select>
-                        <select id="filterSeats" class="form-select" data-title="Seats">
-                            <option value="">Seats</option>
-                            @for($i = 1; $i <= 50; $i++)
-                                <option value="{{ $i }}">{{ $i }}</option>
-                            @endfor
-                        </select>
-                        <select id="filterFuel" class="form-select" data-title="Fuel Type">
-                            <option value="">Fuel Type</option>
-                            <option value="petrol">Petrol</option>
-                            <option value="diesel">Diesel</option>
-                            <option value="cng">CNG</option>
-                            <option value="electric">Electric</option>
-                            <option value="hybrid">Hybrid</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="vehicleList" class="vstack gap-3"></div>
-                <div class="d-flex justify-content-between mt-3">
-                    <button class="btn btn-outline-secondary btn-pill" data-prev>Back</button>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-secondary btn-pill save-draft-btn">Save Draft</button>
-                        <button class="btn btn-primary btn-pill" data-next disabled>Book Now</button>
-                    </div>
-                </div>
-            </section>
+            <!-- Step 2: Vehicles (deprecated - keeping for backwards compatibility, hidden) -->
+            <section id="step-2" data-step="2" class="flow-step d-none"></section>
 
             <!-- Step 3: Customer -->
             <section id="step-3" data-step="3" class="flow-step d-none">
@@ -221,7 +211,7 @@
             </section>
 
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none" id="summarySidebar">
             @include('business.bookings.flow.partials.summary')
         </div>
     </div>
@@ -300,11 +290,11 @@ window.bookingFlow = {
 </div>
 
 <!-- Resume Draft Modal -->
-<div class="modal fade" id="resumeDraftModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="resumeDraftModal" tabindex="-1" aria-labelledby="resumeDraftModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Continue your draft?</h5>
+                <h5 class="modal-title" id="resumeDraftModalLabel">Continue your draft?</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">

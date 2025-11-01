@@ -205,28 +205,45 @@ class DashboardController extends Controller
             }
         } else {
             // For multi-day ranges, chunk into segments (max 30 points)
-            $periodDays = min(30, $daysInRange);
-            $step = max(1, (int) ceil($daysInRange / $periodDays));
-
-            for ($i = ($periodDays - 1) * $step; $i >= 0; $i -= $step) {
-                $segmentStart = $endDate->copy()->subDays($i + ($step - 1))->startOfDay();
-                if ($segmentStart->lt($startDate)) { $segmentStart = $startDate->copy()->startOfDay(); }
-                $segmentEnd = $endDate->copy()->subDays($i)->endOfDay();
-                if ($segmentEnd->gt($endDate)) { $segmentEnd = $endDate->copy()->endOfDay(); }
-
+            $maxPoints = 30;
+            $step = max(1, (int) ceil($daysInRange / $maxPoints));
+            
+            // Build chart data from start to end date in chronological order
+            $currentDate = $startDate->copy()->startOfDay();
+            
+            while ($currentDate->lte($endDate)) {
+                $segmentStart = $currentDate->copy();
+                $segmentEnd = $currentDate->copy()->addDays($step - 1)->endOfDay();
+                
+                // Ensure we don't exceed the end date
+                if ($segmentEnd->gt($endDate)) {
+                    $segmentEnd = $endDate->copy()->endOfDay();
+                }
+                
+                // If segment start is beyond end date, break
+                if ($segmentStart->gt($endDate)) {
+                    break;
+                }
+                
                 // Label by day or by range when chunked
-                $chartLabels[] = $step > 1
-                    ? $segmentStart->format('d M') . ' - ' . $segmentEnd->format('d M')
-                    : $segmentEnd->format('d M');
-
+                if ($step > 1) {
+                    $label = $segmentStart->format('d M') . ' - ' . $segmentEnd->format('d M');
+                } else {
+                    $label = $segmentEnd->format('d M');
+                }
+                
                 // Sum earnings in this chunk - only completed bookings
                 $chunkEarnings = $business->bookings()
                     ->where('status', 'completed')
                     ->whereNotNull('completed_at') // Only bookings that have been completed
                     ->whereBetween('completed_at', [$segmentStart, $segmentEnd])
                     ->sum('total_amount');
-
+                
+                $chartLabels[] = $label;
                 $chartData[] = $chunkEarnings;
+                
+                // Move to next segment
+                $currentDate->addDays($step);
             }
         }
 

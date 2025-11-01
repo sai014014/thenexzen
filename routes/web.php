@@ -200,6 +200,7 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::resource('customers', \App\Http\Controllers\Business\CustomerController::class);
         Route::patch('/customers/{customer}/status', [\App\Http\Controllers\Business\CustomerController::class, 'updateStatus'])->name('customers.update-status');
         Route::post('/customers/{customer}/status', [\App\Http\Controllers\Business\CustomerController::class, 'updateStatus'])->name('customers.update-status-post');
+        Route::get('/customers/{customer}/view/{type}', [\App\Http\Controllers\Business\CustomerController::class, 'viewDocument'])->name('customers.view-document');
         Route::get('/customers/{customer}/download/{type}', [\App\Http\Controllers\Business\CustomerController::class, 'downloadDocument'])->name('customers.download-document');
         Route::get('/customers/{customer}/drivers/{driver}/download/{type}', [\App\Http\Controllers\Business\CustomerController::class, 'downloadDriverDocument'])->name('customers.download-driver-document');
         Route::post('/customers/quick-create', [\App\Http\Controllers\Business\CustomerController::class, 'quickStore'])->name('customers.quick-create');
@@ -209,6 +210,7 @@ Route::prefix('business')->name('business.')->group(function () {
         // Quick add vendor (minimal fields) - JSON endpoint
         Route::post('/vendors/quick-add', [\App\Http\Controllers\Business\VendorController::class, 'quickStore'])->name('vendors.quick-store');
         Route::resource('vendors', \App\Http\Controllers\Business\VendorController::class);
+        Route::get('/vendors/{vendor}/view/{type}', [\App\Http\Controllers\Business\VendorController::class, 'viewDocument'])->name('vendors.view-document');
         Route::get('/vendors/{vendor}/download/{type}', [\App\Http\Controllers\Business\VendorController::class, 'downloadDocument'])->name('vendors.download-document');
         
         // Booking Management Routes
@@ -221,7 +223,6 @@ Route::prefix('business')->name('business.')->group(function () {
         Route::post('/bookings/flow/store', [\App\Http\Controllers\Business\BookingController::class, 'storeFromFlow'])->name('bookings.flow.store');
         Route::get('/bookings/flow/vehicle/{vehicleId}/billing', [\App\Http\Controllers\Business\BookingController::class, 'getVehicleForBilling'])->name('bookings.flow.vehicle.billing');
         
-        Route::get('/bookings/quick-create', [\App\Http\Controllers\Business\BookingController::class, 'quickCreate'])->name('bookings.quick-create');
         Route::resource('bookings', \App\Http\Controllers\Business\BookingController::class);
         Route::post('/bookings/{booking}/start', [\App\Http\Controllers\Business\BookingController::class, 'start'])->name('bookings.start');
         Route::post('/bookings/{booking}/complete', [\App\Http\Controllers\Business\BookingController::class, 'complete'])->name('bookings.complete');

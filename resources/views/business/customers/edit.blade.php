@@ -3,53 +3,163 @@
 @section('title', 'Edit Customer - ' . $customer->display_name)
 @section('page-title', 'Edit Customer')
 
-@section('content')
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="card">
-            <div class="card-header">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h5 class="mb-0">
-                            <i class="fas fa-edit me-2"></i>
-                            @if($customer->customer_type === 'individual')
-                                Edit Individual Customer
-                            @else
-                                Edit Corporate Customer
-                            @endif
-                        </h5>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <a href="{{ route('business.customers.show', $customer) }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>Back to Details
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="{{ route('business.customers.update', $customer) }}" enctype="multipart/form-data" id="customerForm">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="customer_type" value="{{ $customer->customer_type }}">
-                    
-                    @if($customer->customer_type === 'individual')
-                        @include('business.customers.forms.individual', ['customer' => $customer])
-                    @else
-                        @include('business.customers.forms.corporate', ['customer' => $customer])
-                    @endif
+@push('styles')
+<style>
+/* Customer Edit Page Specific Styles - Match Customer Create */
+.customer-add-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 20px 0;
+}
 
-                    <!-- Form Actions -->
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{{ route('business.customers.show', $customer) }}" class="btn btn-secondary">
-                            <i class="fas fa-times me-2"></i>Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Update Customer
-                        </button>
-                    </div>
-                </form>
-            </div>
+.form-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+    padding: 24px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-control, .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #6B6ADE;
+    box-shadow: 0 0 0 0.2rem rgba(107, 106, 222, 0.25);
+}
+
+.file-upload-area {
+    border: 2px dashed #ced4da;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #6B6ADE;
+    background-color: #f0f0ff;
+}
+
+.file-upload-area.dragover {
+    border-color: #6B6ADE;
+    background-color: #f0f0ff;
+}
+
+.upload-icon {
+    font-size: 24px;
+    color: #6c757d;
+    margin-bottom: 8px;
+}
+
+.upload-text {
+    color: #6c757d;
+    font-size: 12px;
+    margin: 0;
+}
+
+.helper-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 10px;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.save-button {
+    background: linear-gradient(135deg, #6B6ADE 0%, #3C3CE1 100%);
+    border: none;
+    color: white;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.save-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 222, 0.4);
+}
+
+.back-button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+}
+</style>
+@endpush
+
+@section('content')
+<div class="customer-add-container">
+    <div class="container-fluid">
+        <!-- Back Button -->
+        <div class="mb-3">
+            <a href="{{ route('business.customers.index') }}" class="btn btn-outline-secondary back-button">
+                <i class="fas fa-arrow-left me-2"></i>Back to Customers
+            </a>
         </div>
+        <form method="POST" action="{{ route('business.customers.update', $customer) }}" enctype="multipart/form-data" id="customerForm">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="customer_type" value="{{ $customer->customer_type }}">
+            
+            @if($customer->customer_type === 'individual')
+                @include('business.customers.forms.individual', ['customer' => $customer])
+            @else
+                @include('business.customers.forms.corporate', ['customer' => $customer])
+            @endif
+
+            <!-- Form Actions -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ route('business.customers.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </a>
+                <button type="submit" class="btn save-button">
+                    <i class="fas fa-save me-2"></i>Update Customer
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection
@@ -107,9 +217,18 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <input type="date" class="form-control" name="drivers[${driverCount}][license_expiry_date]" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">Upload Driving License</label>
-                                    <input type="file" class="form-control" name="drivers[${driverCount}][driving_license_file]" accept=".pdf,.jpg,.jpeg,.png">
-                                    <div class="form-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+                                    <div class="form-group">
+                                        <label class="form-label">Upload Driving License</label>
+                                        <div class="file-upload-area" onclick="document.getElementById('driver_license_${driverCount}').click()">
+                                            <div class="upload-icon">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                            </div>
+                                            <p class="upload-text">Click to upload or drag and drop the file here. Supported format PDF, JPG, PNG</p>
+                                        </div>
+                                        <input type="file" class="form-control" id="driver_license_${driverCount}" name="drivers[${driverCount}][driving_license_file]" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="updateFileLabel('driver_license_${driverCount}', this)">
+                                        <div class="helper-text">PDF, JPG, PNG files only. Max size: 10MB</div>
+                                        <div id="driver_license_${driverCount}_label" class="mt-2 small text-muted" style="display: none;"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -313,6 +432,25 @@ document.addEventListener('DOMContentLoaded', function() {
             this.style.borderColor = '';
         });
     });
+    
+    // Update file label function (also used in dynamically added driver forms)
+    window.updateFileLabel = function(inputId, input) {
+        const labelDiv = document.getElementById(inputId + '_label');
+        if (input.files && input.files.length > 0) {
+            let labelText = `Selected: ${input.files[0].name}`;
+            if (input.files.length > 1) {
+                labelText = `Selected: ${input.files.length} files`;
+            }
+            if (labelDiv) {
+                labelDiv.textContent = labelText;
+                labelDiv.style.display = 'block';
+            }
+        } else {
+            if (labelDiv) {
+                labelDiv.style.display = 'none';
+            }
+        }
+    };
 });
 </script>
 @endpush

@@ -428,6 +428,48 @@ class CustomerController extends Controller
     }
 
     /**
+     * View customer document inline (PDF/Image) in the browser
+     */
+    public function viewDocument(Customer $customer, $type)
+    {
+        $businessAdmin = Auth::guard('business_admin')->user();
+        
+        if (!$businessAdmin) {
+            return redirect()->route('business.login')->with('error', 'Please log in to continue.');
+        }
+        
+        $business = $businessAdmin->business;
+
+        // Ensure the customer belongs to this business
+        if ($customer->business_id !== $business->id) {
+            abort(403, 'Unauthorized access to customer.');
+        }
+
+        $documentPath = null;
+
+        switch ($type) {
+            case 'driving_license':
+                $documentPath = $customer->driving_license_path;
+                break;
+            default:
+                abort(404, 'Document not found.');
+        }
+        
+        if (!$documentPath || !Storage::disk('public')->exists($documentPath)) {
+            abort(404, 'Document not found.');
+        }
+
+        $fullPath = Storage::disk('public')->path($documentPath);
+        $mime = mime_content_type($fullPath);
+
+        // Display inline in new tab
+        return response()->file($fullPath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . basename($documentPath) . '"'
+        ]);
+    }
+
+    /**
      * Download customer document
      */
     public function downloadDocument(Customer $customer, $type)
@@ -451,7 +493,8 @@ class CustomerController extends Controller
         switch ($type) {
             case 'driving_license':
                 $documentPath = $customer->driving_license_path;
-                $filename = 'driving_license_' . $customer->id . '.pdf';
+                // Use original filename from path instead of generic name
+                $filename = basename($documentPath);
                 break;
             default:
                 abort(404, 'Document not found.');

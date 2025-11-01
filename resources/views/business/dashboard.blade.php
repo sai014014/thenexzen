@@ -590,16 +590,45 @@ body.business-dashboard-page .bookings-table tbody td:nth-child(6) {
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Net Earnings Chart
-    const earningsCtx = document.getElementById('netEarningsChart').getContext('2d');
+    // Store chart instance globally so it can be destroyed if needed
+    let netEarningsChartInstance = null;
     
-    // Debug: Log chart data
-    const chartLabels = {!! json_encode($chartLabels ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) !!};
-    const chartData = {!! json_encode($chartData ?? [0, 0, 0, 0, 0, 0, 0]) !!};
-    console.log('Chart Labels:', chartLabels);
-    console.log('Chart Data:', chartData);
-    
-    new Chart(earningsCtx, {
+    function initializeNetEarningsChart() {
+        const canvas = document.getElementById('netEarningsChart');
+        if (!canvas) {
+            console.error('Chart canvas not found');
+            return;
+        }
+        
+        // Destroy existing chart instance if it exists
+        if (netEarningsChartInstance) {
+            netEarningsChartInstance.destroy();
+            netEarningsChartInstance = null;
+        }
+        
+        const earningsCtx = canvas.getContext('2d');
+        
+        // Get chart data from server
+        const chartLabels = {!! json_encode($chartLabels ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) !!};
+        const chartData = {!! json_encode($chartData ?? [0, 0, 0, 0, 0, 0, 0]) !!};
+        
+        // Debug: Log chart data
+        console.log('Chart Labels:', chartLabels);
+        console.log('Chart Data:', chartData);
+        console.log('Chart Data Length:', chartData.length);
+        console.log('Chart Labels Length:', chartLabels.length);
+        
+        // Validate data
+        if (!Array.isArray(chartLabels) || !Array.isArray(chartData)) {
+            console.error('Invalid chart data format');
+            return;
+        }
+        
+        if (chartLabels.length !== chartData.length) {
+            console.warn('Chart labels and data length mismatch:', chartLabels.length, 'vs', chartData.length);
+        }
+        
+        netEarningsChartInstance = new Chart(earningsCtx, {
         type: 'line',
         data: {
             labels: chartLabels,
@@ -687,16 +716,28 @@ body.business-dashboard-page .bookings-table tbody td:nth-child(6) {
                         },
                         callback: function(value) {
                             if (value >= 1000) {
-                                return '₹' + (value / 1000) + 'K';
+                                // Format to 2 decimal places
+                                const kValue = (value / 1000).toFixed(2);
+                                return '₹' + kValue + 'K';
                             } else {
-                                return '₹' + value;
+                                // For values less than 1000, show whole numbers
+                                return '₹' + Math.round(value);
                             }
                         }
                     }
                 }
             }
         }
-    });
+        });
+    }
+    
+    // Initialize chart when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeNetEarningsChart);
+    } else {
+        // DOM already loaded
+        initializeNetEarningsChart();
+    }
 
     // Vehicle Status Chart
     const vehicleCtx = document.getElementById('vehicleStatusChart').getContext('2d');
